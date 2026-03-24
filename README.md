@@ -27,4 +27,9 @@ Example:
 
 - This plugin is distributed outside application repositories.
 - Machine-specific checkout roots are not stored in the plugin.
-- Users may optionally create a local config file in their user profile, or provide the shared parent folder when prompted.
+- The workflow stores confirmed checkout roots in a user-owned config file outside the plugin so the source-code location prompt is normally a one-time setup.
+
+## Dev Testing
+
+- Dev-only reset helpers are maintained outside this plugin deployment.
+- Current repo-tracked copies live in the Nova workspace under `.github/skills/flag-sunset/` on your testing branch.

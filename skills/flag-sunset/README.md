@@ -25,12 +25,12 @@ The workflow performs discovery, editing, and static validation across the regis
 3. The operator knows the exact LaunchDarkly flag key to remove.
 4. The operator can confirm the LaunchDarkly production state in Step 0.
 5. `git` is available locally so the workflow can create or switch to the required feature-removal branches.
-6. The user is prepared to approve permission prompts for external file reads during Step 1.
+6. The user is prepared to approve serial permission prompts during Step 1 when the agent first touches app roots or concrete files.
 7. The user has write access in the local checkouts for the affected repositories.
 
 ## One-Time Machine Setup
 
-Each user may optionally create a personal local-roots configuration file outside the plugin.
+Each user uses a personal local-roots configuration file outside the plugin.
 
 Preferred path:
 - macOS/Linux: `~/.copilot/flag-sunset/local-roots.json`
@@ -40,6 +40,7 @@ Purpose:
 - maps repository names to local checkout roots
 - lets the workflow derive project-specific paths from [applications.md](./applications.md)
 - remains user-specific and outside the installed plugin
+- makes repository-root collection a one-time prompt on a new machine or after a manual config reset
 
 Example:
 
@@ -50,16 +51,19 @@ Example:
 }
 ```
 
-If this file does not exist, the workflow prompts once for the shared parent folder containing both `Applications` and `aya-talent-marketplace`, derives the repository roots, and uses them for the current run only.
+If this file does not exist, the workflow prompts once for the shared parent folder containing both `Applications` and `aya-talent-marketplace`, derives the repository roots, confirms them with the user, then writes the config file so later runs reuse the same locations without prompting again.
 
 ## Permission Prompts
 
 Permission prompts are an expected part of the workflow.
 
 1. Preflight may ask for the shared parent folder if no usable local-roots config is available.
-2. Preflight asks for confirmation before using the derived repository roots.
+2. Preflight asks for confirmation before persisting and using the derived repository roots.
 3. Step 0 asks for the LaunchDarkly production state and whether to continue.
-4. Step 1 reads external definition files serially to trigger VS Code approval prompts for cross-project access.
+4. Preflight should validate repository-root existence with an OS-appropriate terminal check instead of VS Code filesystem reads on parent repository roots.
+5. Step 1 establishes a permission envelope in the main agent by seeding app-root approvals for `list_dir`, `grep_search`, and `get_errors`, then reading only the concrete file set needed for edits and validation.
+6. Step 1 permission-bearing operations must run serially. Do not batch them in parallel, because an interrupted approval can leave the UI showing a misleading long-running working state.
+7. After Step 1 completes, the default workflow is expected to proceed without further approval prompts.
 
 ## Operating Rules
 
@@ -67,7 +71,11 @@ Permission prompts are an expected part of the workflow.
 - Cross-repository discovery must begin from the registry in [applications.md](./applications.md).
 - No edits are allowed before the branch gate passes.
 - Step 1 permission-sensitive actions must run serially, not in parallel.
+- Preflight root existence checks must not use VS Code filesystem tools on parent repository roots.
+- If any permission-bearing tool call is interrupted, the workflow should stop and print the blocked item plus resumable status instead of silently appearing to work.
+- The default workflow must not use subagents after Step 1 begins.
 - The workflow must stop when a gate fails instead of making assumptions.
+- All path resolution and terminal behavior must continue to support both macOS and Windows.
 
 ## Output
 

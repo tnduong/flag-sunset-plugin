@@ -39,16 +39,19 @@ Rules:
 - Outside the mandatory workflow lines in this skill, keep progress updates to one short sentence per phase transition.
 - Prefer VS Code tools for prompts, reads, searches, and diagnostics: `vscode_askQuestions`, `read_file`, `grep_search`, and `get_errors` are the default choices unless a terminal command is strictly required.
 - When a terminal command is required, use an OS-appropriate form for the active shell. On Windows PowerShell, prefer `Test-Path` and `Get-Date`; on macOS/Linux, prefer `test -d` and `date`.
-- `search_subagent` may be used in Step 2 for read-only discovery. It must not make edits.
+- Preflight local-root validation must use an OS-appropriate terminal existence check on the resolved repository roots; do not use `list_dir`, `read_file`, or other VS Code filesystem tools on parent repository roots for existence checks.
+- The default workflow must not use subagents after Step 1 begins. All permission, discovery, edit, and validation actions from Step 1 onward must remain in the main agent context.
 - All file edits must remain in the main agent context.
-- Machine-specific checkout roots must come from either a user-owned config file outside the plugin or a one-time prompt in the current session.
+- Machine-specific checkout roots must come from a user-owned config file outside the plugin, creating or updating that file after a confirmed first-run prompt when needed.
 - The current VS Code workspace must include every project listed in [applications.md](./applications.md) before Step 0 may begin.
 - Do not create, repair, or write configuration files inside the plugin directory.
 - No file edits before branch proof is printed.
 - Keep exactly one behavior path when unwrapping flags.
 - Do not modify unrelated tests.
 - Permission-sensitive validation and external-read approval steps in Step 1 must be executed serially, not in parallel.
+- Do not batch any tool calls that may trigger a permission prompt; preflight root checks, app-root approvals, and file approvals must each run as single-step serial operations.
 - Any canceled, dismissed, timed-out, or interrupted tool or permission result in Step 1 must be treated as `STEP_1_INCOMPLETE`, not as loss of Step 0 state.
+- If a permission-bearing tool result is canceled, interrupted, or delayed unexpectedly, stop and print the current blocked item and latest resumable status line instead of remaining in a generic working state.
 - Do not ask the Step 0 LaunchDarkly question until both preflight gates have passed and those pass lines have been printed.
 - If any gate fails, stop and ask the user.
 
@@ -59,7 +62,7 @@ Before Step 0:
 2. Resolve machine-specific repository roots using one of these sources, in order:
    - macOS/Linux user config file: `~/.copilot/flag-sunset/local-roots.json`
    - Windows user config file: `%USERPROFILE%/.copilot/flag-sunset/local-roots.json`
-   - a one-time prompt for the shared parent folder that contains both `Applications` and `aya-talent-marketplace`
+   - a one-time prompt for the shared parent folder that contains both `Applications` and `aya-talent-marketplace`, followed by persisting the confirmed derived roots to the user config file
 3. If no usable config file is found:
    - ask one `vscode_askQuestions` free-text prompt for the shared parent folder
    - when the active OS is macOS, use this exact prompt text:
@@ -71,13 +74,16 @@ Before Step 0:
      - `AyaHealthcare/aya-talent-marketplace` = `[PARENT]/aya-talent-marketplace`
    - prompt the user to confirm the derived paths before continuing
    - if the confirmation is not approved, stop immediately with no Step 0 prompt and no edits
-   - keep the derived paths in memory for the current run only
+   - create or update the user-owned local-roots config file outside the plugin with the confirmed derived paths before continuing
+   - if the config file cannot be written, stop and ask the user
 4. If repository roots are available and valid, print:
    - `Local roots gate passed: [RepoA]=configured, [RepoB]=configured, ...`
+   - validate root existence with an OS-appropriate terminal check before printing the pass line
 5. Derive the effective local project path for every project row:
    - local repository root + `Path in Repo`
    - if `Path in Repo` is `./`, the effective local project path is the local repository root
 6. Compare those derived project paths against the folders currently added to the active VS Code workspace.
+   - do not use parent repository roots for workspace-gate filesystem reads; compare the effective project paths directly to the open workspace folders
 7. If every project path is present in the workspace, print:
    - `Workspace gate passed: [ProjectA]=present, [ProjectB]=present, ...`
 8. If any project path is missing from the workspace, print:
@@ -102,46 +108,51 @@ Required line before Step 1:
 ## Step 1: Permissions and Start Clock
 
 State model:
+- Capture Step 1 start time immediately on entry to Step 1 and retain it for the current run, including any `STEP_1_INCOMPLETE` resume.
 - Maintain one resumable status line during Step 1:
-  - `Step 1 status: roots_validated=[yes|no]; approved_files=[FileA, FileB, ...]; next_pending=[Item|none]`
+   - `Step 1 status: roots_validated=[yes|no]; approved_apps=[AppA, AppB, ...]; approved_files=[FileA, FileB, ...]; next_pending=[Item|none]`
 - Treat any canceled, dismissed, timed-out, or interrupted validation or read as `STEP_1_INCOMPLETE`.
-- Print the status line after root validation, after each successful external definition-file read, and on interruption.
+- Print the status line after root validation, after each successful app-root approval phase, after each successful file approval phase, and on interruption.
 - On interruption, stop, report the exact blocked item, repeat the latest status line verbatim, and resume Step 1 only from `next_pending`.
 
 Execution:
-1. Read [applications.md](./applications.md).
-2. Resolve the local repository roots for the current run.
-3. Validate each unique local repository root before any permission prompts.
-4. Build the external definition-file read list from the registry.
-5. Read each external app's derived definition-file path serially to trigger approvals.
-6. Record each successful file as approved.
-7. Immediately after the final permission prompt is answered, capture start time.
-8. Capture the current workspace repo branch.
+1. Capture start time immediately on Step 1 entry.
+2. Read [applications.md](./applications.md).
+3. Resolve the local repository roots for the current run.
+4. Validate each unique local repository root with an OS-appropriate terminal existence check before any permission prompts.
+5. Derive each app's effective local app path from the registry.
+6. Seed broad permissions serially for the known workflow operations and app roots that may be touched later:
+    - `list_dir` on each effective app path
+    - `grep_search` on each effective app path
+    - `get_errors` on each effective app path only when that app may later require diagnostics
+   - do not combine these approvals into a parallel batch
+   - do not combine these approvals into a parallel batch
+7. Using only the main agent, confirm the raw flag key in each app's definition target and determine the candidate app set.
+8. Using only the main agent, run exact local usage discovery for the candidate apps with `grep_search` and build the concrete future work set:
+    - definition files
+    - usage files that may be edited
+    - spec, test, or mock files only if they are proven relevant
+    - files that will be checked with `get_errors` later if file-scoped diagnostics are needed
+9. Read each file in the concrete future work set serially with `read_file` to trigger any remaining file-scoped approvals.
+   - after each permission-bearing tool call, either continue immediately on success or stop and print the blocked item and latest Step 1 status on interruption
+10. Capture the current workspace repo branch.
 
 Required line before Step 2:
-`Step 1 complete: all permission prompts approved; proceeding to Step 2.`
+`Step 1 complete: permission envelope established; proceeding to Step 2 without further approval prompts.`
 
 ## Step 2: Discover Impact
 
-Use `#search_code` exact-match first to prefilter affected apps and repositories. Then confirm locally before any edits. If `#search_code` is unavailable, incomplete, or inconsistent with local evidence, fall back to the local workflow in [search-strategy.md](./references/search-strategy.md).
+Use the exact local evidence gathered during Step 1. Do not use subagents after Step 1 begins.
 
-Step 2A: Remote prefilter
-- run `#search_code` with the exact raw flag key string
-- use the result only to identify candidate apps and likely definition files
-- prefer exact matches in feature-flag definition files over tests, docs, comments, or mocks
-- do not treat `#search_code` as edit proof
+Step 2A: Reuse Step 1 discovery
+- reuse the candidate app set, identifier mapping, and concrete future work set produced during Step 1
+- do not expand scope unless a Step 1 result is incomplete
 
-Step 2B: Local confirmation
+Step 2B: Report local confirmation
 - read [applications.md](./applications.md)
 - resolve local roots for the current run
 - derive a resolved app table as described in [search-strategy.md](./references/search-strategy.md)
-- confirm the raw flag key in each candidate app's local definition target
-- extract the exact constant or enum member name from each locally confirmed app
-
-Step 2C: Local usage discovery
-- only after local confirmation, invoke `search_subagent` or exact local search for the confirmed apps
-- pass the resolved app table into the subagent prompt instead of asking the subagent to infer paths
-- use the prompt contract in [search-subagent-template.md](./references/search-subagent-template.md)
+- print the per-app status and evidence derived during Step 1
 
 Minimum required output from Step 2:
 - registry-wide app mapping
