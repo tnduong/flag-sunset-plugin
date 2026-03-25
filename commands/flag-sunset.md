@@ -12,6 +12,6 @@ Use these plugin assets as the authoritative source of workflow behavior:
 - [application registry](../skills/flag-sunset-assets/applications.md)
 - [workflow guide](../skills/flag-sunset-assets/README.md)
 
-Interpret the slash-command argument as the raw feature flag key to remove.
+Interpret the slash-command argument as the raw LaunchDarkly feature flag key to remove.
 
 Follow the workflow exactly.
