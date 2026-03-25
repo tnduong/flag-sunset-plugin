@@ -11,7 +11,7 @@ This workflow must resolve machine-specific local repository roots before starti
 Why this helps:
 - local confirmation preserves branch-local correctness before edits
 - exact local search still provides the narrow file and line evidence needed for safe edits
-- the same discovery pass can establish the permission envelope needed to avoid post-Step-1 prompts
+- the same discovery pass can establish the minimal permission envelope needed to avoid post-Step-1 prompts
 
 Before any search, derive each app's effective local app path from the registry and the resolved repository roots for the current run:
 - map `Repository` to the resolved local root
@@ -57,9 +57,14 @@ Rules:
 Use the same main-agent discovery pass to seed approvals before Step 1 completes.
 
 Rules:
-- Seed broad permissions first with `list_dir`, `grep_search`, and `get_errors` at the effective app-path scope.
-- Then use `read_file` only for files in the concrete future work set.
+- Before any VS Code filesystem or search tool runs, validate local roots with OS-appropriate terminal existence checks and confirm every effective app path is already present in the active workspace.
+- If any required effective app path is missing from the active workspace, stop with workspace-gate failure instead of triggering external-directory approval prompts.
+- Do not use `list_dir` as part of the default permission envelope.
+- Use `grep_search` only on workspace-confirmed app paths.
+- Use `read_file` only for files in the concrete future work set.
+- Defer `get_errors` until Step 5 and scope it to edited files only, unless a Step 1 fallback requires file-scoped diagnostics for a specific already-approved file.
 - Do not use subagents after Step 1 begins.
+- When a terminal command is required for Step 1 path validation, use an OS-appropriate form for the active shell so the workflow remains valid on both macOS and Windows.
 
 ## Targeted Fallback Strategy
 

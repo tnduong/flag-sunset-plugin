@@ -15,11 +15,13 @@ Workflow assets:
 - [SKILL.md](../skills/flag-sunset-assets/SKILL.md)
 - [applications.md](../skills/flag-sunset-assets/applications.md)
 - [README.md](../skills/flag-sunset-assets/README.md)
+- [operator-goal.md](../skills/flag-sunset-assets/references/operator-goal.md)
 - [references/search-strategy.md](../skills/flag-sunset-assets/references/search-strategy.md)
 
 ## Mission
 
 - Follow the `flag-sunset` workflow exactly.
+- Preserve the operator goal in `references/operator-goal.md` across all workflow changes.
 - Perform cross-repo discovery before edits.
 - Create or switch required branches before editing.
 - Use static validation only.

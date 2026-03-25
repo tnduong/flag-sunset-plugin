@@ -27,6 +27,8 @@ This workflow is the required entry point for any feature-flag removal request w
 
 Operator onboarding, prerequisites, prompts, and workflow notes are documented in [README.md](./README.md).
 
+The operator experience goal is documented in [operator-goal.md](./references/operator-goal.md).
+
 ## Runtime Policy
 
 Print before Step 0:
@@ -39,6 +41,8 @@ Rules:
 - No automated build or test commands.
 - Prefer compact outputs at every step. Print only the minimum evidence required to resume, validate, and edit safely.
 - Outside the mandatory workflow lines in this skill, keep progress updates to one short sentence per phase transition.
+- Keep the operator goal in [operator-goal.md](./references/operator-goal.md) in force for all workflow changes.
+- A workflow change is not complete if it reintroduces expected permission prompts after Step 1, unless the exception is explicitly documented and justified in the workflow assets.
 - Immediately after Preflight item 1, print exactly:
    - `## >>>>>> USER ACTION MAY BE REQUIRED NEXT`
    - `VS Code may show a permission prompt during Preflight or Step 1. If it appears, approve it. If no prompt appears, Copilot will continue and you can work on something else.`
@@ -138,24 +142,25 @@ Execution:
 4. Validate each unique local repository root with an OS-appropriate terminal existence check before any permission prompts.
 5. Reuse the required `## >>>>>> USER ACTION MAY BE REQUIRED NEXT` banner that was printed during Preflight; do not print it again in Step 1.
 6. Derive each app's effective local app path from the registry.
-7. Seed broad permissions serially for the known workflow operations and app roots that may be touched later:
-    - `list_dir` on each effective app path
-    - `grep_search` on each effective app path
-    - `get_errors` on each effective app path only when that app may later require diagnostics
+7. Confirm every effective app path is already present in the active VS Code workspace before any VS Code filesystem or search tool runs.
+   - if any required effective app path is missing, stop with workspace-gate failure instead of attempting external reads
+8. Seed only the minimum Step 1 approvals serially for the known workflow operations that are still required later:
+   - `grep_search` on each workspace-confirmed effective app path
+   - do not use `list_dir` as part of the default Step 1 permission envelope
+   - do not run `get_errors` at app-root scope during Step 1
    - do not combine these approvals into a parallel batch
-   - do not combine these approvals into a parallel batch
-8. Using only the main agent, confirm the raw flag key in each app's definition target and determine the candidate app set.
-9. Using only the main agent, run exact local usage discovery for the candidate apps with `grep_search` and build the concrete future work set:
+9. Using only the main agent, confirm the raw flag key in each app's definition target and determine the candidate app set.
+10. Using only the main agent, run exact local usage discovery for the candidate apps with `grep_search` and build the concrete future work set:
     - definition files
     - usage files that may be edited
     - spec, test, or mock files only if they are proven relevant
-    - files that will be checked with `get_errors` later if file-scoped diagnostics are needed
-10. Read each file in the concrete future work set serially with `read_file` to trigger any remaining file-scoped approvals.
+   - files that may later be checked with `get_errors` in Step 5 if file-scoped diagnostics are needed
+11. Read each file in the concrete future work set serially with `read_file` to trigger any remaining file-scoped approvals.
    - after each permission-bearing tool call, either continue immediately on success or stop and print the blocked item and latest Step 1 status on interruption
    - if the user approves a prompt after an interrupted call, retry that exact `read_file` call before doing anything else
-11. Capture the current workspace repo branch.
+12. Capture the current workspace repo branch.
 
-To reduce unnecessary long-running continuation prompts from the chat host, do not emit additional Step 1 status lines for every app-root approval or every individual file read while work is progressing normally.
+To reduce unnecessary long-running continuation prompts from the chat host, do not emit additional Step 1 status lines for every workspace-confirmed app search or every individual file read while work is progressing normally.
 
 Required line before Step 2:
 `Step 1 complete: permission envelope established; proceeding to Step 2 without further approval prompts.`
@@ -212,7 +217,7 @@ Run static validation only.
 
 Minimum checks:
 - zero remaining references to the removed flag in the edited scope
-- zero new diagnostics caused by the edits
+- zero new diagnostics caused by the edits, using `get_errors` scoped to edited files only when diagnostics are needed
 - clean imports and clean structure after dead-code removal
 
 If validation fails, fix the issue and rerun Step 5. Do not run automated build or test commands.
