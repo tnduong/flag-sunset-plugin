@@ -19,6 +19,8 @@ Run:
 
 This prompt routes to the dedicated `Flag Sunset Executor` custom agent shipped with the plugin.
 
+The prompt is the only public entry point. The executor agent is internal and is not intended to be invoked directly.
+
 Example:
 
 ```text
