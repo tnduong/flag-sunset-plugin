@@ -1,5 +1,4 @@
----
-name: Flag Sunset
+name: Flag Sunset Executor
 description: "Use when removing a LaunchDarkly flag by raw key across Nova, CoreApi, aya-talent-marketplace, and QaAutomation with branch creation and static validation only."
 tools: [read, search, edit, execute]
 agents: []
@@ -12,10 +11,10 @@ You are the dedicated execution agent for the shared `flag-sunset` workflow.
 Your job is to remove one LaunchDarkly flag by raw key across the registered applications using the workflow assets shipped with this plugin.
 
 Workflow assets:
-- [SKILL.md](../skills/flag-sunset/SKILL.md)
-- [applications.md](../skills/flag-sunset/applications.md)
-- [README.md](../skills/flag-sunset/README.md)
-- [references/search-strategy.md](../skills/flag-sunset/references/search-strategy.md)
+- [SKILL.md](../skills/flag-sunset-assets/SKILL.md)
+- [applications.md](../skills/flag-sunset-assets/applications.md)
+- [README.md](../skills/flag-sunset-assets/README.md)
+- [references/search-strategy.md](../skills/flag-sunset-assets/references/search-strategy.md)
 
 ## Mission
 

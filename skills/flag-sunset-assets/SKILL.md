@@ -1,6 +1,5 @@
----
-name: flag-sunset
-description: 'Internal workflow asset for the shared flag-sunset custom agent and prompt. Contains the authoritative multi-step process, registry, and runtime policy for removing a LaunchDarkly flag by raw key across Nova, CoreApi, aya-talent-marketplace, and QaAutomation.'
+name: flag-sunset-assets
+description: 'Internal workflow asset bundle for the shared flag-sunset prompt and executor agent. Contains the authoritative multi-step process, registry, and runtime policy for removing a LaunchDarkly flag by raw key across Nova, CoreApi, aya-talent-marketplace, and QaAutomation.'
 argument-hint: 'The feature flag key to remove (for example: WFD-5487-display-strike-duplication)'
 user-invocable: false
 disable-model-invocation: true

@@ -1,6 +1,6 @@
 # Flag Sunset Plugin
 
-Private VS Code agent plugin that provides the `flag-sunset` skill for shared LaunchDarkly feature-flag sunset workflows.
+Private VS Code agent plugin that provides the `/flag-sunset` prompt for shared LaunchDarkly feature-flag sunset workflows.
 
 ## Install
 
@@ -17,7 +17,7 @@ Run:
 /flag-sunset [FLAG_KEY]
 ```
 
-This prompt routes to the dedicated `Flag Sunset` custom agent shipped with the plugin.
+This prompt routes to the dedicated `Flag Sunset Executor` custom agent shipped with the plugin.
 
 Example:
 
