@@ -17,6 +17,8 @@ Run:
 /flag-sunset [FLAG_KEY]
 ```
 
+This prompt routes to the dedicated `Flag Sunset` custom agent shipped with the plugin.
+
 Example:
 
 ```text

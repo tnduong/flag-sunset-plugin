@@ -1,7 +1,9 @@
 ---
 name: flag-sunset
-description: 'Workflow to sunset a feature flag across apps and repos with mandatory branch setup and static validation only. Use when removing LaunchDarkly flags by raw key across Nova, CoreApi, aya-talent-marketplace, and QaAutomation.'
+description: 'Internal workflow asset for the shared flag-sunset custom agent and prompt. Contains the authoritative multi-step process, registry, and runtime policy for removing a LaunchDarkly flag by raw key across Nova, CoreApi, aya-talent-marketplace, and QaAutomation.'
 argument-hint: 'The feature flag key to remove (for example: WFD-5487-display-strike-duplication)'
+user-invocable: false
+disable-model-invocation: true
 ---
 
 # Flag Sunset
