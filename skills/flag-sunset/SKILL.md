@@ -37,6 +37,11 @@ Rules:
 - No automated build or test commands.
 - Prefer compact outputs at every step. Print only the minimum evidence required to resume, validate, and edit safely.
 - Outside the mandatory workflow lines in this skill, keep progress updates to one short sentence per phase transition.
+- Before the first permission-sensitive Step 1 action, print exactly:
+   - `## >>>>>> USER ACTION MAY BE REQUIRED NEXT`
+   - `VS Code may show a permission prompt during Step 1. If it appears, approve it. If no prompt appears, Copilot will continue and you can work on something else.`
+- If Step 1 becomes blocked on a permission or read, print exactly:
+   - `## >>>>>> WAITING ON YOU`
 - Prefer VS Code tools for prompts, reads, searches, and diagnostics: `vscode_askQuestions`, `read_file`, `grep_search`, and `get_errors` are the default choices unless a terminal command is strictly required.
 - When a terminal command is required, use an OS-appropriate form for the active shell. On Windows PowerShell, prefer `Test-Path` and `Get-Date`; on macOS/Linux, prefer `test -d` and `date`.
 - Preflight local-root validation must use an OS-appropriate terminal existence check on the resolved repository roots; do not use `list_dir`, `read_file`, or other VS Code filesystem tools on parent repository roots for existence checks.
@@ -52,6 +57,8 @@ Rules:
 - Do not batch any tool calls that may trigger a permission prompt; preflight root checks, app-root approvals, and file approvals must each run as single-step serial operations.
 - Any canceled, dismissed, timed-out, or interrupted tool or permission result in Step 1 must be treated as `STEP_1_INCOMPLETE`, not as loss of Step 0 state.
 - If a permission-bearing tool result is canceled, interrupted, or delayed unexpectedly, stop and print the current blocked item and latest resumable status line instead of remaining in a generic working state.
+- After the user approves any permission prompt, immediately rerun the exact blocked tool call in the next agent action; never assume the interrupted call will resume on its own.
+- If a permission-bearing tool call does not return a success result, do not continue with additional reads, searches, or reasoning-only progress messages in the same run state.
 - Do not ask the Step 0 LaunchDarkly question until both preflight gates have passed and those pass lines have been printed.
 - If any gate fails, stop and ask the user.
 
@@ -111,31 +118,39 @@ State model:
 - Capture Step 1 start time immediately on entry to Step 1 and retain it for the current run, including any `STEP_1_INCOMPLETE` resume.
 - Maintain one resumable status line during Step 1:
    - `Step 1 status: roots_validated=[yes|no]; approved_apps=[AppA, AppB, ...]; approved_files=[FileA, FileB, ...]; next_pending=[Item|none]`
+- When Step 1 is interrupted, also print one blocked-item line:
+   - `Blocked item: [tool] [target]`
 - Treat any canceled, dismissed, timed-out, or interrupted validation or read as `STEP_1_INCOMPLETE`.
-- Print the status line after root validation, after each successful app-root approval phase, after each successful file approval phase, and on interruption.
-- On interruption, stop, report the exact blocked item, repeat the latest status line verbatim, and resume Step 1 only from `next_pending`.
+- Print the status line after root validation, after the candidate app set is confirmed, after the concrete future work set is fully approved, and on interruption.
+- On interruption, print `## >>>>>> WAITING ON YOU`, report the exact blocked item, repeat the latest status line verbatim, and stop.
+- On resume after approval, rerun only the exact blocked tool call represented by `next_pending`; do not skip ahead or assume the earlier call completed.
 
 Execution:
 1. Capture start time immediately on Step 1 entry.
 2. Read [applications.md](./applications.md).
 3. Resolve the local repository roots for the current run.
+   - if this requires reading the user-owned local-roots config outside the workspace, that read is permission-sensitive and must follow the interruption and retry rules above
 4. Validate each unique local repository root with an OS-appropriate terminal existence check before any permission prompts.
-5. Derive each app's effective local app path from the registry.
-6. Seed broad permissions serially for the known workflow operations and app roots that may be touched later:
+5. Print the required `## >>>>>> USER ACTION MAY BE REQUIRED NEXT` banner immediately before the first permission-sensitive Step 1 action.
+6. Derive each app's effective local app path from the registry.
+7. Seed broad permissions serially for the known workflow operations and app roots that may be touched later:
     - `list_dir` on each effective app path
     - `grep_search` on each effective app path
     - `get_errors` on each effective app path only when that app may later require diagnostics
    - do not combine these approvals into a parallel batch
    - do not combine these approvals into a parallel batch
-7. Using only the main agent, confirm the raw flag key in each app's definition target and determine the candidate app set.
-8. Using only the main agent, run exact local usage discovery for the candidate apps with `grep_search` and build the concrete future work set:
+8. Using only the main agent, confirm the raw flag key in each app's definition target and determine the candidate app set.
+9. Using only the main agent, run exact local usage discovery for the candidate apps with `grep_search` and build the concrete future work set:
     - definition files
     - usage files that may be edited
     - spec, test, or mock files only if they are proven relevant
     - files that will be checked with `get_errors` later if file-scoped diagnostics are needed
-9. Read each file in the concrete future work set serially with `read_file` to trigger any remaining file-scoped approvals.
+10. Read each file in the concrete future work set serially with `read_file` to trigger any remaining file-scoped approvals.
    - after each permission-bearing tool call, either continue immediately on success or stop and print the blocked item and latest Step 1 status on interruption
-10. Capture the current workspace repo branch.
+   - if the user approves a prompt after an interrupted call, retry that exact `read_file` call before doing anything else
+11. Capture the current workspace repo branch.
+
+To reduce unnecessary long-running continuation prompts from the chat host, do not emit additional Step 1 status lines for every app-root approval or every individual file read while work is progressing normally.
 
 Required line before Step 2:
 `Step 1 complete: permission envelope established; proceeding to Step 2 without further approval prompts.`
