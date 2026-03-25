@@ -39,9 +39,9 @@ Rules:
 - No automated build or test commands.
 - Prefer compact outputs at every step. Print only the minimum evidence required to resume, validate, and edit safely.
 - Outside the mandatory workflow lines in this skill, keep progress updates to one short sentence per phase transition.
-- Before the first permission-sensitive Step 1 action, print exactly:
+- Immediately after Preflight item 1, print exactly:
    - `## >>>>>> USER ACTION MAY BE REQUIRED NEXT`
-   - `VS Code may show a permission prompt during Step 1. If it appears, approve it. If no prompt appears, Copilot will continue and you can work on something else.`
+   - `VS Code may show a permission prompt during Preflight or Step 1. If it appears, approve it. If no prompt appears, Copilot will continue and you can work on something else.`
 - If Step 1 becomes blocked on a permission or read, print exactly:
    - `## >>>>>> WAITING ON YOU`
 - Prefer VS Code tools for prompts, reads, searches, and diagnostics: `vscode_askQuestions`, `read_file`, `grep_search`, and `get_errors` are the default choices unless a terminal command is strictly required.
@@ -68,6 +68,9 @@ Rules:
 
 Before Step 0:
 1. Read [applications.md](./applications.md).
+   - Immediately after item 1, print exactly:
+     - `## >>>>>> USER ACTION MAY BE REQUIRED NEXT`
+     - `VS Code may show a permission prompt during Preflight or Step 1. If it appears, approve it. If no prompt appears, Copilot will continue and you can work on something else.`
 2. Resolve machine-specific repository roots using one of these sources, in order:
    - macOS/Linux user config file: `~/.copilot/flag-sunset/local-roots.json`
    - Windows user config file: `%USERPROFILE%/.copilot/flag-sunset/local-roots.json`
@@ -133,7 +136,7 @@ Execution:
 3. Resolve the local repository roots for the current run.
    - if this requires reading the user-owned local-roots config outside the workspace, that read is permission-sensitive and must follow the interruption and retry rules above
 4. Validate each unique local repository root with an OS-appropriate terminal existence check before any permission prompts.
-5. Print the required `## >>>>>> USER ACTION MAY BE REQUIRED NEXT` banner immediately before the first permission-sensitive Step 1 action.
+5. Reuse the required `## >>>>>> USER ACTION MAY BE REQUIRED NEXT` banner that was printed during Preflight; do not print it again in Step 1.
 6. Derive each app's effective local app path from the registry.
 7. Seed broad permissions serially for the known workflow operations and app roots that may be touched later:
     - `list_dir` on each effective app path
