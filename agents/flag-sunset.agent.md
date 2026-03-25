@@ -4,7 +4,6 @@ description: "Use when removing a LaunchDarkly flag by raw key across Nova, Core
 tools: [read, search, edit, execute]
 agents: []
 user-invocable: true
-user-invocable: false
 argument-hint: "The feature flag key to remove, for example: WFD-5487-display-strike-duplication"
 ---
 
