@@ -13,7 +13,7 @@
       },
       "homepage": "https://github.com/tnduong/flag-sunset-plugin",
       "repository": "https://github.com/tnduong/flag-sunset-plugin",
-      "source": "./"
+      "source": "../"
     }
   ]
 }
