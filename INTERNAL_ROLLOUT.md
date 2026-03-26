@@ -42,6 +42,19 @@ Recommended default:
 7. Update the install URL in any saved docs, prompts, or onboarding notes.
 8. Run `node scripts/validate-plugin-layout.mjs` after the transfer if any manifest paths were touched.
 
+## Rename And URL Cutover
+
+If the repository name changes during transfer, treat the final repository URL as a contract and update every place that publishes or embeds it.
+
+1. Decide on the final repository name before broad onboarding starts.
+2. Update `homepage` and `repository` in `plugin.json`.
+3. Update `homepage` and `repository` in `.claude-plugin/plugin.json`.
+4. Update `homepage` and `repository` in `.claude-plugin/marketplace.json`.
+5. Update the canonical install URL in this document and the README.
+6. Verify that the old URL redirects in GitHub, but do not rely on redirects for onboarding documentation.
+7. Re-run `node scripts/validate-plugin-layout.mjs` after the URL changes.
+8. Test installation from the final URL using a fresh VS Code profile or a user who has never installed the plugin before.
+
 ## Canonical Install URL
 
 After transfer, prefer one documented URL format and keep it stable across onboarding docs:
