@@ -2,6 +2,10 @@
 
 Private VS Code agent plugin that provides the `/flag-sunset` prompt for shared LaunchDarkly feature-flag sunset workflows.
 
+For the recommended internal ownership and onboarding model, see `INTERNAL_ROLLOUT.md`.
+
+To validate the source-install manifest layout locally, run `node scripts/validate-plugin-layout.mjs`.
+
 ## Install
 
 1. Open the Command Palette in VS Code.
@@ -30,6 +34,7 @@ Example:
 ## Notes
 
 - This plugin is distributed outside application repositories.
+- For internal rollout, prefer an organization-owned private repository with team-based access instead of a personal repository.
 - Machine-specific checkout roots are not stored in the plugin.
 - The workflow stores confirmed checkout roots in a user-owned config file outside the plugin so the source-code location prompt is normally a one-time setup.
 
@@ -37,3 +42,4 @@ Example:
 
 - Dev-only reset helpers are maintained outside this plugin deployment.
 - Current repo-tracked copies live in the Nova workspace under `.github/skills/flag-sunset/` on your testing branch.
+- Use `node scripts/validate-plugin-layout.mjs` before merging manifest-related changes.
