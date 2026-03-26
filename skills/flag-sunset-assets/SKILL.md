@@ -48,7 +48,8 @@ Rules:
    - `VS Code may show a permission prompt during Preflight or Step 1. If it appears, approve it. If no prompt appears, Copilot will continue and you can work on something else.`
 - If Step 1 becomes blocked on a permission or read, print exactly:
    - `## >>>>>> WAITING ON YOU`
-- Prefer VS Code tools for prompts, reads, searches, and diagnostics: `vscode_askQuestions`, `read_file`, `grep_search`, and `get_errors` are the default choices unless a terminal command is strictly required.
+- Prefer VS Code tools for workflow prompts and in-workspace reads, searches, and diagnostics: `vscode_askQuestions`, `read_file`, `grep_search`, and `get_errors` remain the default choices on workspace-confirmed paths.
+- Use OS-appropriate terminal commands for reading or writing the user-owned `local-roots.json` file and for root validation whenever the target is outside the active workspace.
 - When a terminal command is required, use an OS-appropriate form for the active shell. On Windows PowerShell, prefer `Test-Path` and `Get-Date`; on macOS/Linux, prefer `test -d` and `date`.
 - Preflight local-root validation must use an OS-appropriate terminal existence check on the resolved repository roots; do not use `list_dir`, `read_file`, or other VS Code filesystem tools on parent repository roots for existence checks.
 - The default workflow must not use subagents after Step 1 begins. All permission, discovery, edit, and validation actions from Step 1 onward must remain in the main agent context.
@@ -63,7 +64,8 @@ Rules:
 - Do not batch any tool calls that may trigger a permission prompt; preflight root checks, app-root approvals, and file approvals must each run as single-step serial operations.
 - Any canceled, dismissed, timed-out, or interrupted tool or permission result in Step 1 must be treated as `STEP_1_INCOMPLETE`, not as loss of Step 0 state.
 - If a permission-bearing tool result is canceled, interrupted, or delayed unexpectedly, stop and print the current blocked item and latest resumable status line instead of remaining in a generic working state.
-- After the user approves any permission prompt, immediately rerun the exact blocked tool call in the next agent action; never assume the interrupted call will resume on its own.
+- After the user approves any permission prompt, rerun the exact blocked tool call once in the next agent action; never assume the interrupted call will resume on its own.
+- Do not automatically retry the same blocked item more than once in the same run. If the retry also fails or returns another ambiguous result, stop and ask the user whether to retry again or abort.
 - If a permission-bearing tool call does not return a success result, do not continue with additional reads, searches, or reasoning-only progress messages in the same run state.
 - Do not ask the Step 0 LaunchDarkly question until both preflight gates have passed and those pass lines have been printed.
 - If any gate fails, stop and ask the user.
@@ -79,6 +81,7 @@ Before Step 0:
    - macOS/Linux user config file: `~/.copilot/flag-sunset/local-roots.json`
    - Windows user config file: `%USERPROFILE%/.copilot/flag-sunset/local-roots.json`
    - a one-time prompt for the shared parent folder that contains both `Applications` and `aya-talent-marketplace`, followed by persisting the confirmed derived roots to the user config file
+   - when the user-owned config file is outside the active workspace, read it with an OS-appropriate terminal command instead of a VS Code filesystem tool
 3. If no usable config file is found:
    - ask one `vscode_askQuestions` free-text prompt for the shared parent folder
    - when the active OS is macOS, use this exact prompt text:
@@ -90,7 +93,7 @@ Before Step 0:
      - `AyaHealthcare/aya-talent-marketplace` = `[PARENT]/aya-talent-marketplace`
    - prompt the user to confirm the derived paths before continuing
    - if the confirmation is not approved, stop immediately with no Step 0 prompt and no edits
-   - create or update the user-owned local-roots config file outside the plugin with the confirmed derived paths before continuing
+    - create or update the user-owned local-roots config file outside the plugin with the confirmed derived paths before continuing, using an OS-appropriate terminal command when the target is outside the active workspace
    - if the config file cannot be written, stop and ask the user
 4. If repository roots are available and valid, print:
    - `Local roots gate passed: [RepoA]=configured, [RepoB]=configured, ...`
@@ -130,15 +133,19 @@ State model:
 - When Step 1 is interrupted, also print one blocked-item line:
    - `Blocked item: [tool] [target]`
 - Treat any canceled, dismissed, timed-out, or interrupted validation or read as `STEP_1_INCOMPLETE`.
+- Track one automatic retry allowance for the current `next_pending` item; reset that allowance only after a different blocked item appears or the current item succeeds.
 - Print the status line after root validation, after the candidate app set is confirmed, after the concrete future work set is fully approved, and on interruption.
 - On interruption, print `## >>>>>> WAITING ON YOU`, report the exact blocked item, repeat the latest status line verbatim, and stop.
 - On resume after approval, rerun only the exact blocked tool call represented by `next_pending`; do not skip ahead or assume the earlier call completed.
+- If the same `next_pending` item fails again after that automatic retry, stop and ask the user whether to retry again or abort instead of looping.
 
 Execution:
 1. Capture start time immediately on Step 1 entry.
 2. Read [applications.md](./applications.md).
 3. Resolve the local repository roots for the current run.
-   - if this requires reading the user-owned local-roots config outside the workspace, that read is permission-sensitive and must follow the interruption and retry rules above
+   - if this requires reading the user-owned local-roots config outside the workspace, use an OS-appropriate terminal command instead of a VS Code filesystem tool
+   - if the terminal read fails because the config file does not exist, continue with the first-run prompt path above
+   - if the terminal read fails for any other reason, stop and ask the user
 4. Validate each unique local repository root with an OS-appropriate terminal existence check before any permission prompts.
 5. Reuse the required `## >>>>>> USER ACTION MAY BE REQUIRED NEXT` banner that was printed during Preflight; do not print it again in Step 1.
 6. Derive each app's effective local app path from the registry.
@@ -157,7 +164,8 @@ Execution:
    - files that may later be checked with `get_errors` in Step 5 if file-scoped diagnostics are needed
 11. Read each file in the concrete future work set serially with `read_file` to trigger any remaining file-scoped approvals.
    - after each permission-bearing tool call, either continue immediately on success or stop and print the blocked item and latest Step 1 status on interruption
-   - if the user approves a prompt after an interrupted call, retry that exact `read_file` call before doing anything else
+   - if the user approves a prompt after an interrupted call, retry that exact `read_file` call once before doing anything else
+   - if the same file read is interrupted again after that retry, stop and ask the user whether to retry again or abort
 12. Capture the current workspace repo branch.
 
 To reduce unnecessary long-running continuation prompts from the chat host, do not emit additional Step 1 status lines for every workspace-confirmed app search or every individual file read while work is progressing normally.

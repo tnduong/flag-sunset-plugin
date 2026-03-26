@@ -58,6 +58,7 @@ Use the same main-agent discovery pass to seed approvals before Step 1 completes
 
 Rules:
 - Before any VS Code filesystem or search tool runs, validate local roots with OS-appropriate terminal existence checks and confirm every effective app path is already present in the active workspace.
+- Read or write the user-owned `local-roots.json` file with an OS-appropriate terminal command whenever it lives outside the active workspace.
 - If any required effective app path is missing from the active workspace, stop with workspace-gate failure instead of triggering external-directory approval prompts.
 - Do not use `list_dir` as part of the default permission envelope.
 - Use `grep_search` only on workspace-confirmed app paths.
@@ -65,6 +66,7 @@ Rules:
 - Defer `get_errors` until Step 5 and scope it to edited files only, unless a Step 1 fallback requires file-scoped diagnostics for a specific already-approved file.
 - Do not use subagents after Step 1 begins.
 - When a terminal command is required for Step 1 path validation, use an OS-appropriate form for the active shell so the workflow remains valid on both macOS and Windows.
+- If a Step 1 permission-bearing action is interrupted, retry the same blocked item at most once after approval; if the retry also fails, stop and ask the user whether to retry again or abort.
 
 ## Targeted Fallback Strategy
 
