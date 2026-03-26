@@ -55,6 +55,8 @@ Example:
 
 If this file does not exist, the workflow prompts once for the shared parent folder containing both `Applications` and `aya-talent-marketplace`, derives the repository roots, confirms them with the user, then writes the config file so later runs reuse the same locations without prompting again.
 
+When the config file lives outside the active workspace, the workflow should read and write it with OS-appropriate terminal commands instead of VS Code filesystem tools. This avoids host-managed external-directory approval prompts for routine config access.
+
 ## Permission Prompts
 
 Permission prompts are an expected part of the workflow.
@@ -62,12 +64,17 @@ Permission prompts are an expected part of the workflow.
 1. Preflight may ask for the shared parent folder if no usable local-roots config is available.
 2. Preflight asks for confirmation before persisting and using the derived repository roots.
 3. Step 0 asks for the LaunchDarkly production state and whether to continue.
-4. Preflight should validate repository-root existence with an OS-appropriate terminal check instead of VS Code filesystem reads on parent repository roots.
-5. Step 1 must confirm that every required effective app path is already part of the active VS Code workspace before any VS Code filesystem or search tool runs.
-6. Step 1 establishes a minimal permission envelope in the main agent by using `grep_search` on workspace-confirmed app paths and then reading only the concrete file set needed for edits and validation.
-7. `list_dir` is not part of the default Step 1 approval flow, and `get_errors` should be deferred until Step 5 with file-scoped checks on edited files only.
-8. Step 1 permission-bearing operations must run serially. Do not batch them in parallel, because an interrupted approval can leave the UI showing a misleading long-running working state.
-9. After Step 1 completes, the default workflow is expected to proceed without further approval prompts.
+4. Preflight should read or write the user-owned `local-roots.json` file with OS-appropriate terminal commands whenever that file is outside the active workspace.
+5. Preflight should validate repository-root existence with an OS-appropriate terminal check instead of VS Code filesystem reads on parent repository roots.
+6. Step 1 must confirm that every required effective app path is already part of the active VS Code workspace before any VS Code filesystem or search tool runs.
+7. Step 1 establishes a minimal permission envelope in the main agent by using `grep_search` on workspace-confirmed app paths and then reading only the concrete file set needed for edits and validation.
+8. If a permission-bearing Step 1 action is interrupted, the workflow may retry that exact blocked item once after approval, then must stop and ask the user whether to retry again or abort.
+9. The workflow should not rely on interpreting every non-default VS Code external-access approval option; instead, it should avoid triggering those prompts for off-workspace config access in the first place.
+10. After Step 1 completes, the default workflow is expected to proceed without further approval prompts.
+
+`list_dir` is not part of the default Step 1 approval flow, and `get_errors` should be deferred until Step 5 with file-scoped checks on edited files only.
+
+Step 1 permission-bearing operations must run serially. Do not batch them in parallel, because an interrupted approval can leave the UI showing a misleading long-running working state.
 
 ## Operating Rules
 
@@ -75,9 +82,11 @@ Permission prompts are an expected part of the workflow.
 - Cross-repository discovery must begin from the registry in [applications.md](./applications.md).
 - No edits are allowed before the branch gate passes.
 - Step 1 permission-sensitive actions must run serially, not in parallel.
+- Off-workspace config access must use OS-appropriate terminal commands instead of VS Code filesystem tools.
 - Preflight root existence checks must not use VS Code filesystem tools on parent repository roots.
 - If any required effective app path is not already in the active workspace, the workflow must stop instead of attempting external-directory reads.
 - If any permission-bearing tool call is interrupted, the workflow should stop and print the blocked item plus resumable status instead of silently appearing to work.
+- The workflow must not automatically retry the same blocked item more than once in the same run.
 - The default workflow must not use subagents after Step 1 begins.
 - The workflow must stop when a gate fails instead of making assumptions.
 - All path resolution and terminal behavior must continue to support both macOS and Windows.

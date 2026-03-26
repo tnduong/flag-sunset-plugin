@@ -39,7 +39,8 @@ Workflow assets:
 
 - Treat any canceled, dismissed, timed-out, or interrupted permission-bearing tool call as blocked state.
 - When blocked on a permission-bearing tool call, stop and report the exact blocked item instead of continuing analysis.
-- After the user approves the prompt, rerun only the exact blocked tool call before doing anything else.
+- After the user approves the prompt, rerun only the exact blocked tool call once before doing anything else.
+- If the same blocked item fails again after that retry, stop and ask the user whether to retry again or abort instead of looping.
 
 ## Approach
 
