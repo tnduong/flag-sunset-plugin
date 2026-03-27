@@ -227,6 +227,7 @@ Rules:
 - preserve existing patterns unless the flag itself required branching logic
 - do not modify unrelated tests or neighboring code paths
 - keep changes minimal and deterministic
+- **spec/test files:** when a test suite has both an "FF enabled" (winning-path) test and an "FF disabled" (losing-path) test, remove only the losing-path test; rename and keep the winning-path test without the "when FF is enabled" qualifier (e.g. rename `should display percentage when FF is enabled` → `should display percentage`). The winning-path test continues to verify hardcoded behavior and must not be deleted.
 
 ## Step 5: Static Validation Only
 
