@@ -32,16 +32,21 @@ The intended operator experience is documented in [operator-goal.md](./reference
 
 ## One-Time Machine Setup
 
-Each user uses a personal local-roots configuration file outside the plugin.
+The workflow should prefer a workspace-local local-roots configuration file and keep the home-directory file as a fallback.
 
-Preferred path:
+Preferred path for new users:
+- `Nova/.copilot/flag-sunset/local-roots.json`
+
+Fallback path for existing users:
 - macOS/Linux: `~/.copilot/flag-sunset/local-roots.json`
 - Windows: `%USERPROFILE%/.copilot/flag-sunset/local-roots.json`
 
 Purpose:
 - maps repository names to local checkout roots
 - lets the workflow derive project-specific paths from [applications.md](./applications.md)
-- remains user-specific and outside the installed plugin
+- remains machine-specific and outside the installed plugin assets
+- does not depend on the plugin source repository existing locally
+- keeps the preferred config on a workspace-confirmed path so VS Code does not need an external-directory prompt to read it
 - makes repository-root collection a one-time prompt on a new machine or after a manual config reset
 
 Example:
@@ -53,9 +58,9 @@ Example:
 }
 ```
 
-If this file does not exist, the workflow prompts once for the shared parent folder containing both `Applications` and `aya-talent-marketplace`, derives the repository roots, confirms them with the user, then writes the config file so later runs reuse the same locations without prompting again.
+If the preferred workspace-local file does not exist, the workflow prompts once for the shared parent folder containing both `Applications` and `aya-talent-marketplace`, derives the repository roots, confirms them with the user, then writes the workspace-local file so later runs reuse the same locations without prompting again.
 
-When the config file lives outside the active workspace, the workflow should read and write it with OS-appropriate terminal commands instead of VS Code filesystem tools. This avoids host-managed external-directory approval prompts for routine config access.
+If the workspace-local file cannot be used, the workflow may fall back to the home-directory config file. When the chosen config file lives outside the active workspace, the workflow should read and write it with OS-appropriate terminal commands instead of VS Code filesystem tools. This avoids host-managed external-directory approval prompts for routine config access.
 
 ## Permission Prompts
 
@@ -64,7 +69,7 @@ Permission prompts are an expected part of the workflow.
 1. Preflight may ask for the shared parent folder if no usable local-roots config is available.
 2. Preflight asks for confirmation before persisting and using the derived repository roots.
 3. Step 0 asks for the LaunchDarkly production state and whether to continue.
-4. Preflight should read or write the user-owned `local-roots.json` file with OS-appropriate terminal commands whenever that file is outside the active workspace.
+4. Preflight should prefer the workspace-local `.copilot/flag-sunset/local-roots.json` file under the `Nova` workspace folder and use OS-appropriate terminal commands only when falling back to the home-directory file outside the active workspace.
 5. Preflight should validate repository-root existence with an OS-appropriate terminal check instead of VS Code filesystem reads on parent repository roots.
 6. Step 1 must confirm that every required effective app path is already part of the active VS Code workspace before any VS Code filesystem or search tool runs.
 7. Step 1 establishes a minimal permission envelope in the main agent by using `grep_search` on workspace-confirmed app paths and then reading only the concrete file set needed for edits and validation.
@@ -81,6 +86,7 @@ Step 1 permission-bearing operations must run serially. Do not batch them in par
 - No automated build or test commands are allowed in this workflow.
 - Cross-repository discovery must begin from the registry in [applications.md](./applications.md).
 - No edits are allowed before the branch gate passes.
+- Before creating a removal branch, each affected repository must refresh its local `main` branch from `origin/main`.
 - Step 1 permission-sensitive actions must run serially, not in parallel.
 - Off-workspace config access must use OS-appropriate terminal commands instead of VS Code filesystem tools.
 - Preflight root existence checks must not use VS Code filesystem tools on parent repository roots.
