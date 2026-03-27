@@ -49,12 +49,15 @@ Rules:
 - If Step 1 becomes blocked on a permission or read, print exactly:
    - `## >>>>>> WAITING ON YOU`
 - Prefer VS Code tools for workflow prompts and in-workspace reads, searches, and diagnostics: `vscode_askQuestions`, `read_file`, `grep_search`, and `get_errors` remain the default choices on workspace-confirmed paths.
-- Use OS-appropriate terminal commands for reading or writing the user-owned `local-roots.json` file and for root validation whenever the target is outside the active workspace.
+- Prefer a workspace-local `local-roots.json` file on workspace-confirmed paths before falling back to the user-owned home-directory file.
+- Use OS-appropriate terminal commands for reading or writing the user-owned home-directory `local-roots.json` file and for root validation whenever the target is outside the active workspace.
 - When a terminal command is required, use an OS-appropriate form for the active shell. On Windows PowerShell, prefer `Test-Path` and `Get-Date`; on macOS/Linux, prefer `test -d` and `date`.
 - Preflight local-root validation must use an OS-appropriate terminal existence check on the resolved repository roots; do not use `list_dir`, `read_file`, or other VS Code filesystem tools on parent repository roots for existence checks.
 - The default workflow must not use subagents after Step 1 begins. All permission, discovery, edit, and validation actions from Step 1 onward must remain in the main agent context.
 - All file edits must remain in the main agent context.
-- Machine-specific checkout roots must come from a user-owned config file outside the plugin, creating or updating that file after a confirmed first-run prompt when needed.
+- Machine-specific checkout roots must not be stored in the plugin.
+- Prefer storing machine-specific checkout roots in a workspace-local config file at `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder, ignored by Git.
+- Preserve support for the user-owned home-directory config file as a fallback for existing users.
 - The current VS Code workspace must include every project listed in [applications.md](./applications.md) before Step 0 may begin.
 - Do not create, repair, or write configuration files inside the plugin directory.
 - No file edits before branch proof is printed.
@@ -78,10 +81,11 @@ Before Step 0:
      - `## >>>>>> USER ACTION MAY BE REQUIRED NEXT`
      - `VS Code may show a permission prompt during Preflight or Step 1. If it appears, approve it. If no prompt appears, Copilot will continue and you can work on something else.`
 2. Resolve machine-specific repository roots using one of these sources, in order:
+   - workspace-local config file: `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder
    - macOS/Linux user config file: `~/.copilot/flag-sunset/local-roots.json`
    - Windows user config file: `%USERPROFILE%/.copilot/flag-sunset/local-roots.json`
-   - a one-time prompt for the shared parent folder that contains both `Applications` and `aya-talent-marketplace`, followed by persisting the confirmed derived roots to the user config file
-   - when the user-owned config file is outside the active workspace, read it with an OS-appropriate terminal command instead of a VS Code filesystem tool
+   - a one-time prompt for the shared parent folder that contains both `Applications` and `aya-talent-marketplace`, followed by persisting the confirmed derived roots to the workspace-local config file
+   - when the selected config file is outside the active workspace, read it with an OS-appropriate terminal command instead of a VS Code filesystem tool
 3. If no usable config file is found:
    - ask one `vscode_askQuestions` free-text prompt for the shared parent folder
    - when the active OS is macOS, use this exact prompt text:
@@ -93,7 +97,8 @@ Before Step 0:
      - `AyaHealthcare/aya-talent-marketplace` = `[PARENT]/aya-talent-marketplace`
    - prompt the user to confirm the derived paths before continuing
    - if the confirmation is not approved, stop immediately with no Step 0 prompt and no edits
-    - create or update the user-owned local-roots config file outside the plugin with the confirmed derived paths before continuing, using an OS-appropriate terminal command when the target is outside the active workspace
+   - create or update the workspace-local `.copilot/flag-sunset/local-roots.json` file with the confirmed derived paths before continuing
+   - if the workspace-local file cannot be written, fall back to the user-owned home-directory config file outside the plugin, using an OS-appropriate terminal command when the target is outside the active workspace
    - if the config file cannot be written, stop and ask the user
 4. If repository roots are available and valid, print:
    - `Local roots gate passed: [RepoA]=configured, [RepoB]=configured, ...`
@@ -143,7 +148,8 @@ Execution:
 1. Capture start time immediately on Step 1 entry.
 2. Read [applications.md](./applications.md).
 3. Resolve the local repository roots for the current run.
-   - if this requires reading the user-owned local-roots config outside the workspace, use an OS-appropriate terminal command instead of a VS Code filesystem tool
+   - first check the workspace-local `.copilot/flag-sunset/local-roots.json` file under the `Nova` workspace folder
+   - if this requires reading the user-owned home-directory local-roots config outside the workspace, use an OS-appropriate terminal command instead of a VS Code filesystem tool
    - if the terminal read fails because the config file does not exist, continue with the first-run prompt path above
    - if the terminal read fails for any other reason, stop and ask the user
 4. Validate each unique local repository root with an OS-appropriate terminal existence check before any permission prompts.
@@ -204,9 +210,10 @@ If the mapping cannot be completed, stop and ask the user.
 
 Before any edits:
 1. Determine the affected repositories.
-2. Create or switch each affected repository to `[FLAG_KEY]-ff-removal`.
-3. Print branch proof for each affected repository.
-4. If branch proof cannot be established, stop with no edits.
+2. For each affected repository, update the local `main` branch from `origin/main` before creating the removal branch.
+3. Create or switch each affected repository to `[FLAG_KEY]-ff-removal` from the updated `main` branch.
+4. Print branch proof for each affected repository.
+5. If branch proof cannot be established, stop with no edits.
 
 ## Step 4: Edit Scope
 

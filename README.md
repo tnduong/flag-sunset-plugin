@@ -36,7 +36,9 @@ Example:
 - This plugin is distributed outside application repositories.
 - For internal rollout, prefer an organization-owned private repository with team-based access instead of a personal repository.
 - Machine-specific checkout roots are not stored in the plugin.
-- The workflow stores confirmed checkout roots in a user-owned config file outside the plugin so the source-code location prompt is normally a one-time setup.
+- For new users, the workflow should store confirmed checkout roots in `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder and keep that file ignored by Git.
+- The home-directory config at `~/.copilot/flag-sunset/local-roots.json` remains a fallback for existing setups.
+- The installed plugin location, including `%APPDATA%\Code\agentPlugins\github.com\tnduong\flag-sunset-plugin`, is not used for machine-specific config reads or writes.
 
 ## Dev Testing
 
