@@ -82,6 +82,7 @@ Before Step 0:
      - `VS Code may show a permission prompt during Preflight or Step 1. If it appears, approve it. If no prompt appears, Copilot will continue and you can work on something else.`
 2. Resolve machine-specific repository roots using one of these sources, in order:
    - workspace-local config file: `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder
+     - if this file does not exist (read_file error or file not found), treat it as absent and continue to the next source; this is not a gate failure
    - macOS/Linux user config file: `~/.copilot/flag-sunset/local-roots.json`
    - Windows user config file: `%USERPROFILE%/.copilot/flag-sunset/local-roots.json`
    - a one-time prompt for the shared parent folder that contains both `Applications` and `aya-talent-marketplace`, followed by persisting the confirmed derived roots to the workspace-local config file
@@ -149,6 +150,7 @@ Execution:
 2. Read [applications.md](./applications.md).
 3. Resolve the local repository roots for the current run.
    - first check the workspace-local `.copilot/flag-sunset/local-roots.json` file under the `Nova` workspace folder
+   - if this file does not exist (read_file error or file not found), treat it as absent and fall through to the next source; this is not a gate failure
    - if this requires reading the user-owned home-directory local-roots config outside the workspace, use an OS-appropriate terminal command instead of a VS Code filesystem tool
    - if the terminal read fails because the config file does not exist, continue with the first-run prompt path above
    - if the terminal read fails for any other reason, stop and ask the user
