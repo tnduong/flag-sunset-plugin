@@ -50,12 +50,13 @@ Workflow assets:
 
 ## Approach
 
-1. Load and follow the plugin-owned `flag-sunset` workflow assets.
-2. Resolve local roots, validate workspace membership, and capture LaunchDarkly PROD state.
-3. Establish the Step 1 permission envelope and exact edit scope.
-4. Create the required `[FLAG_KEY]-ff-removal` branch in each affected repository before editing.
-5. Remove only proven definitions and usages while keeping exactly one surviving behavior path.
-6. Run static validation only and report compact results.
+1. **Workspace gate (zero tool calls required).** Read `skills/flag-sunset-assets/applications.md` only. Cross-reference every repo listed there against the open folders already present in the injected `<workspace_info>`. If any repo root is absent → print the workspace-gate-failed message and stop. Do not load `SKILL.md`. Do not run any terminal commands. Do not proceed to step 2.
+2. Load and follow the plugin-owned `flag-sunset` workflow assets (`SKILL.md`).
+3. Resolve local roots, validate workspace membership, and capture LaunchDarkly PROD state.
+4. Establish the Step 1 permission envelope and exact edit scope.
+5. Create the required `[FLAG_KEY]-ff-removal` branch in each affected repository before editing.
+6. Remove only proven definitions and usages while keeping exactly one surviving behavior path.
+7. Run static validation only and report compact results.
 
 ## Output Rules
 
