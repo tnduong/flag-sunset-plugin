@@ -96,6 +96,7 @@ Each scenario maps to one or more behavioral contracts enforced by `scripts/vali
 
 - [ ] The workflow stops with workspace-gate failure.
 - [ ] It does not try external reads on the missing project.
+- [ ] No subagent is invoked to reach the missing project.
 
 ---
 

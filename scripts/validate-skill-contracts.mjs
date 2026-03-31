@@ -141,6 +141,19 @@ const contracts = [
             },
         ],
     },
+    {
+        scenario: 'Scenario 9: subagent bypass — workspace-gate failure is terminal',
+        checks: [
+            {
+                label: 'Subagent ban is unconditional and covers workspace-gate bypass',
+                text: 'Do not invoke a subagent to access a missing workspace project or to bypass a workspace-gate failure',
+            },
+            {
+                label: 'Workspace-gate failure explicitly blocks subagent bypass',
+                text: 'do not invoke a subagent or use any external mechanism to access the missing project; a workspace-gate failure is terminal for this run',
+            },
+        ],
+    },
 ];
 
 let passed = 0;
