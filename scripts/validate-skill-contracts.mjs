@@ -1,11 +1,12 @@
 /**
  * validate-skill-contracts.mjs
  *
- * Static content validator for skills/flag-sunset-assets/SKILL.md.
+ * Static content validator for the flag-sunset prompt, agent, and shared skill.
  *
  * Each entry in `contracts` maps one scenario (see tests/validate-plugin-contract.md)
- * to the specific clauses in SKILL.md that make it pass. If a clause is removed or
- * reworded without updating these checks, this script exits non-zero and CI fails.
+ * to the specific clauses in the relevant plugin file that make it pass. If a clause
+ * is removed or reworded without updating these checks, this script exits non-zero
+ * and CI fails.
  *
  * Add a new entry whenever a new scenario is added to tests/validate-plugin-contract.md.
  */
@@ -18,14 +19,58 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '..');
 
+const commandPath = path.join(repoRoot, 'commands/flag-sunset.md');
+const agentPath = path.join(repoRoot, 'agents/flag-sunset.agent.md');
 const skillPath = path.join(repoRoot, 'skills/flag-sunset-assets/SKILL.md');
-const skill = await readFile(skillPath, 'utf8');
 
-// Each contract is: { scenario, checks: [{ label, text }] }
-// `text` is an exact substring that must appear in SKILL.md.
+const files = {
+    command: await readFile(commandPath, 'utf8'),
+    agent: await readFile(agentPath, 'utf8'),
+    skill: await readFile(skillPath, 'utf8'),
+};
+
+// Each contract is: { file, scenario, checks: [{ label, text }] }
+// `text` is an exact substring that must appear in the target file.
 // Keep `text` as short as possible while remaining unambiguous.
 const contracts = [
     {
+        file: 'command',
+        scenario: 'Scenario 4: missing workspace folder — command prompt fails closed',
+        checks: [
+            {
+                label: 'Command enforces a workspace gate before loading workflow assets',
+                text: 'Before loading any workflow asset, enforce the workspace gate with zero tool calls beyond reading `../skills/flag-sunset-assets/applications.md`',
+            },
+            {
+                label: 'Command blocks SKILL.md loading before the workspace gate passes',
+                text: 'Do not read `SKILL.md`.',
+            },
+            {
+                label: 'Command blocks terminal fallback before the workspace gate passes',
+                text: 'Do not run any terminal commands.',
+            },
+        ],
+    },
+    {
+        file: 'agent',
+        scenario: 'Scenario 4: missing workspace folder — custom agent still guards first',
+        checks: [
+            {
+                label: 'Agent performs a zero-tool workspace gate first',
+                text: '**Workspace gate (zero tool calls required).**',
+            },
+            {
+                label: 'Agent blocks SKILL.md loading before the workspace gate passes',
+                text: 'Do not load `SKILL.md`.',
+            },
+            {
+                label: 'Agent blocks terminal commands before the workspace gate passes',
+                text: 'Do not run any terminal commands.',
+            },
+        ],
+    },
+    {
+        file: 'skill',
         scenario: 'Scenario 1: brand new user — first-run setup',
         checks: [
             {
@@ -47,6 +92,7 @@ const contracts = [
         ],
     },
     {
+        file: 'skill',
         scenario: 'Scenario 2: existing user with valid local-roots — setup is skipped',
         checks: [
             {
@@ -60,6 +106,7 @@ const contracts = [
         ],
     },
     {
+        file: 'skill',
         scenario: 'Scenario 3: stale local-roots — path points to missing repo',
         checks: [
             {
@@ -73,6 +120,7 @@ const contracts = [
         ],
     },
     {
+        file: 'skill',
         scenario: 'Scenario 4: missing workspace folder — workspace gate fails early',
         checks: [
             {
@@ -86,6 +134,7 @@ const contracts = [
         ],
     },
     {
+        file: 'skill',
         scenario: 'Scenario 5: non-default approval selection — resume path works correctly',
         checks: [
             {
@@ -99,6 +148,7 @@ const contracts = [
         ],
     },
     {
+        file: 'skill',
         scenario: 'Scenario 6: explicit deny or dismiss — clean stop with no retry loop',
         checks: [
             {
@@ -112,6 +162,7 @@ const contracts = [
         ],
     },
     {
+        file: 'skill',
         scenario: 'Scenario 7: bounded retry — exactly one automatic retry per blocked item',
         checks: [
             {
@@ -129,6 +180,7 @@ const contracts = [
         ],
     },
     {
+        file: 'skill',
         scenario: 'Scenario 8: Windows path variant — cross-platform support',
         checks: [
             {
@@ -142,6 +194,7 @@ const contracts = [
         ],
     },
     {
+        file: 'skill',
         scenario: 'Scenario 9: subagent bypass — workspace-gate failure is terminal',
         checks: [
             {
@@ -159,10 +212,12 @@ const contracts = [
 let passed = 0;
 let failed = 0;
 
-for (const { scenario, checks } of contracts) {
-    console.log(`\n${scenario}`);
+for (const { file, scenario, checks } of contracts) {
+    console.log(`\n${scenario} [${file}]`);
+    const source = files[file];
+
     for (const { label, text } of checks) {
-        if (skill.includes(text)) {
+        if (source.includes(text)) {
             console.log(`  PASS  ${label}`);
             passed++;
         } else {
@@ -177,10 +232,10 @@ console.log(`\n${passed} passed, ${failed} failed.`);
 
 if (failed > 0) {
     console.error(
-        '\nSkill contract validation FAILED. One or more behavioral contracts are no longer expressed in SKILL.md.\n' +
-        'Update SKILL.md to restore the missing clauses, or update the contract text in this file if the wording was intentionally changed.'
+        '\nPlugin contract validation FAILED. One or more behavioral contracts are no longer expressed in the prompt, agent, or shared skill.\n' +
+        'Update the relevant source file to restore the missing clauses, or update the contract text in this file if the wording was intentionally changed.'
     );
     process.exit(1);
 }
 
-console.log('Skill contract validation passed.');
+console.log('Plugin contract validation passed.');
