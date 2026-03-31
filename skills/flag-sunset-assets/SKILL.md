@@ -230,6 +230,7 @@ Rules:
 - do not modify unrelated tests or neighboring code paths
 - keep changes minimal and deterministic
 - when a TypeScript source file loses a cleanup-only library import, injected dependency, or provider because of the flag removal, inspect the paired unit test file and remove only the matching stale import/provider/mock/setup there; do not remove broader test scaffolding that is still present in the source file
+- before removing any remaining import from the paired unit test file, verify that the imported symbol has no other references anywhere else in that spec; if the symbol is still used for unrelated setup or assertions, keep the import
 - **spec/test files:** when a test suite has both an "FF enabled" (winning-path) test and an "FF disabled" (losing-path) test, remove only the losing-path test; rename and keep the winning-path test without the "when FF is enabled" qualifier (e.g. rename `should display percentage when FF is enabled` → `should display percentage`). The winning-path test continues to verify hardcoded behavior and must not be deleted.
 
 ## Step 5: Static Validation Only
