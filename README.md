@@ -34,6 +34,7 @@ Example:
 ## Notes
 
 - This plugin is distributed outside application repositories.
+- Critical safety gates must live in the slash-command prompt itself. Source-installed plugin flows may load command content under the current chat agent before a custom-agent handoff is enforced, so the command must fail closed on required preconditions such as workspace completeness.
 - For internal rollout, prefer an organization-owned private repository with team-based access instead of a personal repository.
 - Machine-specific checkout roots are not stored in the plugin.
 - For new users, the workflow should store confirmed checkout roots in `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder and keep that file ignored by Git.
