@@ -170,6 +170,7 @@ Execution:
     - definition files
     - usage files that may be edited
     - spec, test, or mock files only if they are proven relevant
+   - if a candidate Angular component, service, or similar source file is expected to lose a feature-manager or other cleanup-only library import/provider during flag removal, include the co-located `*.spec.ts` file in the concrete future work set for mirrored cleanup review
    - files that may later be checked with `get_errors` in Step 5 if file-scoped diagnostics are needed
 11. Read each file in the concrete future work set serially with `read_file` to trigger any remaining file-scoped approvals.
    - after each permission-bearing tool call, either continue immediately on success or stop and print the blocked item and latest Step 1 status on interruption
@@ -228,6 +229,8 @@ Rules:
 - preserve existing patterns unless the flag itself required branching logic
 - do not modify unrelated tests or neighboring code paths
 - keep changes minimal and deterministic
+- when a TypeScript source file loses a cleanup-only library import, injected dependency, or provider because of the flag removal, inspect the paired unit test file and remove only the matching stale import/provider/mock/setup there; do not remove broader test scaffolding that is still present in the source file
+- before removing any remaining import from the paired unit test file, verify that the imported symbol has no other references anywhere else in that spec; if the symbol is still used for unrelated setup or assertions, keep the import
 - **spec/test files:** when a test suite has both an "FF enabled" (winning-path) test and an "FF disabled" (losing-path) test, remove only the losing-path test; rename and keep the winning-path test without the "when FF is enabled" qualifier (e.g. rename `should display percentage when FF is enabled` → `should display percentage`). The winning-path test continues to verify hardcoded behavior and must not be deleted.
 
 ## Step 5: Static Validation Only
