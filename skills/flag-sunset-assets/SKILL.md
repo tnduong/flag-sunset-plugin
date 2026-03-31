@@ -53,7 +53,7 @@ Rules:
 - Use OS-appropriate terminal commands for reading or writing the user-owned home-directory `local-roots.json` file and for root validation whenever the target is outside the active workspace.
 - When a terminal command is required, use an OS-appropriate form for the active shell. On Windows PowerShell, prefer `Test-Path` and `Get-Date`; on macOS/Linux, prefer `test -d` and `date`.
 - Preflight local-root validation must use an OS-appropriate terminal existence check on the resolved repository roots; do not use `list_dir`, `read_file`, or other VS Code filesystem tools on parent repository roots for existence checks.
-- The default workflow must not use subagents after Step 1 begins. All permission, discovery, edit, and validation actions from Step 1 onward must remain in the main agent context.
+- The default workflow must not use subagents at any point in the run. All permission, discovery, edit, and validation actions must remain in the main agent context. Do not invoke a subagent to access a missing workspace project or to bypass a workspace-gate failure.
 - All file edits must remain in the main agent context.
 - Machine-specific checkout roots must not be stored in the plugin.
 - Prefer storing machine-specific checkout roots in a workspace-local config file at `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder, ignored by Git.
@@ -115,6 +115,7 @@ Before Step 0:
    - `Workspace gate failed: missing [ProjectA]=[PathA], [ProjectB]=[PathB], ...`
    - `Open or create a VS Code workspace that includes every project listed in applications.md, then rerun flag-sunset.`
    - stop immediately with no Step 0 prompt and no edits
+   - do not invoke a subagent or use any external mechanism to access the missing project; a workspace-gate failure is terminal for this run
 
 ## Step 0: LaunchDarkly Final State
 
@@ -183,7 +184,7 @@ Required line before Step 2:
 
 ## Step 2: Discover Impact
 
-Use the exact local evidence gathered during Step 1. Do not use subagents after Step 1 begins.
+Use the exact local evidence gathered during Step 1. Do not use subagents.
 
 Step 2A: Reuse Step 1 discovery
 - reuse the candidate app set, identifier mapping, and concrete future work set produced during Step 1
