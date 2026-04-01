@@ -64,7 +64,7 @@ Rules:
 - If any required effective app path is missing from the active workspace, stop with workspace-gate failure instead of triggering external-directory approval prompts.
 - Do not use `list_dir` as part of the default permission envelope.
 - Use `grep_search` only on workspace-confirmed app paths.
-- Use `read_file` only for files in the concrete future work set.
+- Use `read_file` only for files in the concrete future work set. Definition files are read in full. All other files are read as targeted ranges anchored to grep-discovered match lines (±30 lines, expanded to contain the full logical block, merged when overlapping). The grep line numbers from Step 3 are the authoritative coverage list; every match line must fall within a read range.
 - Defer `get_errors` until Step 5 and scope it to edited files only, unless a Step 1 fallback requires file-scoped diagnostics for a specific already-approved file.
 - Do not use subagents after Step 1 begins.
 - When a terminal command is required for Step 1 path validation, use an OS-appropriate form for the active shell so the workflow remains valid on both macOS and Windows.
