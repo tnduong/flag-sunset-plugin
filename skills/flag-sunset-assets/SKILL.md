@@ -172,7 +172,15 @@ Execution:
     - spec, test, or mock files only if they are proven relevant
    - if a candidate Angular component, service, or similar source file is expected to lose a feature-manager or other cleanup-only library import/provider during flag removal, include the co-located `*.spec.ts` file in the concrete future work set for mirrored cleanup review
    - files that may later be checked with `get_errors` in Step 5 if file-scoped diagnostics are needed
-11. Read each file in the concrete future work set **in full** with `read_file` to trigger any remaining file-scoped approvals; do not stop at the first match — read to the end of each file before moving on.
+11. Read each file in the concrete future work set with `read_file` to trigger any remaining file-scoped approvals, using this strategy:
+   - **Definition files** (the flag enum/const file for each app): read in full — they are small and are the authoritative identifier source.
+   - **All other files**: read only the line ranges anchored to the grep-discovered match lines from Step 10:
+     - default context window: ±30 lines around each match line
+     - expand the range if the logical block at the match site (function body, decorator, class, import group) is not fully contained within ±30 lines
+     - merge overlapping or adjacent ranges for the same file into a single `read_file` call
+     - the first range read per file triggers the file-scoped permission approval
+   - The grep-discovered line numbers from Step 10 are the authoritative completeness list. Every line number returned by `grep_search` for a file must fall within a read range. If any grep-discovered line falls outside all ranges after merging, expand the nearest range to include it.
+   - Read all ranges for a file before moving to the next file.
    - after each permission-bearing tool call, either continue immediately on success or stop and print the blocked item and latest Step 1 status on interruption
    - if the user approves a prompt after an interrupted call, retry that exact `read_file` call once before doing anything else
    - if the same file read is interrupted again after that retry, stop and ask the user whether to retry again or abort
