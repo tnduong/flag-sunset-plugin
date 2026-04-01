@@ -172,7 +172,7 @@ Execution:
     - spec, test, or mock files only if they are proven relevant
    - if a candidate Angular component, service, or similar source file is expected to lose a feature-manager or other cleanup-only library import/provider during flag removal, include the co-located `*.spec.ts` file in the concrete future work set for mirrored cleanup review
    - files that may later be checked with `get_errors` in Step 5 if file-scoped diagnostics are needed
-11. Read each file in the concrete future work set serially with `read_file` to trigger any remaining file-scoped approvals.
+11. Read each file in the concrete future work set **in full** with `read_file` to trigger any remaining file-scoped approvals; do not stop at the first match — read to the end of each file before moving on.
    - after each permission-bearing tool call, either continue immediately on success or stop and print the blocked item and latest Step 1 status on interruption
    - if the user approves a prompt after an interrupted call, retry that exact `read_file` call once before doing anything else
    - if the same file read is interrupted again after that retry, stop and ask the user whether to retry again or abort
