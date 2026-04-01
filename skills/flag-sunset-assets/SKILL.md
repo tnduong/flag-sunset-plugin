@@ -234,6 +234,7 @@ Edit only files proven by Step 2.
 Rules:
 - remove the flag definition and direct usages for affected apps only
 - keep exactly one behavior path after removal
+- **compound conditions:** when the removed flag appears as one term in a compound condition (e.g. `A && !B` where B is being removed), eliminate only the removed flag's sub-expression and leave other flags intact — the result is `if (A)`, not the else branch; never substitute the removed flag's production value into a compound condition that contains other flags
 - preserve existing patterns unless the flag itself required branching logic
 - do not modify unrelated tests or neighboring code paths
 - keep changes minimal and deterministic
