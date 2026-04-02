@@ -325,6 +325,20 @@ const contracts = [
             },
         ],
     },
+    {
+        file: 'skill',
+        scenario: 'Scenario 18: pre-edit freshness check guards against stale discovery evidence',
+        checks: [
+            {
+                label: 'Freshness check re-reads anchored ranges before any edits',
+                text: 're-read the anchored line ranges for every file in the concrete future work set',
+            },
+            {
+                label: 'Freshness pass prints per-file confirmation',
+                text: 'Freshness check passed: [N] files validated; proceeding to edits.',
+            },
+        ],
+    },
 ];
 
 let passed = 0;

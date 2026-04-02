@@ -171,7 +171,7 @@ Execution:
     - usage files that may be edited
     - spec, test, or mock files only if they are proven relevant
    - if a candidate Angular component, service, or similar source file is expected to lose a feature-manager or other cleanup-only library import/provider during flag removal, include the co-located `*.spec.ts` file in the concrete future work set for mirrored cleanup review
-   - files that may later be checked with `get_errors` in Step 5 if file-scoped diagnostics are needed
+   - files that may later be checked with `get_errors` in Step 6 if file-scoped diagnostics are needed
 11. Read each file in the concrete future work set with `read_file` to trigger any remaining file-scoped approvals, using this strategy:
    - **Definition files** (the flag enum/const file for each app): read in full — they are small and are the authoritative identifier source.
    - **All other files**: read only the line ranges anchored to the grep-discovered match lines from Step 10:
@@ -227,7 +227,15 @@ Before any edits:
 4. Print branch proof for each affected repository.
 5. If branch proof cannot be established, stop with no edits.
 
-## Step 4: Edit Scope
+## Step 4: Pre-Edit Freshness Check
+
+Before any edits, re-read the anchored line ranges for every file in the concrete future work set (the same ranges used in Step 1: grep-discovered match line ±30 lines, expanded if the logical block is not fully contained, merged if overlapping).
+
+- For each file: print `Fresh: [file]=[identifier]@~line[N]`.
+- When all files are read, print: `Freshness check passed: [N] files validated; proceeding to edits.`
+- Proceed to Step 5.
+
+## Step 5: Edit Scope
 
 Edit only files proven by Step 2.
 
@@ -242,7 +250,7 @@ Rules:
 - before removing any remaining import from the paired unit test file, verify that the imported symbol has no other references anywhere else in that spec; if the symbol is still used for unrelated setup or assertions, keep the import
 - **spec/test files:** when a test suite has both an "FF enabled" (winning-path) test and an "FF disabled" (losing-path) test, remove only the losing-path test; rename and keep the winning-path test without the "when FF is enabled" qualifier (e.g. rename `should display percentage when FF is enabled` → `should display percentage`). The winning-path test continues to verify hardcoded behavior and must not be deleted.
 
-## Step 5: Static Validation Only
+## Step 6: Static Validation Only
 
 Run static validation only.
 
@@ -251,9 +259,9 @@ Minimum checks:
 - zero new diagnostics caused by the edits, using `get_errors` scoped to edited files only when diagnostics are needed
 - clean imports and clean structure after dead-code removal
 
-If validation fails, fix the issue and rerun Step 5. Do not run automated build or test commands.
+If validation fails, fix the issue and rerun Step 6. Do not run automated build or test commands.
 
-## Step 6: Final Output
+## Step 7: Final Output
 
 Print a compact summary containing:
 - flag key
