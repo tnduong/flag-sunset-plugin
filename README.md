@@ -12,6 +12,9 @@ To validate the source-install manifest layout locally, run `node scripts/valida
 2. Run `Chat: Install Plugin From Source`.
 3. Paste the Git repository URL for this repo.
 4. Enable the plugin if prompted.
+Note: the plugin install folder is
+Windows:  %APPDATA%\Code\agentPlugins\github.com\<github-username>\flag-sunset-plugin
+MacOS: ~/Library/Application Support/Code/agentPlugins/github.com/<github-username>/flag-sunset-plugin/
 
 ## Use
 
