@@ -13,8 +13,8 @@ When the active workspace folder is this plugin source repo, you are in **develo
 
 This repo is the **source**. VS Code installs a separate copy to the **plugin cache** when the plugin is installed:
 
-- **macOS cache:** `~/Library/Application Support/Code/agentPlugins/github.com/tnduong/flag-sunset-plugin/`
-- **Windows cache:** `%APPDATA%\Code\agentPlugins\github.com\tnduong\flag-sunset-plugin\`
+- **macOS cache:** `~/.vscode/agent-plugins/github.com/tnduong/flag-sunset-plugin/`
+- **Windows cache:** `%USERPROFILE%\.vscode\agent-plugins\github.com\tnduong\flag-sunset-plugin\`
 
 To test a change without committing:
 1. Edit the file in this source repo.
