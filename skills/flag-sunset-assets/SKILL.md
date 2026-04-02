@@ -40,7 +40,7 @@ Print immediately after the execution-mode line:
 Rules:
 - No automated build or test commands.
 - Prefer compact outputs at every step. Print only the minimum evidence required to resume, validate, and edit safely.
-- Outside the mandatory workflow lines in this skill, keep progress updates to one short sentence per phase transition.
+- Do not emit per-file read confirmations, intermediate search result echoes, or other tool progress notes outside of Step 1 resumability status lines. Each phase should produce only its required output and gate lines.
 - Keep the operator goal in [operator-goal.md](./references/operator-goal.md) in force for all workflow changes.
 - A workflow change is not complete if it reintroduces expected permission prompts after Step 1, unless the exception is explicitly documented and justified in the workflow assets.
 - Immediately after Preflight item 1, print exactly:
@@ -76,7 +76,7 @@ Rules:
 ## Preflight
 
 Before Step 0:
-1. Read [applications.md](./applications.md).
+1. Read [applications.md](./applications.md). Cache the content for the remainder of this run; do not re-read it in later steps.
    - Immediately after item 1, print exactly:
      - `## >>>>>> USER ACTION MAY BE REQUIRED NEXT`
      - `VS Code may show a permission prompt during Preflight or Step 1. If it appears, approve it. If no prompt appears, Copilot will continue and you can work on something else.`
@@ -148,7 +148,7 @@ State model:
 
 Execution:
 1. Capture start time immediately on Step 1 entry.
-2. Read [applications.md](./applications.md).
+2. Reuse the [applications.md](./applications.md) content cached during Preflight; do not re-read it.
 3. Resolve the local repository roots for the current run.
    - first check the workspace-local `.copilot/flag-sunset/local-roots.json` file under the `Nova` workspace folder
    - if this file does not exist (read_file error or file not found), treat it as absent and fall through to the next source; this is not a gate failure
@@ -175,8 +175,8 @@ Execution:
 11. Read each file in the concrete future work set with `read_file` to trigger any remaining file-scoped approvals, using this strategy:
    - **Definition files** (the flag enum/const file for each app): read in full — they are small and are the authoritative identifier source.
    - **All other files**: read only the line ranges anchored to the grep-discovered match lines from Step 10:
-     - default context window: ±30 lines around each match line
-     - expand the range if the logical block at the match site (function body, decorator, class, import group) is not fully contained within ±30 lines
+     - default context window: ±20 lines around each match line
+     - expand the range ONLY when the closing delimiter of the innermost logical block containing the match line falls outside the ±20 window; expand by the minimum number of lines needed to reach that delimiter and no more; do not expand to capture outer block delimiters or unrelated surrounding code
      - merge overlapping or adjacent ranges for the same file into a single `read_file` call
      - the first range read per file triggers the file-scoped permission approval
    - The grep-discovered line numbers from Step 10 are the authoritative completeness list. Every line number returned by `grep_search` for a file must fall within a read range. If any grep-discovered line falls outside all ranges after merging, expand the nearest range to include it.
@@ -200,7 +200,7 @@ Step 2A: Reuse Step 1 discovery
 - do not expand scope unless a Step 1 result is incomplete
 
 Step 2B: Report local confirmation
-- read [applications.md](./applications.md)
+- reuse the [applications.md](./applications.md) content cached during Preflight; do not re-read it
 - resolve local roots for the current run
 - derive a resolved app table as described in [search-strategy.md](./references/search-strategy.md)
 - print the per-app status and evidence derived during Step 1
@@ -229,7 +229,7 @@ Before any edits:
 
 ## Step 4: Pre-Edit Freshness Check
 
-Before any edits, re-read the anchored line ranges for every file in the concrete future work set (the same ranges used in Step 1: grep-discovered match line ±30 lines, expanded if the logical block is not fully contained, merged if overlapping).
+Before any edits, re-read the anchored line ranges for every file in the concrete future work set (the same ranges used in Step 1: grep-discovered match line ±20 lines, expanded only to the minimum needed to close the innermost logical block when it falls outside that window, merged if overlapping).
 
 - For each file: print `Fresh: [file]=[identifier]@~line[N]`.
 - When all files are read, print: `Freshness check passed: [N] files validated; proceeding to edits.`

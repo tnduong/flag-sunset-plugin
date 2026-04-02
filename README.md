@@ -13,8 +13,8 @@ To validate the source-install manifest layout locally, run `node scripts/valida
 3. Paste the Git repository URL for this repo.
 4. Enable the plugin if prompted.
 Note: the plugin install folder is
-Windows:  %APPDATA%\Code\agentPlugins\github.com\<github-username>\flag-sunset-plugin
-MacOS: ~/Library/Application Support/Code/agentPlugins/github.com/<github-username>/flag-sunset-plugin/
+Windows:  %USERPROFILE%\.vscode\agent-plugins\github.com\<github-username>\flag-sunset-plugin
+MacOS: ~/.vscode/agent-plugins/github.com/<github-username>/flag-sunset-plugin/
 
 ## Use
 
@@ -42,7 +42,7 @@ Example:
 - Machine-specific checkout roots are not stored in the plugin.
 - For new users, the workflow should store confirmed checkout roots in `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder and keep that file ignored by Git.
 - The home-directory config at `~/.copilot/flag-sunset/local-roots.json` remains a fallback for existing setups.
-- The installed plugin location, including `%APPDATA%\Code\agentPlugins\github.com\tnduong\flag-sunset-plugin`, is not used for machine-specific config reads or writes.
+- The installed plugin location, including `%USERPROFILE%\.vscode\agent-plugins\github.com\tnduong\flag-sunset-plugin`, is not used for machine-specific config reads or writes.
 
 ## Dev Testing
 
