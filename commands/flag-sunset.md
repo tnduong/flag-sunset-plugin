@@ -23,4 +23,7 @@ Use these plugin assets as the authoritative source of workflow behavior:
 
 Interpret the slash-command argument as the raw LaunchDarkly feature flag key to remove.
 
+As the very first line of output, print exactly:
+`flag-sunset-plugin v1.0.0`
+
 Follow the workflow exactly.
