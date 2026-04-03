@@ -39,3 +39,19 @@ Notes:
 
 - If recent changes are not stable: deploy/install from **v0.1.0** (fallback).
 - If recent changes are stable: create a new tag (e.g., **v0.2.0**) on the approved commit and deploy/install from that tag.
+
+## Upgrading to a New Version
+
+Source-installed plugins pinned to a frozen tag **do not auto-update**. When a new version is released, you must reinstall manually.
+
+1. Open **Command Palette** in VS Code.
+2. Run **Chat: Install Plugin From Source**.
+3. Paste the new tag URL:
+   ```
+   https://github.com/tnduong/flag-sunset-plugin/tree/vX.Y.Z
+   ```
+4. Enable the plugin if prompted.
+5. Confirm the upgrade by running `/flag-sunset` — the first output line will show the new version.
+
+The new tag URL for each release is included in the DM notification sent when a version ships.
+
