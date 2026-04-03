@@ -206,18 +206,19 @@ Users install via **Chat: Install Plugin from Source**. Source-installed plugins
 
 ---
 
-## Regression Checklist
+## Regression Checklist & Keeping Scenarios in Sync
 
-Before tagging a release, manually verify the scenarios in `tests/workflow-regression-scenarios.md`:
+Before tagging a release, manually verify all scenarios in `tests/workflow-regression-scenarios.md`.
 
-| Scenario | What it covers |
-|----------|---------------|
-| 1 — brand new user | First-run setup, `local-roots.json` creation |
-| 2 — existing user with valid roots | Common path, no redundant prompts |
-| 3 — stale local-roots | Clean early failure, no retry loop |
-| 4 — missing workspace folder | Workspace gate fires before any file ops |
+When you change `SKILL.md`, the agent, or the command, use the **`synch-skill-regression`** prompt to confirm that `tests/workflow-regression-scenarios.md` and `scripts/validate-skill-contracts.mjs` are updated to match:
 
-All pass criteria must be checked off before the tag is created.
+```
+> /synch-skill-regression
+```
+
+This prompt loads all four key files and checks alignment — add or update scenarios and contracts in the same PR as the behavioral change.
+
+> `tests/workflow-regression-scenarios.md` and `scripts/validate-skill-contracts.mjs` are developer-side only. Only `SKILL.md`, `applications.md`, `commands/flag-sunset.md`, and `agents/flag-sunset.agent.md` are active at runtime.
 
 ---
 

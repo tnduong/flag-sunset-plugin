@@ -195,7 +195,7 @@ const contracts = [
     },
     {
         file: 'skill',
-        scenario: 'Scenario 9: subagent bypass — workspace-gate failure is terminal',
+        scenario: 'Scenario 4 (supplemental): subagent bypass — workspace-gate failure is terminal',
         checks: [
             {
                 label: 'Subagent ban is unconditional and covers workspace-gate bypass',
@@ -334,8 +334,16 @@ const contracts = [
                 text: 're-read the anchored line ranges for every file in the concrete future work set',
             },
             {
-                label: 'Freshness pass prints per-file confirmation',
                 text: 'Freshness check passed: [N] files validated; proceeding to edits.',
+            },
+        ],
+    },
+                label: 'Step 2 prints definition-file path and usage count only, not individual usage file paths or line numbers',
+                text: 'definition-file path only, and a count of usage files',
+            },
+            {
+                label: 'NO_MATCH apps are excluded from the per-app detail block',
+                text: 'skip NO_MATCH apps from the per-app detail block; list them only in the identifier mapping line',
             },
         ],
     },
