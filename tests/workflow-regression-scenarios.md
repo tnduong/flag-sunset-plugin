@@ -323,3 +323,62 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 - [ ] Only the removed flag sub-expression is eliminated.
 - [ ] The unrelated condition remains intact.
 - [ ] The workflow does not collapse the logic to the wrong branch.
+
+---
+
+## Scenario 18: pre-edit freshness check guards against stale discovery evidence
+
+**Setup**
+
+1. Complete Step 1 discovery on a flag that touches multiple files.
+
+**Steps**
+
+2. Run `/flag-sunset [FLAG_KEY]` through Step 4.
+3. Observe the freshness check output.
+
+**Pass criteria**
+
+- [ ] All anchored line ranges for the concrete future work set are re-read before edits.
+- [ ] No per-file `Fresh:` lines are printed — only the single summary line.
+- [ ] The summary line `Freshness check passed: [N] files validated; proceeding to edits.` is printed.
+
+---
+
+## Scenario 19: branch creation uses three separate serial terminal calls
+
+**Setup**
+
+1. Use a flag with at least one affected repository that is behind `origin/main` by one or more commits.
+
+**Steps**
+
+2. Run `/flag-sunset [FLAG_KEY]` through Step 3.
+3. Observe the terminal calls made during branch creation.
+
+**Pass criteria**
+
+- [ ] The pull and branch creation are not combined into a single chained command.
+- [ ] Call 1 (`git fetch … && git pull`) runs and its output is not read or echoed into the conversation.
+- [ ] Call 2 (`git checkout -b …`) runs separately and captures only the branch-creation result.
+- [ ] Call 3 (`git branch --show-current`) is used as the branch proof, not the pull output.
+- [ ] A large pull output (many commits) does not cause a `read_file` on a temp file to recover branch proof.
+
+---
+
+## Scenario 20: Step 2 output is compact — no per-file line numbers for usage files
+
+**Setup**
+
+1. Use a flag matched in at least two usage files in one app.
+
+**Steps**
+
+2. Run `/flag-sunset [FLAG_KEY]` through Step 2.
+3. Observe the Step 2 printed output.
+
+**Pass criteria**
+
+- [ ] The identifier mapping is a single line covering all apps.
+- [ ] For each MATCH app, only the definition-file path and a usage-file count are printed (e.g. `2 usage files`) — not individual usage file paths or line numbers.
+- [ ] NO_MATCH apps appear only in the identifier mapping line, not in a separate detail block.

@@ -206,12 +206,9 @@ Step 2B: Report local confirmation
 - print the per-app status and evidence derived during Step 1
 
 Minimum required output from Step 2:
-- registry-wide app mapping
-- per confirmed app status: `MATCH`, `NO_MATCH`, `PATH_ERROR`, or `READ_ERROR`
-- exact identifier mapping for confirmed apps
-- definition-file path evidence from local confirmation
-- usage files with line numbers only for confirmed apps
-- spec, test, or mock files with line numbers only for confirmed apps
+- one-line identifier mapping: `Identifier mapping: [AppA]=[IdentifierA|NO_MATCH], ...`
+- for each MATCH app: definition-file path only, and a count of usage files (e.g. `2 usage files`)
+- skip NO_MATCH apps from the per-app detail block; list them only in the identifier mapping line
 
 Print the full per-app mapping before any usage scan:
 - `Identifier mapping: [AppA]=[IdentifierA|NO_MATCH], [AppB]=[IdentifierB|NO_MATCH], ...`
@@ -222,17 +219,19 @@ If the mapping cannot be completed, stop and ask the user.
 
 Before any edits:
 1. Determine the affected repositories.
-2. For each affected repository, update the local `main` branch from `origin/main` before creating the removal branch.
-3. Create or switch each affected repository to `[FLAG_KEY]-ff-removal` from the updated `main` branch.
-4. Print branch proof for each affected repository.
-5. If branch proof cannot be established, stop with no edits.
+2. For each affected repository, run the update and branch creation as **three separate serial terminal calls** — do not chain them into one command:
+   - Call 1: `git fetch origin main && git checkout main && git pull origin main` — run and ignore the output; its only purpose is to bring main up to date.
+   - Call 2: `git checkout -b [FLAG_KEY]-ff-removal` — create the branch; capture any error output.
+   - Call 3: `git branch --show-current` — use this output as the branch proof.
+3. Print branch proof for each affected repository from Call 3 output.
+4. If branch proof cannot be established, stop with no edits.
 
 ## Step 4: Pre-Edit Freshness Check
 
 Before any edits, re-read the anchored line ranges for every file in the concrete future work set (the same ranges used in Step 1: grep-discovered match line ±20 lines, expanded only to the minimum needed to close the innermost logical block when it falls outside that window, merged if overlapping).
 
-- For each file: print `Fresh: [file]=[identifier]@~line[N]`.
-- When all files are read, print: `Freshness check passed: [N] files validated; proceeding to edits.`
+- Do not print per-file `Fresh:` lines. Suppress individual file confirmations.
+- When all files are read, print one line only: `Freshness check passed: [N] files validated; proceeding to edits.`
 - Proceed to Step 5.
 
 ## Step 5: Edit Scope

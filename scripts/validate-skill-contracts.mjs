@@ -195,7 +195,7 @@ const contracts = [
     },
     {
         file: 'skill',
-        scenario: 'Scenario 9: subagent bypass — workspace-gate failure is terminal',
+        scenario: 'Scenario 4 (supplemental): subagent bypass — workspace-gate failure is terminal',
         checks: [
             {
                 label: 'Subagent ban is unconditional and covers workspace-gate bypass',
@@ -334,8 +334,44 @@ const contracts = [
                 text: 're-read the anchored line ranges for every file in the concrete future work set',
             },
             {
-                label: 'Freshness pass prints per-file confirmation',
+                label: 'Per-file Fresh: lines are suppressed',
+                text: 'Do not print per-file `Fresh:` lines. Suppress individual file confirmations.',
+            },
+            {
+                label: 'Freshness pass prints only a single summary line',
                 text: 'Freshness check passed: [N] files validated; proceeding to edits.',
+            },
+        ],
+    },
+    {
+        file: 'skill',
+        scenario: 'Scenario 19: branch creation uses three separate serial terminal calls',
+        checks: [
+            {
+                label: 'Pull and branch creation are split into three separate serial calls',
+                text: 'three separate serial terminal calls',
+            },
+            {
+                label: 'Pull output is explicitly ignored — not read or echoed',
+                text: 'run and ignore the output; its only purpose is to bring main up to date.',
+            },
+            {
+                label: 'Branch proof comes from git branch --show-current, not pull output',
+                text: '`git branch --show-current` — use this output as the branch proof.',
+            },
+        ],
+    },
+    {
+        file: 'skill',
+        scenario: 'Scenario 20: Step 2 output is compact — no per-file line numbers for usage files',
+        checks: [
+            {
+                label: 'Step 2 prints definition-file path and usage count only, not individual usage file paths or line numbers',
+                text: 'definition-file path only, and a count of usage files',
+            },
+            {
+                label: 'NO_MATCH apps are excluded from the per-app detail block',
+                text: 'skip NO_MATCH apps from the per-app detail block; list them only in the identifier mapping line',
             },
         ],
     },
