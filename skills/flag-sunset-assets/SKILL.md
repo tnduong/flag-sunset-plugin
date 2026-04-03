@@ -43,7 +43,7 @@ Rules:
 - Do not emit per-file read confirmations, intermediate search result echoes, or other tool progress notes outside of Step 1 resumability status lines. Each phase should produce only its required output and gate lines.
 - Keep the operator goal in [operator-goal.md](./references/operator-goal.md) in force for all workflow changes.
 - A workflow change is not complete if it reintroduces expected permission prompts after Step 1, unless the exception is explicitly documented and justified in the workflow assets.
-- Immediately after Preflight item 1, print exactly:
+- Immediately before Preflight item 1, print exactly:
    - `## >>>>>> USER ACTION MAY BE REQUIRED NEXT`
    - `VS Code may show a permission prompt during Preflight or Step 1. If it appears, approve it. If no prompt appears, Copilot will continue and you can work on something else.`
 - If Step 1 becomes blocked on a permission or read, print exactly:
@@ -76,10 +76,10 @@ Rules:
 ## Preflight
 
 Before Step 0:
+- Print exactly before item 1:
+  - `## >>>>>> USER ACTION MAY BE REQUIRED NEXT`
+  - `VS Code may show a permission prompt during Preflight or Step 1. If it appears, approve it. If no prompt appears, Copilot will continue and you can work on something else.`
 1. Read [applications.md](./applications.md). Cache the content for the remainder of this run; do not re-read it in later steps.
-   - Immediately after item 1, print exactly:
-     - `## >>>>>> USER ACTION MAY BE REQUIRED NEXT`
-     - `VS Code may show a permission prompt during Preflight or Step 1. If it appears, approve it. If no prompt appears, Copilot will continue and you can work on something else.`
 2. Resolve machine-specific repository roots using one of these sources, in order:
    - workspace-local config file: `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder
      - if this file does not exist (read_file error or file not found), treat it as absent and continue to the next source; this is not a gate failure
