@@ -13,6 +13,22 @@ To validate the source-install manifest layout locally, run `node scripts/valida
 3. Paste the Git repository URL for this repo.
 4. Enable the plugin if prompted.
 
+## Update
+
+VS Code does not automatically update installed plugins. To pull the latest changes from GitHub:
+
+**macOS / Linux:**
+```bash
+git -C ~/.vscode/agent-plugins/github.com/tnduong/flag-sunset-plugin pull
+```
+
+**Windows:**
+```powershell
+git -C "$env:USERPROFILE\.vscode\agent-plugins\github.com\tnduong\flag-sunset-plugin" pull
+```
+
+Then reload VS Code (`Ctrl+Shift+P` / `Cmd+Shift+P` → `Developer: Reload Window`).
+
 ## Use
 
 Run:
