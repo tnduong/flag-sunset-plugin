@@ -165,15 +165,18 @@ Execution:
    - do not use `list_dir` as part of the default Step 1 permission envelope
    - do not run `get_errors` at app-root scope during Step 1
    - do not combine these approvals into a parallel batch
-9. Using only the main agent, confirm the raw flag key in each app's definition target and determine the candidate app set.
+9. Determine the candidate app set using the `Flag Definition File` and `Fallback Definition Search Path` columns from [applications.md](./applications.md):
+   - **Apps with `—` as their definition file** (e.g. QaAutomation): skip this step for that app; it is always included as a candidate.
+   - **All other apps**: read the `Flag Definition File` in full with `read_file`. If the raw flag key is found, mark the app as a candidate.
+   - **Fallback (Nova only)**: if the key is not found in the main definition file and the app has a `Fallback Definition Search Path`, run one `grep_search` scoped to that path. If a match is found, read the matched sub-file in full with `read_file` to confirm the identifier; mark the app as a candidate. The sub-file counts as a definition file read — do not re-read it in Step 1.11.
+   - Apps where the raw flag key is absent after all checks are excluded from subsequent steps.
 10. Using only the main agent, run exact local usage discovery for the candidate apps with `grep_search` and build the concrete future work set:
-    - definition files
     - usage files that may be edited
     - spec, test, or mock files only if they are proven relevant
    - if a candidate Angular component, service, or similar source file is expected to lose a feature-manager or other cleanup-only library import/provider during flag removal, include the co-located `*.spec.ts` file in the concrete future work set for mirrored cleanup review
    - files that may later be checked with `get_errors` in Step 6 if file-scoped diagnostics are needed
 11. Read each file in the concrete future work set with `read_file` to trigger any remaining file-scoped approvals, using this strategy:
-   - **Definition files** (the flag enum/const file for each app): read in full — they are small and are the authoritative identifier source.
+   - **Definition files**: already read in full during step 1.9; do not re-read.
    - **All other files**: read only the line ranges anchored to the grep-discovered match lines from Step 10:
      - default context window: ±20 lines around each match line
      - expand the range ONLY when the closing delimiter of the innermost logical block containing the match line falls outside the ±20 window; expand by the minimum number of lines needed to reach that delimiter and no more; do not expand to capture outer block delimiters or unrelated surrounding code
