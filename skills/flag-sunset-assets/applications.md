@@ -18,12 +18,12 @@ Required local root keys:
 | AyaHealthcare/Applications |
 | AyaHealthcare/aya-talent-marketplace |
 
-| App | Language | Repository | Path in Repo | Flag Definition File | Build Command | Test Command |
-|---|---|---|---|---|---|---|
-| Nova | typescript-angular | AyaHealthcare/Applications | Nova/ | src/app/shared/models/enums/feature-flag.ts | *(combined with test)* | `NODE_OPTIONS="--max-old-space-size=8192" npx ng test --include="[SPEC_PATH]" --watch=false --browsers=ChromeHeadlessCI` |
-| CoreApi | csharp | AyaHealthcare/Applications | Aya.Core.Api/ | Aya.Core.Common/FeatureManagement/FeatureFlag.cs | `dotnet build` | `dotnet test Aya.Core.BL.Tests/Aya.Core.BL.Tests.csproj --filter "FullyQualifiedName~[TEST_FILTER]" --no-build` |
-| aya-talent-marketplace | typescript-angular | AyaHealthcare/aya-talent-marketplace | ./ | apps/atm-web/src/app/shared/enums/feature-flag.ts | `npm run build` | `npx nx test atm-web --include="[SPEC_PATH]" --watch=false --browsers=ChromeHeadlessCI` |
-| QaAutomation | cypress | AyaHealthcare/Applications | QaAutomation/ | — | — | — |
+| App | Language | Repository | Path in Repo | Usage Search Path | Flag Definition File | Build Command | Test Command |
+|---|---|---|---|---|---|---|---|
+| Nova | typescript-angular | AyaHealthcare/Applications | Nova/ | src/app | src/app/shared/models/enums/feature-flag.ts | *(combined with test)* | `NODE_OPTIONS="--max-old-space-size=8192" npx ng test --include="[SPEC_PATH]" --watch=false --browsers=ChromeHeadlessCI` |
+| CoreApi | csharp | AyaHealthcare/Applications | Aya.Core.Api/ | Aya.Core.Api/, Aya.Core.BL/, Aya.Core.Common/ | Aya.Core.Common/FeatureManagement/FeatureFlag.cs | `dotnet build` | `dotnet test Aya.Core.BL.Tests/Aya.Core.BL.Tests.csproj --filter "FullyQualifiedName~[TEST_FILTER]" --no-build` |
+| aya-talent-marketplace | typescript-angular | AyaHealthcare/aya-talent-marketplace | ./ | apps/atm-web/, libs/ | apps/atm-web/src/app/shared/enums/feature-flag.ts | `npm run build` | `npx nx test atm-web --include="[SPEC_PATH]" --watch=false --browsers=ChromeHeadlessCI` |
+| QaAutomation | cypress | AyaHealthcare/Applications | QaAutomation/ | cypress/e2e/ | — | — | — |
 
 ## App-Specific Notes
 
@@ -31,6 +31,7 @@ Required local root keys:
 - **aya-talent-marketplace:** Uses `@angular/build:karma`. Use `--include`, not Jest-only flags.
 - **CoreApi:** Target `Aya.Core.BL.Tests/Aya.Core.BL.Tests.csproj` directly instead of the whole solution.
 - **QaAutomation:** Edit-only. No build or test commands.
+- **Usage Search Path:** Scope terminal usage grep to these paths to avoid broad repository-wide searches that can timeout.
 
 ## Multi-Repository Support
 

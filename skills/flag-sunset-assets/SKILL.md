@@ -48,7 +48,7 @@ Rules:
    - `VS Code may show a permission prompt during Preflight or Step 1. If it appears, approve it. If no prompt appears, Copilot will continue and you can work on something else.`
 - If Step 1 becomes blocked on a permission or read, print exactly:
    - `## >>>>>> WAITING ON YOU`
-- Prefer VS Code tools for workflow prompts and in-workspace reads, searches, and diagnostics: `vscode_askQuestions`, `read_file`, `grep_search`, and `get_errors` remain the default choices on workspace-confirmed paths.
+- Prefer VS Code tools for workflow prompts and in-workspace reads and diagnostics: `vscode_askQuestions`, `read_file`, and `get_errors` remain the default choices on workspace-confirmed paths. Use OS-appropriate terminal grep commands for definition-file and usage searches.
 - Prefer a workspace-local `local-roots.json` file on workspace-confirmed paths before falling back to the user-owned home-directory file.
 - Use OS-appropriate terminal commands for reading or writing the user-owned home-directory `local-roots.json` file and for root validation whenever the target is outside the active workspace.
 - When a terminal command is required, use an OS-appropriate form for the active shell. On Windows PowerShell, prefer `Test-Path` and `Get-Date`; on macOS/Linux, prefer `test -d` and `date`.
@@ -160,13 +160,12 @@ Execution:
 6. Derive each app's effective local app path from the registry.
 7. Confirm every effective app path is already present in the active VS Code workspace before any VS Code filesystem or search tool runs.
    - if any required effective app path is missing, stop with workspace-gate failure instead of attempting external reads
-8. Seed only the minimum Step 1 approvals serially for the known workflow operations that are still required later:
-   - `grep_search` on each workspace-confirmed effective app path
+8. No VS Code search pre-seeding is required; all definition-file and usage searches use OS-appropriate terminal grep commands. Negative constraints still apply:
    - do not use `list_dir` as part of the default Step 1 permission envelope
    - do not run `get_errors` at app-root scope during Step 1
-   - do not combine these approvals into a parallel batch
-9. Using only the main agent, confirm the raw flag key in each app's definition target and determine the candidate app set.
-10. Using only the main agent, run exact local usage discovery for the candidate apps with `grep_search` and build the concrete future work set:
+   - do not batch permission-bearing `read_file` calls
+9. Using only the main agent, confirm the raw flag key in each app's definition target with an OS-appropriate terminal grep command and determine the candidate app set.
+10. Using only the main agent, run exact local usage discovery for the candidate apps with OS-appropriate terminal grep commands and build the concrete future work set:
     - definition files
     - usage files that may be edited
     - spec, test, or mock files only if they are proven relevant
@@ -179,7 +178,7 @@ Execution:
      - expand the range if the logical block at the match site (function body, decorator, class, import group) is not fully contained within ±30 lines
      - merge overlapping or adjacent ranges for the same file into a single `read_file` call
      - the first range read per file triggers the file-scoped permission approval
-   - The grep-discovered line numbers from Step 10 are the authoritative completeness list. Every line number returned by `grep_search` for a file must fall within a read range. If any grep-discovered line falls outside all ranges after merging, expand the nearest range to include it.
+   - The grep-discovered line numbers from Step 10 are the authoritative completeness list. Every matched line number for a file must fall within a read range. If any grep-discovered line falls outside all ranges after merging, expand the nearest range to include it.
    - Read all ranges for a file before moving to the next file.
    - after each permission-bearing tool call, either continue immediately on success or stop and print the blocked item and latest Step 1 status on interruption
    - if the user approves a prompt after an interrupted call, retry that exact `read_file` call once before doing anything else
