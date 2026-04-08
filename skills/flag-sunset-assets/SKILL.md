@@ -50,7 +50,7 @@ Rules:
    - `VS Code may show a permission prompt during Preflight or Step 1. If it appears, approve it. If no prompt appears, Copilot will continue and you can work on something else.`
 - If Step 1 becomes blocked on a permission or read, print exactly:
    - `## >>>>>> WAITING ON YOU`
-- Prefer VS Code tools for workflow prompts and in-workspace reads and diagnostics: `vscode_askQuestions`, `read_file`, and `get_errors` remain the default choices on workspace-confirmed paths. Use OS-appropriate terminal grep commands for definition-file and usage searches.
+- Use plain chat prompts for workflow questions that require a user reply. `read_file` and `get_errors` remain the default VS Code tools on workspace-confirmed paths. Use OS-appropriate terminal grep commands for definition-file and usage searches.
 - Prefer a workspace-local `local-roots.json` file on workspace-confirmed paths before falling back to the user-owned home-directory file.
 - Use OS-appropriate terminal commands for reading or writing the user-owned home-directory `local-roots.json` file and for root validation whenever the target is outside the active workspace.
 - When a terminal command is required, use an OS-appropriate form for the active shell. On Windows PowerShell, prefer `Test-Path` and `Get-Date`; on macOS/Linux, prefer `test -d` and `date`.
@@ -85,13 +85,15 @@ Before Step 0:
 ## Step 0: LaunchDarkly Final State
 
 - Start Step 0 only after all required preflight pass lines were printed in the current run.
-- Run one `vscode_askQuestions` prompt with options:
+- Print one plain chat prompt with options:
   1. `FF is TRUE on PROD + YES to continue with FF removal`
   2. `FF is FALSE on PROD + YES to continue with FF removal (entire feature removal)`
   3. `NO - Quit`
-- Default to option 1.
-- Once the Step 0 selection is captured for the current run, it remains valid until the run ends or the user explicitly changes it.
-- If option 3 is selected, stop with no edits.
+- Continue only if the next user reply in this run is exactly `1` or `2`.
+- If the next user reply is `3`, stop with no edits.
+- If the next user reply is anything else, or no reply arrives, stop and ask whether to retry or abort.
+- Do not infer a default Step 0 selection.
+- Do not print the Step 0 complete line or start Step 1 without that valid Step 0 reply.
 
 Required line before Step 1:
 `Step 0 complete: LaunchDarkly PROD state captured; proceeding to Step 1 permissions.`
@@ -125,8 +127,7 @@ Minimum required output from Step 2:
 - usage files with line numbers only for confirmed apps
 - spec, test, or mock files with line numbers only for confirmed apps
 
-Print the full per-app mapping before any usage scan:
-- `Identifier mapping: [AppA]=[IdentifierA|NO_MATCH], [AppB]=[IdentifierB|NO_MATCH], ...`
+Print the full per-app mapping before any usage scan using the exact format defined in [search-strategy.md](./references/search-strategy.md#step-2---read-the-exact-constant-name).
 
 If the mapping cannot be completed, stop and ask the user.
 
@@ -148,6 +149,7 @@ Rules:
 - keep exactly one behavior path after removal
 - **compound conditions:** when the removed flag appears as one term in a compound condition (e.g. `A && !B` where B is being removed), eliminate only the removed flag's sub-expression and leave other flags intact — the result is `if (A)`, not the else branch; never substitute the removed flag's production value into a compound condition that contains other flags
 - preserve existing patterns unless the flag itself required branching logic
+- do not add new comments in edited source or test files as part of flag removal
 - do not modify unrelated tests or neighboring code paths
 - keep changes minimal and deterministic
 - when a TypeScript source file loses a cleanup-only library import, injected dependency, or provider because of the flag removal, inspect the paired unit test file and remove only the matching stale import/provider/mock/setup there; do not remove broader test scaffolding that is still present in the source file

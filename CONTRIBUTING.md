@@ -131,6 +131,7 @@ Open a workspace that contains the repos the plugin operates on, then:
 ```
 
 Work through the relevant scenario(s) from `tests/workflow-regression-scenarios.md`.
+If you are validating a deployable build or pre-release candidate, also check `tests/validate-plugin-contract.md`.
 
 ---
 
@@ -208,17 +209,23 @@ Users install via **Chat: Install Plugin from Source**. Source-installed plugins
 
 ## Regression Checklist & Keeping Scenarios in Sync
 
-Before tagging a release, manually verify all scenarios in `tests/workflow-regression-scenarios.md`.
+Use the test artifacts this way:
 
-When you change `SKILL.md`, the agent, or the command, use the **`synch-skill-regression`** prompt to confirm that `tests/workflow-regression-scenarios.md` and `scripts/validate-skill-contracts.mjs` are updated to match:
+- `tests/validate-plugin-contract.md`: deployment/readiness checklist used to verify the plugin is safe to install and ship.
+- `tests/workflow-regression-scenarios.md`: broader workflow regression matrix for behavior changes.
+- `scripts/validate-skill-contracts.mjs`: static contract checker that enforces key clauses in the live workflow assets.
+
+Before tagging a release, manually verify the deployment checklist in `tests/validate-plugin-contract.md` and the relevant scenarios in `tests/workflow-regression-scenarios.md`.
+
+When you change `SKILL.md`, the agent, or the command, use the **`synch-skill-regression`** prompt to confirm that `tests/validate-plugin-contract.md`, `tests/workflow-regression-scenarios.md`, and `scripts/validate-skill-contracts.mjs` are updated to match:
 
 ```
 > /synch-skill-regression
 ```
 
-This prompt loads all four key files and checks alignment — add or update scenarios and contracts in the same PR as the behavioral change.
+This prompt loads the key workflow, checklist, and contract files and checks alignment. Add or update the relevant checklist entries and static contracts in the same PR as the behavioral change.
 
-> `tests/workflow-regression-scenarios.md` and `scripts/validate-skill-contracts.mjs` are developer-side only. Only `SKILL.md`, `applications.md`, `commands/flag-sunset.md`, and `agents/flag-sunset.agent.md` are active at runtime.
+> `tests/validate-plugin-contract.md`, `tests/workflow-regression-scenarios.md`, and `scripts/validate-skill-contracts.mjs` are developer-side only. Only `SKILL.md`, `applications.md`, `commands/flag-sunset.md`, and `agents/flag-sunset.agent.md` are active at runtime.
 
 ---
 

@@ -3,12 +3,14 @@
  *
  * Static content validator for the flag-sunset prompt, agent, and shared skill.
  *
- * Each entry in `contracts` maps one scenario (see tests/validate-plugin-contract.md)
+ * Each entry in `contracts` maps one scenario from the deployment/readiness and
+ * regression checklists (see tests/validate-plugin-contract.md and
+ * tests/workflow-regression-scenarios.md)
  * to the specific clauses in the relevant plugin file that make it pass. If a clause
  * is removed or reworded without updating these checks, this script exits non-zero
  * and CI fails.
  *
- * Add a new entry whenever a new scenario is added to tests/validate-plugin-contract.md.
+ * Add or update entries whenever either checklist changes.
  */
 
 import { readFile } from 'node:fs/promises';
@@ -23,12 +25,14 @@ const commandPath = path.join(repoRoot, 'commands/flag-sunset.md');
 const agentPath = path.join(repoRoot, 'agents/flag-sunset.agent.md');
 const skillPath = path.join(repoRoot, 'skills/flag-sunset-assets/SKILL.md');
 const preflightPath = path.join(repoRoot, 'skills/flag-sunset-assets/references/preflight-step1.md');
+const operatorGoalPath = path.join(repoRoot, 'skills/flag-sunset-assets/references/operator-goal.md');
 
 const files = {
     command: await readFile(commandPath, 'utf8'),
     agent: await readFile(agentPath, 'utf8'),
     skill: await readFile(skillPath, 'utf8'),
     preflight: await readFile(preflightPath, 'utf8'),
+    operatorGoal: await readFile(operatorGoalPath, 'utf8'),
 };
 
 // Each contract is: { file, scenario, checks: [{ label, text }] }
@@ -77,11 +81,15 @@ const contracts = [
             },
             {
                 label: 'Asks user to confirm derived paths before continuing',
-                text: 'prompt the user to confirm the derived paths before continuing',
+                text: 'ask the user to confirm the derived paths in chat before continuing',
             },
             {
                 label: 'Creates workspace-local local-roots.json after confirmation',
                 text: 'create or update the workspace-local',
+            },
+            {
+                label: 'First-run parent-folder question is a plain chat prompt',
+                text: 'ask one plain chat prompt for the shared parent folder',
             },
         ],
     },
@@ -102,6 +110,10 @@ const contracts = [
             {
                 label: 'Workspace-local config is preferred before home-directory fallback',
                 text: 'Prefer a workspace-local `local-roots.json` file on workspace-confirmed paths before falling back to the user-owned home-directory file',
+            },
+            {
+                label: 'Workflow questions use plain chat prompts',
+                text: 'Use plain chat prompts for workflow questions that require a user reply',
             },
         ],
     },
@@ -217,11 +229,165 @@ const contracts = [
     },
     {
         file: 'preflight',
-        scenario: 'Scenario 9: subagent bypass — workspace-gate failure is terminal',
+        scenario: 'Scenario 4: missing workspace folder — workspace gate failure is terminal',
         checks: [
             {
                 label: 'Workspace-gate failure explicitly blocks subagent bypass',
                 text: 'do not invoke a subagent or use any external mechanism to access the missing project; a workspace-gate failure is terminal for this run',
+            },
+        ],
+    },
+    {
+        file: 'operatorGoal',
+        scenario: 'Scenario 9: no new permission prompts after Step 1 on the normal path',
+        checks: [
+            {
+                label: 'Normal execution should continue unattended after Step 1',
+                text: 'After Step 1 completes, the agent should be able to continue unattended',
+            },
+            {
+                label: 'Any expected post-Step-1 prompt is treated as regression unless justified',
+                text: 'A workflow change is not complete if it reintroduces expected permission prompts after Step 1',
+            },
+        ],
+    },
+    {
+        file: 'skill',
+        scenario: 'Scenario 10: branch proof before edits',
+        checks: [
+            {
+                label: 'Edits are blocked until branch proof exists',
+                text: 'No file edits before branch proof is printed.',
+            },
+            {
+                label: 'Step 3 prints branch proof for each affected repository',
+                text: 'Print branch proof for each affected repository.',
+            },
+            {
+                label: 'Branch proof failure stops with no edits',
+                text: 'If branch proof cannot be established, stop with no edits.',
+            },
+        ],
+    },
+    {
+        file: 'skill',
+        scenario: 'Scenario 11: static validation remains file-scoped and build-free',
+        checks: [
+            {
+                label: 'Step 5 is static validation only',
+                text: 'Run static validation only.',
+            },
+            {
+                label: 'Diagnostics are scoped to edited files when needed',
+                text: 'using `get_errors` scoped to edited files only when diagnostics are needed',
+            },
+            {
+                label: 'Automated build and test commands remain forbidden',
+                text: 'Do not run automated build or test commands.',
+            },
+        ],
+    },
+    {
+        file: 'preflight',
+        scenario: 'Scenario 12: targeted-read completeness including a trailing match near end-of-file',
+        checks: [
+            {
+                label: 'Grep-discovered lines are the authoritative completeness list',
+                text: 'The grep-discovered line numbers from Step 10 are the authoritative completeness list.',
+            },
+            {
+                label: 'Ranges must be expanded to include any uncovered match lines',
+                text: 'expand the nearest range to include it',
+            },
+        ],
+    },
+    {
+        file: 'preflight',
+        scenario: 'Scenario 13: paired spec file enters scope when source cleanup implies stale test wiring',
+        checks: [
+            {
+                label: 'Co-located spec file enters the future work set for mirrored cleanup review',
+                text: 'include the co-located `*.spec.ts` file in the concrete future work set for mirrored cleanup review',
+            },
+        ],
+    },
+    {
+        file: 'skill',
+        scenario: 'Scenario 14: minimal mirrored unit-test cleanup',
+        checks: [
+            {
+                label: 'Only the mirrored stale test wiring is removed',
+                text: 'remove only the matching stale import/provider/mock/setup there; do not remove broader test scaffolding that is still present in the source file',
+            },
+        ],
+    },
+    {
+        file: 'skill',
+        scenario: 'Scenario 15: still-used spec imports are retained',
+        checks: [
+            {
+                label: 'Spec imports are checked for remaining references before removal',
+                text: 'verify that the imported symbol has no other references anywhere else in that spec',
+            },
+            {
+                label: 'Still-used spec imports are kept',
+                text: 'keep the import',
+            },
+        ],
+    },
+    {
+        file: 'skill',
+        scenario: 'Scenario 16: winning-path tests are preserved and normalized',
+        checks: [
+            {
+                label: 'Only the losing-path test is removed and the winning path is renamed',
+                text: 'remove only the losing-path test; rename and keep the winning-path test without the "when FF is enabled" qualifier',
+            },
+            {
+                label: 'Winning-path tests must be preserved',
+                text: 'The winning-path test continues to verify hardcoded behavior and must not be deleted.',
+            },
+        ],
+    },
+    {
+        file: 'skill',
+        scenario: 'Scenario 17: compound-condition cleanup removes only the targeted flag term',
+        checks: [
+            {
+                label: 'Compound-condition cleanup preserves the unrelated condition terms',
+                text: '**compound conditions:** when the removed flag appears as one term in a compound condition',
+            },
+        ],
+    },
+    {
+        file: 'skill',
+        scenario: 'Scenario 18: Step 0 plain reply handling — continue only on 1 or 2',
+        checks: [
+            {
+                label: 'Step 0 is presented as a plain chat prompt',
+                text: 'Print one plain chat prompt with options:',
+            },
+            {
+                label: 'Step 0 continues only on replies 1 or 2',
+                text: 'Continue only if the next user reply in this run is exactly `1` or `2`.',
+            },
+            {
+                label: 'Step 0 invalid or missing reply stops for retry-or-abort',
+                text: 'If the next user reply is anything else, or no reply arrives, stop and ask whether to retry or abort.',
+            },
+        ],
+    },
+    {
+        file: 'agent',
+        scenario: 'Scenario 18: Step 0 plain reply handling — continue only on 1 or 2',
+        checks: [
+            {
+                label: 'Agent uses the next chat reply for Step 0',
+                text: 'Print the Step 0 question in chat with the three numbered choices and use only the next user reply in this run.',
+            },
+            {
+                label: 'Agent blocks Step 1 without a valid Step 0 reply',
+                text: 'without a valid Step 0 reply of `1` or `2` captured in the current run',
             },
         ],
     },

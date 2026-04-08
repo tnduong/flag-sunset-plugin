@@ -58,7 +58,7 @@ Example:
 }
 ```
 
-If the preferred workspace-local file does not exist, the workflow prompts once for the shared parent folder containing both `Applications` and `aya-talent-marketplace`, derives the repository roots, confirms them with the user, then writes the workspace-local file so later runs reuse the same locations without prompting again.
+If the preferred workspace-local file does not exist, the workflow asks once in chat for the shared parent folder containing both `Applications` and `aya-talent-marketplace`, derives the repository roots, confirms them in chat with the user, then writes the workspace-local file so later runs reuse the same locations without prompting again.
 
 If the workspace-local file cannot be used, the workflow may fall back to the home-directory config file. When the chosen config file lives outside the active workspace, the workflow should read and write it with OS-appropriate terminal commands instead of VS Code filesystem tools. This avoids host-managed external-directory approval prompts for routine config access.
 
@@ -68,7 +68,7 @@ Permission prompts are an expected part of the workflow.
 
 1. Preflight may ask for the shared parent folder if no usable local-roots config is available.
 2. Preflight asks for confirmation before persisting and using the derived repository roots.
-3. Step 0 asks for the LaunchDarkly production state and whether to continue.
+3. Step 0 asks in plain chat for the LaunchDarkly production state and whether to continue.
 4. Preflight should prefer the workspace-local `.copilot/flag-sunset/local-roots.json` file under the `Nova` workspace folder and use OS-appropriate terminal commands only when falling back to the home-directory file outside the active workspace.
 5. Preflight should validate repository-root existence with an OS-appropriate terminal check instead of VS Code filesystem reads on parent repository roots.
 6. Step 1 must confirm that every required effective app path is already part of the active VS Code workspace before any VS Code filesystem or search tool runs.
