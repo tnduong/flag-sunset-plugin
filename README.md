@@ -12,9 +12,6 @@ To validate the source-install manifest layout locally, run `node scripts/valida
 2. Run `Chat: Install Plugin From Source`.
 3. Paste the Git repository URL for this repo.
 4. Enable the plugin if prompted.
-Note: the plugin install folder is
-Windows:  %USERPROFILE%\.vscode\agent-plugins\github.com\<github-username>\flag-sunset-plugin
-MacOS: ~/.vscode/agent-plugins/github.com/<github-username>/flag-sunset-plugin/
 
 ## Use
 
@@ -37,12 +34,12 @@ Example:
 ## Notes
 
 - This plugin is distributed outside application repositories.
-- Critical safety gates must live in the slash-command prompt itself. Source-installed plugin flows may load command content under the current chat agent before a custom-agent handoff is enforced, so the command must fail closed on required preconditions such as workspace completeness.
+- The slash command stays thin and routes to the custom agent; critical safety gates live in the agent plus skill workflow assets.
 - For internal rollout, prefer an organization-owned private repository with team-based access instead of a personal repository.
 - Machine-specific checkout roots are not stored in the plugin.
 - For new users, the workflow should store confirmed checkout roots in `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder and keep that file ignored by Git.
 - The home-directory config at `~/.copilot/flag-sunset/local-roots.json` remains a fallback for existing setups.
-- The installed plugin location, including `%USERPROFILE%\.vscode\agent-plugins\github.com\tnduong\flag-sunset-plugin`, is not used for machine-specific config reads or writes.
+- The installed plugin location, including `%APPDATA%\Code\agentPlugins\github.com\tnduong\flag-sunset-plugin`, is not used for machine-specific config reads or writes.
 
 ## Dev Testing
 

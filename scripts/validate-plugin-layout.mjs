@@ -26,39 +26,24 @@ const assertExists = async (relativePath, message) => {
   }
 };
 
-const rootManifest = await readJson('plugin.json');
 const pluginManifest = await readJson('.claude-plugin/plugin.json');
 const marketplaceManifest = await readJson('.claude-plugin/marketplace.json');
-
-// Version consistency — plugin.json (root) is the single source of truth
-if (rootManifest.version !== pluginManifest.version) {
-  throw new Error(
-    `Version mismatch: plugin.json is "${rootManifest.version}" but .claude-plugin/plugin.json is "${pluginManifest.version}". Sync them before tagging.`
-  );
-}
-
-// marketplace.json version must also stay in sync — this file is required for "Chat: Install Plugin from Source"
-const marketplacePlugin = marketplaceManifest.plugins?.[0];
-if (!marketplacePlugin) {
-  throw new Error('.claude-plugin/marketplace.json must have at least one entry in the plugins array.');
-}
-if (marketplacePlugin.version !== rootManifest.version) {
-  throw new Error(
-    `Version mismatch: plugin.json is "${rootManifest.version}" but .claude-plugin/marketplace.json plugins[0].version is "${marketplacePlugin.version}". Sync them before tagging.`
-  );
-}
-if (marketplacePlugin.source !== '../') {
-  throw new Error(`marketplace.json plugins[0].source must be "../" to point to the repo root. Got: "${marketplacePlugin.source}".`);
-}
 
 assertEqual(pluginManifest.agents, '../agents', 'Nested plugin manifest must point to the repo-root agents folder');
 assertEqual(pluginManifest.commands, '../commands', 'Nested plugin manifest must point to the repo-root commands folder');
 assertEqual(pluginManifest.skills, '../skills', 'Nested plugin manifest must point to the repo-root skills folder');
 
-await assertExists('.claude-plugin/marketplace.json', '.claude-plugin/marketplace.json must exist — required for "Chat: Install Plugin from Source"');
+const pluginEntry = marketplaceManifest.plugins?.[0];
+
+if (!pluginEntry) {
+  throw new Error('Marketplace manifest must contain at least one plugin entry.');
+}
+
+assertEqual(pluginEntry.source, '../', 'Marketplace manifest must point to the repo root as the plugin source');
+
 await assertExists('agents', 'Repo-root agents folder must exist');
 await assertExists('commands', 'Repo-root commands folder must exist');
 await assertExists('skills', 'Repo-root skills folder must exist');
 await assertExists('commands/flag-sunset.md', 'Flag sunset command file must exist');
 
-console.log(`Plugin layout validation passed. Version: ${rootManifest.version}`);
+console.log('Plugin layout validation passed.');

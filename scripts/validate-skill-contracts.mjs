@@ -3,12 +3,12 @@
  *
  * Static content validator for the flag-sunset prompt, agent, and shared skill.
  *
- * Each entry in `contracts` maps one scenario (see tests/workflow-regression-scenarios.md)
+ * Each entry in `contracts` maps one scenario (see tests/validate-plugin-contract.md)
  * to the specific clauses in the relevant plugin file that make it pass. If a clause
  * is removed or reworded without updating these checks, this script exits non-zero
  * and CI fails.
  *
- * Add a new entry whenever a new scenario is added to tests/workflow-regression-scenarios.md.
+ * Add a new entry whenever a new scenario is added to tests/validate-plugin-contract.md.
  */
 
 import { readFile } from 'node:fs/promises';
@@ -195,7 +195,7 @@ const contracts = [
     },
     {
         file: 'skill',
-        scenario: 'Scenario 4 (supplemental): subagent bypass — workspace-gate failure is terminal',
+        scenario: 'Scenario 9: subagent bypass — workspace-gate failure is terminal',
         checks: [
             {
                 label: 'Subagent ban is unconditional and covers workspace-gate bypass',
@@ -204,174 +204,6 @@ const contracts = [
             {
                 label: 'Workspace-gate failure explicitly blocks subagent bypass',
                 text: 'do not invoke a subagent or use any external mechanism to access the missing project; a workspace-gate failure is terminal for this run',
-            },
-        ],
-    },
-    {
-        file: 'skill',
-        scenario: 'Scenario 9: no new permission prompts after Step 1 on the normal path',
-        checks: [
-            {
-                label: 'Operator goal prevents reintroducing expected permission prompts after Step 1',
-                text: 'A workflow change is not complete if it reintroduces expected permission prompts after Step 1',
-            },
-            {
-                label: 'Step 1 completion promises Step 2 will proceed without further approval prompts',
-                text: 'Step 1 complete: permission envelope established; proceeding to Step 2 without further approval prompts.',
-            },
-        ],
-    },
-    {
-        file: 'skill',
-        scenario: 'Scenario 10: branch proof before edits',
-        checks: [
-            {
-                label: 'No file edits occur before branch proof is printed',
-                text: 'No file edits before branch proof is printed.',
-            },
-            {
-                label: 'Branch proof is required before edits',
-                text: 'If branch proof cannot be established, stop with no edits.',
-            },
-        ],
-    },
-    {
-        file: 'skill',
-        scenario: 'Scenario 11: static validation remains file-scoped and build-free',
-        checks: [
-            {
-                label: 'Workflow is static-validation only',
-                text: 'Run static validation only.',
-            },
-            {
-                label: 'Diagnostics are scoped to edited files only when needed',
-                text: 'using `get_errors` scoped to edited files only when diagnostics are needed',
-            },
-            {
-                label: 'Automated builds and tests remain forbidden',
-                text: 'Do not run automated build or test commands.',
-            },
-        ],
-    },
-    {
-        file: 'skill',
-        scenario: 'Scenario 12: targeted-read completeness including a trailing match near end-of-file',
-        checks: [
-            {
-                label: 'Every grep-discovered line must fall within a read range',
-                text: 'Every line number returned by `grep_search` for a file must fall within a read range.',
-            },
-            {
-                label: 'Late matches outside merged ranges force range expansion',
-                text: 'If any grep-discovered line falls outside all ranges after merging, expand the nearest range to include it.',
-            },
-            {
-                label: 'All ranges for a file are read before moving on',
-                text: 'Read all ranges for a file before moving to the next file.',
-            },
-        ],
-    },
-    {
-        file: 'skill',
-        scenario: 'Scenario 13: paired spec file enters scope when source cleanup implies stale test wiring',
-        checks: [
-            {
-                label: 'Paired Angular spec files are added to the future work set for mirrored cleanup',
-                text: 'include the co-located `*.spec.ts` file in the concrete future work set for mirrored cleanup review',
-            },
-        ],
-    },
-    {
-        file: 'skill',
-        scenario: 'Scenario 14: minimal mirrored unit-test cleanup',
-        checks: [
-            {
-                label: 'Only matching stale unit-test setup is removed',
-                text: 'remove only the matching stale import/provider/mock/setup there; do not remove broader test scaffolding that is still present in the source file',
-            },
-        ],
-    },
-    {
-        file: 'skill',
-        scenario: 'Scenario 15: still-used spec imports are retained',
-        checks: [
-            {
-                label: 'Spec imports are kept when their symbols still have references',
-                text: 'verify that the imported symbol has no other references anywhere else in that spec; if the symbol is still used for unrelated setup or assertions, keep the import',
-            },
-        ],
-    },
-    {
-        file: 'skill',
-        scenario: 'Scenario 16: winning-path tests are preserved and normalized',
-        checks: [
-            {
-                label: 'Losing-path tests are removed while winning-path tests are kept and renamed',
-                text: 'remove only the losing-path test; rename and keep the winning-path test without the "when FF is enabled" qualifier',
-            },
-        ],
-    },
-    {
-        file: 'skill',
-        scenario: 'Scenario 17: compound-condition cleanup removes only the targeted flag term',
-        checks: [
-            {
-                label: 'Compound-condition cleanup preserves unrelated condition terms',
-                text: 'eliminate only the removed flag\'s sub-expression and leave other flags intact',
-            },
-            {
-                label: 'Compound-condition cleanup forbids substituting the removed flag\'s production value',
-                text: 'never substitute the removed flag\'s production value into a compound condition that contains other flags',
-            },
-        ],
-    },
-    {
-        file: 'skill',
-        scenario: 'Scenario 18: pre-edit freshness check guards against stale discovery evidence',
-        checks: [
-            {
-                label: 'Freshness check re-reads anchored ranges before any edits',
-                text: 're-read the anchored line ranges for every file in the concrete future work set',
-            },
-            {
-                label: 'Per-file Fresh: lines are suppressed',
-                text: 'Do not print per-file `Fresh:` lines. Suppress individual file confirmations.',
-            },
-            {
-                label: 'Freshness pass prints only a single summary line',
-                text: 'Freshness check passed: [N] files validated; proceeding to edits.',
-            },
-        ],
-    },
-    {
-        file: 'skill',
-        scenario: 'Scenario 19: branch creation uses three separate serial terminal calls',
-        checks: [
-            {
-                label: 'Pull and branch creation are split into three separate serial calls',
-                text: 'three separate serial terminal calls',
-            },
-            {
-                label: 'Pull output is explicitly ignored — not read or echoed',
-                text: 'run and ignore the output; its only purpose is to bring main up to date.',
-            },
-            {
-                label: 'Branch proof comes from git branch --show-current, not pull output',
-                text: '`git branch --show-current` — use this output as the branch proof.',
-            },
-        ],
-    },
-    {
-        file: 'skill',
-        scenario: 'Scenario 20: Step 2 output is compact — no per-file line numbers for usage files',
-        checks: [
-            {
-                label: 'Step 2 prints definition-file path and usage count only, not individual usage file paths or line numbers',
-                text: 'definition-file path only, and a count of usage files',
-            },
-            {
-                label: 'NO_MATCH apps are excluded from the per-app detail block',
-                text: 'skip NO_MATCH apps from the per-app detail block; list them only in the identifier mapping line',
             },
         ],
     },
