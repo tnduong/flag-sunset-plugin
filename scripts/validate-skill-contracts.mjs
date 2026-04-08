@@ -22,11 +22,13 @@ const repoRoot = path.resolve(__dirname, '..');
 const commandPath = path.join(repoRoot, 'commands/flag-sunset.md');
 const agentPath = path.join(repoRoot, 'agents/flag-sunset.agent.md');
 const skillPath = path.join(repoRoot, 'skills/flag-sunset-assets/SKILL.md');
+const preflightPath = path.join(repoRoot, 'skills/flag-sunset-assets/references/preflight-step1.md');
 
 const files = {
     command: await readFile(commandPath, 'utf8'),
     agent: await readFile(agentPath, 'utf8'),
     skill: await readFile(skillPath, 'utf8'),
+    preflight: await readFile(preflightPath, 'utf8'),
 };
 
 // Each contract is: { file, scenario, checks: [{ label, text }] }
@@ -38,16 +40,12 @@ const contracts = [
         scenario: 'Scenario 4: missing workspace folder — command prompt fails closed',
         checks: [
             {
-                label: 'Command enforces a workspace gate before loading workflow assets',
-                text: 'Before loading any workflow asset, enforce the workspace gate with zero tool calls beyond reading `../skills/flag-sunset-assets/applications.md`',
+                label: 'Command is intentionally thin and routes to the execution agent',
+                text: 'Route this request to the configured custom agent.',
             },
             {
-                label: 'Command blocks SKILL.md loading before the workspace gate passes',
-                text: 'Do not read `SKILL.md`.',
-            },
-            {
-                label: 'Command blocks terminal fallback before the workspace gate passes',
-                text: 'Do not run any terminal commands.',
+                label: 'Command delegates gating and workflow ownership to the agent and assets',
+                text: 'The command is intentionally thin. Workspace gating, workflow preflight, and execution rules are owned by the agent and skill assets.',
             },
         ],
     },
@@ -70,7 +68,7 @@ const contracts = [
         ],
     },
     {
-        file: 'skill',
+        file: 'preflight',
         scenario: 'Scenario 1: brand new user — first-run setup',
         checks: [
             {
@@ -85,9 +83,15 @@ const contracts = [
                 label: 'Creates workspace-local local-roots.json after confirmation',
                 text: 'create or update the workspace-local',
             },
+        ],
+    },
+    {
+        file: 'skill',
+        scenario: 'Scenario 1: brand new user — first-run setup',
+        checks: [
             {
-                label: 'Step 0 gated until both preflight gates pass',
-                text: 'both preflight gates have passed',
+                label: 'Step 0 gated until all required preflight pass lines are printed',
+                text: 'all required preflight pass lines were printed',
             },
         ],
     },
@@ -99,6 +103,12 @@ const contracts = [
                 label: 'Workspace-local config is preferred before home-directory fallback',
                 text: 'Prefer a workspace-local `local-roots.json` file on workspace-confirmed paths before falling back to the user-owned home-directory file',
             },
+        ],
+    },
+    {
+        file: 'preflight',
+        scenario: 'Scenario 2: existing user with valid local-roots — setup is skipped',
+        checks: [
             {
                 label: 'Home-directory config is read with OS-appropriate terminal command when outside workspace',
                 text: 'when the selected config file is outside the active workspace, read it with an OS-appropriate terminal command instead of a VS Code filesystem tool',
@@ -120,7 +130,7 @@ const contracts = [
         ],
     },
     {
-        file: 'skill',
+        file: 'preflight',
         scenario: 'Scenario 4: missing workspace folder — workspace gate fails early',
         checks: [
             {
@@ -134,7 +144,7 @@ const contracts = [
         ],
     },
     {
-        file: 'skill',
+        file: 'preflight',
         scenario: 'Scenario 5: non-default approval selection — resume path works correctly',
         checks: [
             {
@@ -162,7 +172,7 @@ const contracts = [
         ],
     },
     {
-        file: 'skill',
+        file: 'preflight',
         scenario: 'Scenario 7: bounded retry — exactly one automatic retry per blocked item',
         checks: [
             {
@@ -173,9 +183,25 @@ const contracts = [
                 label: 'Second failure stops and asks user instead of looping automatically',
                 text: 'If the same `next_pending` item fails again after that automatic retry, stop and ask',
             },
+        ],
+    },
+    {
+        file: 'skill',
+        scenario: 'Scenario 7: bounded retry — exactly one automatic retry per blocked item',
+        checks: [
             {
                 label: 'Explicit rule limits automatic retry to once per blocked item per run',
                 text: 'Do not automatically retry the same blocked item more than once in the same run',
+            },
+        ],
+    },
+    {
+        file: 'preflight',
+        scenario: 'Scenario 8: Windows path variant — cross-platform support',
+        checks: [
+            {
+                label: 'Windows user config path uses %USERPROFILE%',
+                text: '%USERPROFILE%/.copilot/flag-sunset/local-roots.json',
             },
         ],
     },
@@ -184,23 +210,15 @@ const contracts = [
         scenario: 'Scenario 8: Windows path variant — cross-platform support',
         checks: [
             {
-                label: 'Windows user config path uses %USERPROFILE%',
-                text: '%USERPROFILE%/.copilot/flag-sunset/local-roots.json',
-            },
-            {
                 label: 'Windows PowerShell uses Test-Path for existence checks',
                 text: 'On Windows PowerShell, prefer `Test-Path`',
             },
         ],
     },
     {
-        file: 'skill',
+        file: 'preflight',
         scenario: 'Scenario 9: subagent bypass — workspace-gate failure is terminal',
         checks: [
-            {
-                label: 'Subagent ban is unconditional and covers workspace-gate bypass',
-                text: 'Do not invoke a subagent to access a missing workspace project or to bypass a workspace-gate failure',
-            },
             {
                 label: 'Workspace-gate failure explicitly blocks subagent bypass',
                 text: 'do not invoke a subagent or use any external mechanism to access the missing project; a workspace-gate failure is terminal for this run',

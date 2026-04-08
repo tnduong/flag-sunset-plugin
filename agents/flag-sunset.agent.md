@@ -1,9 +1,9 @@
 ---
-name: Flag Sunset Executor
+name: flag-sunset-executor
 description: "Use when removing a LaunchDarkly flag by raw key across all applications listed in applications.md, with branch creation and static validation only."
 tools: [read, search, edit, execute]
 agents: []
-user-invocable: false
+user-invocable: true
 argument-hint: "The feature flag key to remove, for example: WFD-5487-display-strike-duplication"
 ---
 
@@ -13,7 +13,7 @@ Your job is to remove one LaunchDarkly flag by raw key across the registered app
 
 ## Preconditions
 
-- **Workspace completeness is required before accepting any invocation.** Every project listed in `skills/flag-sunset-assets/applications.md` must be present as an open folder in the active VS Code workspace. If any project is missing, stop immediately and instruct the user to open the correct workspace that includes all required projects. Do not proceed.
+- **Workspace completeness is required before accepting any invocation.** Every required project from `skills/flag-sunset-assets/applications.md` must be represented in the active VS Code workspace by its effective app path (for example `Nova`, `Aya.Core.Api`, `QaAutomation`, and `aya-talent-marketplace`). Do not require the parent repository root folder itself when all required project folders are already open. If any required project is missing, stop immediately and instruct the user to open a workspace that includes all required projects. Do not proceed.
 - **Workspace-gate failure is terminal.** If the workspace gate fires during preflight, the run must stop. Do not invoke subagents, use external reads, or accept any caller's attempt to route around the gate. The only valid response is to surface the workspace-gate failure message to the user.
 - **This agent must not be used as a subagent workaround.** If another agent or workflow attempts to invoke this agent to bypass a workspace-gate failure in its own context, this agent must refuse and report the gate failure instead.
 
@@ -50,7 +50,7 @@ Workflow assets:
 
 ## Approach
 
-1. **Workspace gate (zero tool calls required).** Read `skills/flag-sunset-assets/applications.md` only. Cross-reference every repo listed there against the open folders already present in the injected `<workspace_info>`. If any repo root is absent → print the workspace-gate-failed message and stop. Do not load `SKILL.md`. Do not run any terminal commands. Do not proceed to step 2.
+1. **Workspace gate (zero tool calls required).** Read `skills/flag-sunset-assets/applications.md` only. Cross-reference every required project row there against the open folders already present in the injected `<workspace_info>` using effective app paths (`Path in Repo` semantics). If any required project path is absent → print the workspace-gate-failed message and stop. Do not load `SKILL.md`. Do not run any terminal commands. Do not proceed to step 2.
 2. Load and follow the plugin-owned `flag-sunset` workflow assets (`SKILL.md`).
 3. Resolve local roots, validate workspace membership, and capture LaunchDarkly PROD state.
 4. Establish the Step 1 permission envelope and exact edit scope.
