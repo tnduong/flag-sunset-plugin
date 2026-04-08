@@ -50,8 +50,9 @@ Each scenario maps to one or more behavioral contracts enforced by `scripts/vali
 6. Verify there is no parent-folder question.
 7. Verify there is no derived-roots confirmation question.
 8. Verify there is no VS Code external-directory prompt for reading `local-roots.json`.
-9. Verify Step 0 appears normally.
-10. Verify Step 1 searches and reads only workspace-confirmed paths.
+9. Verify Step 0 appears as a plain chat question with options `1`, `2`, and `3`.
+10. Reply `1` or `2` and verify the workflow continues into Step 1.
+11. Verify Step 1 searches and reads only workspace-confirmed paths.
 
 **Pass criteria**
 
@@ -156,3 +157,26 @@ Each scenario maps to one or more behavioral contracts enforced by `scripts/vali
 **Pass criteria**
 
 - [ ] Behavior is equivalent across macOS and Windows.
+
+---
+
+## Scenario 9: Step 0 plain reply handling
+
+**Setup**
+
+1. Use a workspace that passes preflight.
+
+**Steps**
+
+2. Run `/flag-sunset [FF KEY]` until Step 0 appears.
+3. Verify Step 0 is printed as plain chat text with the three numbered choices.
+4. Reply `1` and verify the workflow continues.
+5. Repeat and reply `2` and verify the workflow continues.
+6. Repeat and reply `3` and verify the workflow stops with no edits.
+7. Repeat and reply something else, or do not reply, and verify the workflow asks whether to retry or abort.
+
+**Pass criteria**
+
+- [ ] Replies `1` and `2` continue.
+- [ ] Reply `3` aborts cleanly.
+- [ ] Invalid or missing Step 0 input does not continue silently.

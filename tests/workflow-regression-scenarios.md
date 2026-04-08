@@ -50,8 +50,9 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 6. Verify there is no parent-folder question.
 7. Verify there is no derived-roots confirmation question.
 8. Verify there is no VS Code external-directory prompt for reading `local-roots.json`.
-9. Verify Step 0 appears normally.
-10. Verify Step 1 searches and reads only workspace-confirmed paths.
+9. Verify Step 0 appears as a plain chat question with options `1`, `2`, and `3`.
+10. Reply `1` or `2` and verify the workflow continues into Step 1.
+11. Verify Step 1 searches and reads only workspace-confirmed paths.
 
 **Pass criteria**
 
@@ -326,59 +327,23 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 
 ---
 
-## Scenario 18: pre-edit freshness check guards against stale discovery evidence
+## Scenario 18: Step 0 plain reply handling
 
 **Setup**
 
-1. Complete Step 1 discovery on a flag that touches multiple files.
+1. Use a workspace that passes preflight.
 
 **Steps**
 
-2. Run `/flag-sunset [FLAG_KEY]` through Step 4.
-3. Observe the freshness check output.
+2. Run `/flag-sunset [FF KEY]` until Step 0 appears.
+3. Verify Step 0 is printed as plain chat text with the three numbered choices.
+4. Reply `1` and verify the workflow continues.
+5. Repeat and reply `2` and verify the workflow continues.
+6. Repeat and reply `3` and verify the workflow stops with no edits.
+7. Repeat and reply something else, or do not reply, and verify the workflow asks whether to retry or abort.
 
 **Pass criteria**
 
-- [ ] All anchored line ranges for the concrete future work set are re-read before edits.
-- [ ] No per-file `Fresh:` lines are printed — only the single summary line.
-- [ ] The summary line `Freshness check passed: [N] files validated; proceeding to edits.` is printed.
-
----
-
-## Scenario 19: branch creation uses three separate serial terminal calls
-
-**Setup**
-
-1. Use a flag with at least one affected repository that is behind `origin/main` by one or more commits.
-
-**Steps**
-
-2. Run `/flag-sunset [FLAG_KEY]` through Step 3.
-3. Observe the terminal calls made during branch creation.
-
-**Pass criteria**
-
-- [ ] The pull and branch creation are not combined into a single chained command.
-- [ ] Call 1 (`git fetch … && git pull`) runs and its output is not read or echoed into the conversation.
-- [ ] Call 2 (`git checkout -b …`) runs separately and captures only the branch-creation result.
-- [ ] Call 3 (`git branch --show-current`) is used as the branch proof, not the pull output.
-- [ ] A large pull output (many commits) does not cause a `read_file` on a temp file to recover branch proof.
-
----
-
-## Scenario 20: Step 2 output is compact — no per-file line numbers for usage files
-
-**Setup**
-
-1. Use a flag matched in at least two usage files in one app.
-
-**Steps**
-
-2. Run `/flag-sunset [FLAG_KEY]` through Step 2.
-3. Observe the Step 2 printed output.
-
-**Pass criteria**
-
-- [ ] The identifier mapping is a single line covering all apps.
-- [ ] For each MATCH app, only the definition-file path and a usage-file count are printed (e.g. `2 usage files`) — not individual usage file paths or line numbers.
-- [ ] NO_MATCH apps appear only in the identifier mapping line, not in a separate detail block.
+- [ ] Replies `1` and `2` continue.
+- [ ] Reply `3` aborts cleanly.
+- [ ] Invalid or missing Step 0 input does not continue silently.

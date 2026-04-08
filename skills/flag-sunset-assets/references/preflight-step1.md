@@ -17,7 +17,7 @@ Before Step 0:
    - a one-time prompt for the shared parent folder that contains both `Applications` and `aya-talent-marketplace`, followed by persisting the confirmed derived roots to the workspace-local config file
    - when the selected config file is outside the active workspace, read it with an OS-appropriate terminal command instead of a VS Code filesystem tool
 3. If no usable config file is found:
-   - ask one `vscode_askQuestions` free-text prompt for the shared parent folder
+    - ask one plain chat prompt for the shared parent folder
    - when the active OS is macOS, use this exact prompt text:
      - `Provide the macOS parent folder that contains both Applications and aya-talent-marketplace.`
    - when the active OS is Windows, use this exact prompt text:
@@ -25,7 +25,7 @@ Before Step 0:
    - derive:
      - `AyaHealthcare/Applications` = `[PARENT]/Applications`
      - `AyaHealthcare/aya-talent-marketplace` = `[PARENT]/aya-talent-marketplace`
-   - prompt the user to confirm the derived paths before continuing
+    - ask the user to confirm the derived paths in chat before continuing
    - if the confirmation is not approved, stop immediately with no Step 0 prompt and no edits
    - create or update the workspace-local `.copilot/flag-sunset/local-roots.json` file with the confirmed derived paths before continuing
    - if the workspace-local file cannot be written, fall back to the user-owned home-directory config file outside the plugin, using an OS-appropriate terminal command when the target is outside the active workspace
@@ -94,6 +94,7 @@ Execution:
     - definition files
     - usage files that may be edited
     - spec, test, or mock files only if they are proven relevant
+   - apply the downstream-symbol second-hop rule defined in [search-strategy.md](./search-strategy.md) when building the concrete future work set
    - if a candidate Angular component, service, or similar source file is expected to lose a feature-manager or other cleanup-only library import/provider during flag removal, include the co-located `*.spec.ts` file in the concrete future work set for mirrored cleanup review
    - files that may later be checked with `get_errors` in Step 5 if file-scoped diagnostics are needed
 11. Read each file in the concrete future work set with `read_file` to trigger any remaining file-scoped approvals, using this strategy:
