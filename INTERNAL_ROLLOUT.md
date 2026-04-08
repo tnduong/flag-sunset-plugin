@@ -49,7 +49,8 @@ If the repository name changes during transfer, treat the final repository URL a
 1. Decide on the final repository name before broad onboarding starts.
 2. Update `homepage` and `repository` in `plugin.json`.
 3. Update `homepage` and `repository` in `.claude-plugin/plugin.json`.
-4. Update the canonical install URL in this document and the README.
+4. Update `homepage` and `repository` in `.claude-plugin/marketplace.json`.
+5. Update the canonical install URL in this document and the README.
 6. Verify that the old URL redirects in GitHub, but do not rely on redirects for onboarding documentation.
 7. Re-run `node scripts/validate-plugin-layout.mjs` after the URL changes.
 8. Test installation from the final URL using a fresh VS Code profile or a user who has never installed the plugin before.
@@ -88,41 +89,4 @@ https://github.com/AyaHealthcare/flag-sunset-plugin.git
 
 - Keep the manifest validation workflow enabled on pull requests.
 - Treat the install URL as a stable contract and avoid changing it once onboarding has been shared.
-
----
-
-## Releasing a New Version
-
-1. Bump `version` in `plugin.json` (root) — this is the single source of truth.
-2. Set the same version in `.claude-plugin/plugin.json`.
-3. Update the version print line in `commands/flag-sunset.md` to match (e.g., `` `flag-sunset-plugin v1.1.0` ``).
-4. Add an entry to `CHANGELOG.md`.
-5. Run `node scripts/validate-plugin-layout.mjs` — must pass before tagging.
-6. Commit:
-   ```bash
-   git commit -am "chore: bump to vX.Y.Z"
-   ```
-7. Tag and push:
-   ```bash
-   git tag vX.Y.Z && git push && git push --tags
-   ```
-8. On GitHub, go to **Releases → Draft a new release**, select the tag, and publish.
-9. Send the DM notification (see below).
-
-## Notifying Users of a New Version
-
-Send a direct message to each user with this copy-paste template:
-
-```
-🚀 flag-sunset-plugin vX.Y.Z released
-
-Changes: <one-line summary>
-
-To upgrade:
-1. VS Code → Command Palette → "Chat: Install Plugin From Source"
-2. Paste: https://github.com/tnduong/flag-sunset-plugin/tree/vX.Y.Z
-3. Enable the plugin if prompted.
-
-Note: your previous install is frozen on the old tag and will not auto-update.
-```
 

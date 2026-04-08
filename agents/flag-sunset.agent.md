@@ -1,6 +1,6 @@
 ---
 name: Flag Sunset Executor
-description: "Use when removing a LaunchDarkly flag by raw key across Nova, CoreApi, aya-talent-marketplace, and QaAutomation with branch creation and static validation only."
+description: "Use when removing a LaunchDarkly flag by raw key across all applications listed in applications.md, with branch creation and static validation only."
 tools: [read, search, edit, execute]
 agents: []
 user-invocable: false

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Preferred flow: local definition-file confirmation -> exact local usage search -> concrete future work set. Reuse the application registry from [../applications.md](../applications.md) cached during Preflight; do not re-read it.
+Preferred flow: local definition-file confirmation -> exact local usage search -> concrete future work set. Read the application registry from [../applications.md](../applications.md) before starting.
 
 This workflow must resolve machine-specific local repository roots before starting, using either:
 - the workspace-local config file
@@ -21,17 +21,17 @@ Before any search, derive each app's effective local app path from the registry 
 
 ## Step 1 - Local Definition-File Confirmation
 
-For each app in the registry, run an OS-appropriate terminal `grep` for the exact raw flag key in its `Flag Definition File`.
+For each app in the registry, search its definition file for the exact raw flag key.
 
 From the results:
 1. Apps whose definition file contains the flag key are affected.
 2. Apps with zero matches are marked `NO_MATCH`.
 3. Apps with missing or unreadable paths are marked `PATH_ERROR` or `READ_ERROR`.
-4. Record the exact searched path and matched line number for every app.
+4. Record the exact searched path for every app.
 
 ## Step 2 - Read the Exact Constant Name
 
-For each affected app, read only the matched line ±2 lines with `read_file` to extract the exact constant or enum member name. Do not read the definition file in full.
+For each affected app, read the definition file and extract the exact constant or enum member name used by that app.
 
 Before proceeding, print the full mapping:
 
@@ -41,14 +41,11 @@ If an app matched by key but no identifier can be extracted, stop and ask the us
 
 ## Step 3 - Local Usage Search
 
-Search only the affected apps using the exact identifier discovered in Step 2.
+Search only the affected apps using the exact identifier discovered in Step 3.
 
 Rules:
-- Use an OS-appropriate terminal command for each affected app. If a `Usage Search Path` is present in the registry for an app (not `—`), use those paths as search roots; otherwise use the full effective app path. Combine all comma-separated paths into a single terminal call — do not issue one call per path.
-- File extensions by app language: Angular apps (Nova, aya-talent-marketplace) → `*.ts` and `*.html`; CoreApi → `*.cs`; QaAutomation → `*.feature`.
-- **macOS/Linux:** `grep -rn "IDENTIFIER" [path1] [path2] ... --include="*.ext1" --include="*.ext2"`
-- **Windows:** `Select-String -Path "[path1]\**\*.ext1","[path1]\**\*.ext2","[path2]\**\*.ext1",... -Pattern "IDENTIFIER" -Recurse`
-- Parse terminal output (format `filepath:linenum:content`) to extract file paths and match line numbers.
+- Use `grep_search` for each affected app root.
+- For QaAutomation, search `*.feature` files only.
 - Search test and mock files with the exact LaunchDarkly key string, not fuzzy variants.
 - Build the concrete future work set from the results:
 	- definition files
@@ -66,8 +63,8 @@ Rules:
 - Read or write the user-owned home-directory `local-roots.json` file with an OS-appropriate terminal command only when that fallback file is needed outside the active workspace.
 - If any required effective app path is missing from the active workspace, stop with workspace-gate failure instead of triggering external-directory approval prompts.
 - Do not use `list_dir` as part of the default permission envelope.
-- Do not use `grep_search`; all definition-file confirmation and usage discovery use OS-appropriate terminal grep commands (see Steps 1–3).
-- Use `read_file` only for files in the concrete future work set. Definition files are not re-read; the matched line ±2 was read during Step 2 to extract the identifier. All other files are read as targeted ranges anchored to grep-discovered match lines (±20 lines, expanded to contain the full logical block, merged when overlapping). The grep line numbers from Step 3 are the authoritative coverage list; every match line must fall within a read range.
+- Use `grep_search` only on workspace-confirmed app paths.
+- Use `read_file` only for files in the concrete future work set. Definition files are read in full. All other files are read as targeted ranges anchored to grep-discovered match lines (±30 lines, expanded to contain the full logical block, merged when overlapping). The grep line numbers from Step 3 are the authoritative coverage list; every match line must fall within a read range.
 - Defer `get_errors` until Step 5 and scope it to edited files only, unless a Step 1 fallback requires file-scoped diagnostics for a specific already-approved file.
 - Do not use subagents after Step 1 begins.
 - When a terminal command is required for Step 1 path validation, use an OS-appropriate form for the active shell so the workflow remains valid on both macOS and Windows.

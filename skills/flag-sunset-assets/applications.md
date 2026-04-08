@@ -18,14 +18,12 @@ Required local root keys:
 | AyaHealthcare/Applications |
 | AyaHealthcare/aya-talent-marketplace |
 
-| App | Language | Repository | Path in Repo | Usage Search Path | Flag Definition File | Fallback Definition Search Path | Build Command | Test Command |
-|---|---|---|---|---|---|---|---|---|
-| Nova | typescript-angular | AyaHealthcare/Applications | Nova/ | src/app | src/app/shared/models/enums/feature-flag.ts | src/app/shared/models/enums/team-feature-flags/ | *(combined with test)* | `NODE_OPTIONS="--max-old-space-size=8192" npx ng test --include="[SPEC_PATH]" --watch=false --browsers=ChromeHeadlessCI` |
-| CoreApi | csharp | AyaHealthcare/Applications | Aya.Core.Api/ | — | Aya.Core.Common/FeatureManagement/FeatureFlag.cs | — | `dotnet build` | `dotnet test Aya.Core.BL.Tests/Aya.Core.BL.Tests.csproj --filter "FullyQualifiedName~[TEST_FILTER]" --no-build` |
-| aya-talent-marketplace | typescript-angular | AyaHealthcare/aya-talent-marketplace | ./ | apps/atm-web/, libs/ | apps/atm-web/src/app/shared/enums/feature-flag.ts | — | `npm run build` | `npx nx test atm-web --include="[SPEC_PATH]" --watch=false --browsers=ChromeHeadlessCI` |
-| QaAutomation | cypress | AyaHealthcare/Applications | QaAutomation/ | cypress/e2e/ | — | — | — | — |
-
-> `Usage Search Path` — when present (not `—`), scopes usage terminal grep commands to `[effective app path]/[Usage Search Path]` instead of the full effective app path. All comma-separated paths are combined into a single terminal call.
+| App | Language | Repository | Path in Repo | Flag Definition File | Build Command | Test Command |
+|---|---|---|---|---|---|---|
+| Nova | typescript-angular | AyaHealthcare/Applications | Nova/ | src/app/shared/models/enums/feature-flag.ts | *(combined with test)* | `NODE_OPTIONS="--max-old-space-size=8192" npx ng test --include="[SPEC_PATH]" --watch=false --browsers=ChromeHeadlessCI` |
+| CoreApi | csharp | AyaHealthcare/Applications | Aya.Core.Api/ | Aya.Core.Common/FeatureManagement/FeatureFlag.cs | `dotnet build` | `dotnet test Aya.Core.BL.Tests/Aya.Core.BL.Tests.csproj --filter "FullyQualifiedName~[TEST_FILTER]" --no-build` |
+| aya-talent-marketplace | typescript-angular | AyaHealthcare/aya-talent-marketplace | ./ | apps/atm-web/src/app/shared/enums/feature-flag.ts | `npm run build` | `npx nx test atm-web --include="[SPEC_PATH]" --watch=false --browsers=ChromeHeadlessCI` |
+| QaAutomation | cypress | AyaHealthcare/Applications | QaAutomation/ | — | — | — |
 
 ## App-Specific Notes
 
