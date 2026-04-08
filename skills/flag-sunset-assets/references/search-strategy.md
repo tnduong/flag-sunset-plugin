@@ -21,7 +21,7 @@ Before any search, derive each app's effective local app path from the registry 
 
 ## Step 1 - Local Definition-File Confirmation
 
-For each app in the registry, run an OS-appropriate terminal grep command against its definition file for the exact raw flag key.
+For each app in the registry, search its definition file for the exact raw flag key.
 
 From the results:
 1. Apps whose definition file contains the flag key are affected.
@@ -41,17 +41,11 @@ If an app matched by key but no identifier can be extracted, stop and ask the us
 
 ## Step 3 - Local Usage Search
 
-Search only the affected apps using the exact identifier discovered in Step 2.
+Search only the affected apps using the exact identifier discovered in Step 3.
 
 Rules:
-- Use OS-appropriate terminal grep commands for each affected app.
-- If `Usage Search Path` is present for an app (not `—`), search only those paths. If not present, search the app root.
+- Use `grep_search` for each affected app root.
 - For QaAutomation, search `*.feature` files only.
-- Use language-specific extensions for usage discovery:
-	- Nova and aya-talent-marketplace: `*.ts`, `*.html`
-	- CoreApi: `*.cs`
-	- QaAutomation: `*.feature`
-- Parse grep output in `file:line:content` format to capture line evidence.
 - Search test and mock files with the exact LaunchDarkly key string, not fuzzy variants.
 - Build the concrete future work set from the results:
 	- definition files
@@ -69,7 +63,7 @@ Rules:
 - Read or write the user-owned home-directory `local-roots.json` file with an OS-appropriate terminal command only when that fallback file is needed outside the active workspace.
 - If any required effective app path is missing from the active workspace, stop with workspace-gate failure instead of triggering external-directory approval prompts.
 - Do not use `list_dir` as part of the default permission envelope.
-- Use OS-appropriate terminal grep commands only on workspace-confirmed app paths.
+- Use `grep_search` only on workspace-confirmed app paths.
 - Use `read_file` only for files in the concrete future work set. Definition files are read in full. All other files are read as targeted ranges anchored to grep-discovered match lines (±30 lines, expanded to contain the full logical block, merged when overlapping). The grep line numbers from Step 3 are the authoritative coverage list; every match line must fall within a read range.
 - Defer `get_errors` until Step 5 and scope it to edited files only, unless a Step 1 fallback requires file-scoped diagnostics for a specific already-approved file.
 - Do not use subagents after Step 1 begins.
