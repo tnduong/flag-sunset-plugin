@@ -5,7 +5,7 @@
 | Audience | Context |
 |----------|---------|
 | **Plugin developer** (you) | Editing files in this source repo (`/src/flag-sunset-plugin`) |
-| **Plugin user / operator** | Running `/ld:flag-sunset` in a different multi-repo workspace |
+| **Plugin user / operator** | Running `/flag-sunset` in a different multi-repo workspace |
 
 When the active workspace folder is this plugin source repo, you are in **developer mode** — helping edit, test, and ship workflow changes. The operator experience is documented in `skills/flag-sunset-assets/README.md`.
 

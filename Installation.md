@@ -51,7 +51,7 @@ Source-installed plugins pinned to a frozen tag **do not auto-update**. When a n
    https://github.com/tnduong/flag-sunset-plugin/tree/vX.Y.Z
    ```
 4. Enable the plugin if prompted.
-5. Confirm the upgrade by running `/ld:flag-sunset` — the first output line will show the new version.
+5. Confirm the upgrade by running `/flag-sunset` — the first output line will show the new version.
 
 The new tag URL for each release is included in the DM notification sent when a version ships.
 
