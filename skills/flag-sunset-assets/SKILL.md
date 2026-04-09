@@ -50,7 +50,7 @@ Rules:
    - `VS Code may show a permission prompt during Preflight or Step 1. If it appears, approve it. If no prompt appears, Copilot will continue and you can work on something else.`
 - If Step 1 becomes blocked on a permission or read, print exactly:
    - `## >>>>>> WAITING ON YOU`
-- Use plain chat prompts for workflow questions that require a user reply. `read_file` and `get_errors` remain the default VS Code tools on workspace-confirmed paths. Use OS-appropriate terminal grep commands for definition-file and usage searches.
+- Use plain chat prompts for workflow questions that require a user reply. `read_file` and `get_errors` remain the default VS Code tools on workspace-confirmed paths. Prefer `rg` when available; otherwise use OS-appropriate terminal search commands with app-scoped, extension-filtered paths for definition-file and usage searches.
 - Prefer a workspace-local `local-roots.json` file on workspace-confirmed paths before falling back to the user-owned home-directory file.
 - Use OS-appropriate terminal commands for reading or writing the user-owned home-directory `local-roots.json` file and for root validation whenever the target is outside the active workspace.
 - When a terminal command is required, use an OS-appropriate form for the active shell. On Windows PowerShell, prefer `Test-Path` and `Get-Date`; on macOS/Linux, prefer `test -d` and `date`.

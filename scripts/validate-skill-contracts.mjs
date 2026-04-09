@@ -303,6 +303,28 @@ const contracts = [
     },
     {
         file: 'preflight',
+        scenario: 'Scenario 12B: Step 10 completion gate remains mandatory and fail-closed',
+        checks: [
+            {
+                label: 'Step 10 gate requires app-scoped identifier file-list search from exact resolved scope',
+                text: 'Step 10 completion gate: for each `MATCH` app, run one extension-filtered identifier file-list search from exactly that app\'s resolved scope (`Search Scope` when present, otherwise the effective app path).',
+            },
+            {
+                label: 'Invalid search root must stop with explicit STEP_1_INCOMPLETE message',
+                text: 'If the search runs from any other root, print `STEP_1_INCOMPLETE: invalid search scope for [app]=[actual root]` and stop.',
+            },
+            {
+                label: 'Untracked identifier matches must stop with explicit STEP_1_INCOMPLETE message',
+                text: 'If any matched file is not in the concrete future work set, print `STEP_1_INCOMPLETE: untracked matches found for [app]=[untracked files]` and stop.',
+            },
+            {
+                label: 'Step 10 gate must pass for all MATCH apps before continuing to item 11',
+                text: 'Proceed to item 11 only when all `MATCH` apps pass both checks.',
+            },
+        ],
+    },
+    {
+        file: 'preflight',
         scenario: 'Scenario 13: paired spec file enters scope when source cleanup implies stale test wiring',
         checks: [
             {
@@ -388,6 +410,52 @@ const contracts = [
             {
                 label: 'Agent blocks Step 1 without a valid Step 0 reply',
                 text: 'without a valid Step 0 reply of `1` or `2` captured in the current run',
+            },
+        ],
+    },
+    {
+        file: 'preflight',
+        scenario: 'Scenario 19: Step 1 search prefers rg when available',
+        checks: [
+            {
+                label: 'Step 1 prefers rg for definition-file confirmation',
+                text: 'prefer `rg -n --fixed-strings` when available',
+            },
+            {
+                label: 'Step 1 prefers rg for usage discovery',
+                text: 'prefer `rg -n --fixed-strings` with extension globs when available',
+            },
+        ],
+    },
+    {
+        file: 'preflight',
+        scenario: 'Scenario 20: fallback searches stay extension-filtered and avoid broad PowerShell scans',
+        checks: [
+            {
+                label: 'Step 1 keeps searches extension-filtered by app language',
+                text: 'file extensions by app language: Angular apps (Nova, aya-talent-marketplace) -> `*.ts`, `*.html`, plus `*.spec.ts` only when the spec is already proven relevant; CoreApi -> `*.cs`; QaAutomation -> `*.feature`',
+            },
+            {
+                label: 'Windows fallback uses Select-String with explicit extension patterns',
+                text: 'use `Select-String -Path "[path1]\\**\\*.ext1","[path1]\\**\\*.ext2",... -Pattern "IDENTIFIER"`',
+            },
+            {
+                label: 'Broad Get-ChildItem whole-tree scans are explicitly blocked',
+                text: 'do not use `Get-ChildItem ... -Recurse -File` pipelines for usage discovery',
+            },
+        ],
+    },
+    {
+        file: 'preflight',
+        scenario: 'Scenario 21: definition targets resolve from effective app paths before PATH_ERROR classification',
+        checks: [
+            {
+                label: 'Definition-file confirmation resolves targets from effective app paths, not repository root alone',
+                text: 'resolve each definition target as: `[effective app path] + [Flag Definition File]`; do not resolve definition targets from repository root alone',
+            },
+            {
+                label: 'PATH_ERROR is allowed only after exact derived definition target validation fails',
+                text: 'classify an app as `PATH_ERROR` only after validating that exact derived definition target path is missing or unreadable',
             },
         ],
     },

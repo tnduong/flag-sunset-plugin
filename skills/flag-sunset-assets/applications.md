@@ -18,7 +18,7 @@ Required local root keys:
 | App | Language | Repository | Path in Repo | Search Scope | Flag Definition File |
 |---|---|---|---|---|---|
 | Nova | typescript-angular | AyaHealthcare/Applications | Nova/ | Nova/src/app | src/app/shared/models/enums/feature-flag.ts |
-| CoreApi | csharp | AyaHealthcare/Applications | Aya.Core.Api/ | Aya.Core.Api/** | Aya.Core.Common/FeatureManagement/FeatureFlag.cs |
+| CoreApi | csharp | AyaHealthcare/Applications | Aya.Core.Api/ | | Aya.Core.Common/FeatureManagement/FeatureFlag.cs |
 | aya-talent-marketplace | typescript-angular | AyaHealthcare/aya-talent-marketplace | ./ | apps/atm-web/**, libs/** | apps/atm-web/src/app/shared/enums/feature-flag.ts |
 | QaAutomation | cypress | AyaHealthcare/Applications | QaAutomation/ | QaAutomation/cypress/e2e | — |
 

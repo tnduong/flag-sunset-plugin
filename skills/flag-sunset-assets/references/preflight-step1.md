@@ -85,18 +85,32 @@ Execution:
 6. Derive each app's effective local app path from the registry.
 7. Confirm every effective app path is already present in the active VS Code workspace before any VS Code filesystem or search tool runs.
    - if any required effective app path is missing, stop with workspace-gate failure instead of attempting external reads
-8. No VS Code search pre-seeding is required; all definition-file and usage searches use OS-appropriate terminal grep commands. Negative constraints still apply:
+8. No VS Code search pre-seeding is required; all definition-file and usage searches use terminal search commands on workspace-confirmed paths. Search rules:
+   - prefer `rg` when it is available in the current shell
+   - if `rg` is unavailable, fall back to OS-appropriate native commands
+   - keep every search extension-filtered by app language and search purpose; do not search all file types under a repo root
+   - on Windows fallback paths, use `Select-String -Path ...` with explicit `*.ext` patterns; do not use broad `Get-ChildItem ... -Recurse -File | Select-String ...` scans over an app or repository root
+   - use the narrowest workspace-confirmed search roots available from the registry and candidate app set; do not run whole-repo fallback scans when an app-scoped search root is known
+   Negative constraints still apply:
    - do not use `list_dir` as part of the default Step 1 permission envelope
    - do not run `get_errors` at app-root scope during Step 1
    - do not batch permission-bearing `read_file` calls
-9. Using only the main agent, confirm the raw flag key in each app's definition target with an OS-appropriate terminal grep command and determine the candidate app set.
-10. Using only the main agent, run exact local usage discovery for the candidate apps with OS-appropriate terminal grep commands and build the concrete future work set:
+9. Using only the main agent, confirm the raw flag key in each app's definition target with a terminal search command and determine the candidate app set.
+   - resolve each definition target as: `[effective app path] + [Flag Definition File]`; do not resolve definition targets from repository root alone
+   - classify an app as `PATH_ERROR` only after validating that exact derived definition target path is missing or unreadable
+   - prefer `rg -n --fixed-strings` when available
+   - when falling back, keep the command scoped to the definition file itself or the documented fallback definition search path
+10. Using only the main agent, run exact local usage discovery for the candidate apps with extension-filtered terminal search commands and build the concrete future work set:
     - definition files
     - usage files that may be edited
     - spec, test, or mock files only if they are proven relevant
+   - file extensions by app language: Angular apps (Nova, aya-talent-marketplace) -> `*.ts`, `*.html`, plus `*.spec.ts` only when the spec is already proven relevant; CoreApi -> `*.cs`; QaAutomation -> `*.feature`
+   - prefer `rg -n --fixed-strings` with extension globs when available
+   - when falling back on Windows, use `Select-String -Path "[path1]\**\*.ext1","[path1]\**\*.ext2",... -Pattern "IDENTIFIER"`; do not use `Get-ChildItem ... -Recurse -File` pipelines for usage discovery
    - apply the downstream-symbol second-hop rule defined in [search-strategy.md](./search-strategy.md) when building the concrete future work set
    - if a candidate Angular component, service, or similar source file is expected to lose a feature-manager or other cleanup-only library import/provider during flag removal, include the co-located `*.spec.ts` file in the concrete future work set for mirrored cleanup review
    - files that may later be checked with `get_errors` in Step 5 if file-scoped diagnostics are needed
+   - Step 10 completion gate: for each `MATCH` app, run one extension-filtered identifier file-list search from exactly that app's resolved scope (`Search Scope` when present, otherwise the effective app path). If the search runs from any other root, print `STEP_1_INCOMPLETE: invalid search scope for [app]=[actual root]` and stop. If any matched file is not in the concrete future work set, print `STEP_1_INCOMPLETE: untracked matches found for [app]=[untracked files]` and stop. Proceed to item 11 only when all `MATCH` apps pass both checks.
 11. Read each file in the concrete future work set with `read_file` to trigger any remaining file-scoped approvals, using this strategy:
    - **Definition files** (the flag enum/const file for each app): read in full - they are small and are the authoritative identifier source.
    - **All other files**: read only the line ranges anchored to the grep-discovered match lines from Step 10:
