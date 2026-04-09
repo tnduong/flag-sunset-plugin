@@ -127,7 +127,7 @@ VS Code picks up the cache on the next chat session. No reinstall needed.
 Open a workspace that contains the repos the plugin operates on, then:
 
 ```
-/flag-sunset [FF KEY]
+/flag-sunset-plugin:run [FLAG_KEY]
 ```
 
 Work through the relevant scenario(s) from `tests/workflow-regression-scenarios.md`.
@@ -148,7 +148,7 @@ After merging to `main` (or from any branch), install directly into VS Code usin
    ```
    https://github.com/tnduong/flag-sunset-plugin/tree/my-feature-branch
    ```
-3. Run `/flag-sunset [FF KEY]` and verify behavior
+3. Run `/flag-sunset-plugin:run [FLAG_KEY]` and verify behavior
 
 > **Important:** This installs into the plugin cache and overwrites your local test copy. Re-run the rsync above if you want to keep iterating locally after this.
 

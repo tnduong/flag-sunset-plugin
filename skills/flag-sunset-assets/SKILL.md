@@ -20,7 +20,7 @@ This workflow is the required entry point for any feature-flag removal request w
 ## Quick Start
 
 ```text
-/flag-sunset [FLAG_KEY]
+/flag-sunset-plugin:run [FLAG_KEY]
 ```
 
 ## User Guide
@@ -55,6 +55,7 @@ Rules:
 - Use OS-appropriate terminal commands for reading or writing the user-owned home-directory `local-roots.json` file and for root validation whenever the target is outside the active workspace.
 - When a terminal command is required, use an OS-appropriate form for the active shell. On Windows PowerShell, prefer `Test-Path` and `Get-Date`; on macOS/Linux, prefer `test -d` and `date`.
 - Preflight local-root validation must use an OS-appropriate terminal existence check on the resolved repository roots; do not use `list_dir`, `read_file`, or other VS Code filesystem tools on parent repository roots for existence checks.
+- Preflight working-tree validation must run on each resolved repository root with OS-appropriate terminal git status checks before Step 0 may begin.
 - The default workflow must not use subagents at any point in the run. All permission, discovery, edit, and validation actions must remain in the main agent context. Do not invoke a subagent to access a missing workspace project or to bypass a workspace-gate failure.
 - All file edits must remain in the main agent context.
 - Machine-specific checkout roots must not be stored in the plugin.

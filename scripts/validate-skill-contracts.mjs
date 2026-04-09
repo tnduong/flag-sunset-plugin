@@ -459,6 +459,38 @@ const contracts = [
             },
         ],
     },
+    {
+        file: 'preflight',
+        scenario: 'Scenario 22: dirty working tree gate blocks Step 0 when repositories are not clean',
+        checks: [
+            {
+                label: 'Dirty working tree gate runs after main freshness and before Step 0',
+                text: 'If the main freshness gate passed, validate working-tree cleanliness for each unique repository listed in [applications.md](../applications.md) before starting Step 0',
+            },
+            {
+                label: 'Clean repositories continue without an extra clean-status line',
+                text: 'if every repository is clean, continue to Step 0 with no additional clean-status line',
+            },
+            {
+                label: 'Dirty working tree gate has explicit fail line and clean-up instruction',
+                text: '`Dirty working tree gate failed: [RepoX]=dirty`',
+            },
+            {
+                label: 'Dirty working tree gate fail path stops before Step 0',
+                text: 'stop immediately with no Step 0 prompt and no edits',
+            },
+        ],
+    },
+    {
+        file: 'skill',
+        scenario: 'Scenario 22: dirty working tree validation is required before Step 0',
+        checks: [
+            {
+                label: 'Top-level runtime policy requires preflight git status checks before Step 0',
+                text: 'Preflight working-tree validation must run on each resolved repository root with OS-appropriate terminal git status checks before Step 0 may begin.',
+            },
+        ],
+    },
 ];
 
 let passed = 0;

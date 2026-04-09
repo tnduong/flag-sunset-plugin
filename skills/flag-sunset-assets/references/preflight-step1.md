@@ -55,6 +55,15 @@ Before Step 0:
      - `Main freshness gate failed: [RepoX]=[reason]`
      - `Resolve the local main update issue, then rerun flag-sunset.`
      - stop immediately with no Step 0 prompt and no edits
+10. If the main freshness gate passed, validate working-tree cleanliness for each unique repository listed in [applications.md](../applications.md) before starting Step 0:
+    - use OS-appropriate terminal git status commands on the resolved repository roots
+    - evaluate staged, unstaged, and untracked changes
+    - run cleanliness checks serially, one repository at a time
+   - if every repository is clean, continue to Step 0 with no additional clean-status line
+    - if any repository is dirty, print:
+       - `Dirty working tree gate failed: [RepoX]=dirty`
+       - `Commit, stash, or discard local changes, then rerun flag-sunset.`
+       - stop immediately with no Step 0 prompt and no edits
 
 ## Step 1: Permissions and Start Clock
 
