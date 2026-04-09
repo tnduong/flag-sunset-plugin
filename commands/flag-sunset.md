@@ -1,5 +1,5 @@
 ---
-name: "flag-sunset"
+name: "run"
 description: "Start the shared flag-sunset workflow for a raw LaunchDarkly flag key using the dedicated flag-sunset-executor custom agent."
 argument-hint: "The feature flag key to remove, for example: WFD-5487-display-strike-duplication"
 agent: "flag-sunset-executor"

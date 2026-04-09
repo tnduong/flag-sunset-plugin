@@ -18,7 +18,7 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 
 **Steps**
 
-6. Run `/flag-sunset [FF KEY]`.
+6. Run `/flag-sunset-plugin:run [FLAG_KEY]`.
 7. Verify the workflow asks for the shared parent folder.
 8. Verify the workflow asks to confirm the derived roots.
 9. Verify `local-roots.json` gets created.
@@ -46,7 +46,7 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 
 **Steps**
 
-5. Run `/flag-sunset [FF KEY]`.
+5. Run `/flag-sunset-plugin:run [FLAG_KEY]`.
 6. Verify there is no parent-folder question.
 7. Verify there is no derived-roots confirmation question.
 8. Verify there is no VS Code external-directory prompt for reading `local-roots.json`.
@@ -69,7 +69,7 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 
 **Steps**
 
-2. Run `/flag-sunset [FF KEY]`.
+2. Run `/flag-sunset-plugin:run [FLAG_KEY]`.
 3. Verify preflight fails at root validation.
 4. Verify the workflow stops before Step 0.
 5. Verify there is no retry loop.
@@ -90,7 +90,7 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 
 **Steps**
 
-3. Run `/flag-sunset [FF KEY]`.
+3. Run `/flag-sunset-plugin:run [FLAG_KEY]`.
 4. Verify workspace gate fails before any VS Code filesystem or search operation runs on the missing project.
 
 **Pass criteria**
@@ -169,7 +169,7 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 
 **Steps**
 
-3. Run `/flag-sunset [FF KEY]`.
+3. Run `/flag-sunset-plugin:run [FLAG_KEY]`.
 4. Allow Preflight and Step 1 to complete successfully.
 5. Continue through Step 2 and Step 4 on the normal path.
 
@@ -188,7 +188,7 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 
 **Steps**
 
-2. Run `/flag-sunset [FF KEY]` through discovery.
+2. Run `/flag-sunset-plugin:run [FLAG_KEY]` through discovery.
 3. Observe Step 3 and the first edit action.
 
 **Pass criteria**
@@ -335,7 +335,7 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 
 **Steps**
 
-2. Run `/flag-sunset [FF KEY]` until Step 0 appears.
+2. Run `/flag-sunset-plugin:run [FLAG_KEY]` until Step 0 appears.
 3. Verify Step 0 is printed as plain chat text with the three numbered choices.
 4. Reply `1` and verify the workflow continues.
 5. Repeat and reply `2` and verify the workflow continues.
@@ -358,7 +358,7 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 
 **Steps**
 
-2. Run `/flag-sunset [FF KEY]` through Step 1 discovery.
+2. Run `/flag-sunset-plugin:run [FLAG_KEY]` through Step 1 discovery.
 3. Observe the terminal search commands used for definition-file confirmation and usage discovery.
 
 **Pass criteria**
@@ -376,7 +376,7 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 
 **Steps**
 
-2. Run `/flag-sunset [FF KEY]` through Step 1 discovery.
+2. Run `/flag-sunset-plugin:run [FLAG_KEY]` through Step 1 discovery.
 3. Observe the fallback search commands.
 
 **Pass criteria**
@@ -384,3 +384,25 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 - [ ] Fallback searches are limited to language-appropriate file types for the target app.
 - [ ] Windows fallback searches use `Select-String -Path ...` with explicit `*.ext` patterns.
 - [ ] The workflow does not use broad `Get-ChildItem ... -Recurse -File | Select-String ...` scans over an app or repository root.
+
+---
+
+## Scenario 21: dirty working tree gate blocks Step 0 until repositories are clean
+
+**Setup**
+
+1. Use valid local roots and a workspace that passes the workspace gate.
+2. Ensure the main freshness gate can pass.
+3. Leave one required repository with staged, unstaged, or untracked changes.
+
+**Steps**
+
+4. Run `/flag-sunset-plugin:run [FLAG_KEY]` through preflight.
+5. Observe the dirty working tree gate output.
+
+**Pass criteria**
+
+- [ ] The workflow prints `Dirty working tree gate failed: [RepoX]=dirty` when any repository is not clean.
+- [ ] The workflow prints `Commit, stash, or discard local changes, then rerun flag-sunset.`.
+- [ ] The workflow stops before Step 0 and makes no edits.
+- [ ] When all required repositories are clean, the workflow continues to Step 0 without printing an additional clean-status line.
