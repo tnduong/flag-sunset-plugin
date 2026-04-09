@@ -70,14 +70,14 @@ https://github.com/AyaHealthcare/flag-sunset-plugin.git
 3. In VS Code, run `Chat: Install Plugin From Source`.
 4. Paste the canonical repository URL.
 5. Enable the plugin when prompted.
-6. Run `/flag-sunset <FLAG_KEY>`.
+6. Run `/ld:flag-sunset <FLAG_KEY>`.
 
 ## Troubleshooting
 
 - If install fails before any plugin prompt appears, verify the user can access the private repository in the browser and is a member of the `copilot` team.
 - If install fails after manifest changes, run `node scripts/validate-plugin-layout.mjs` and confirm the nested `.claude-plugin` paths still point at the repository root assets.
 - If install works for existing users but fails for new users, treat it as an access-provisioning problem first, not a plugin-content problem.
-- If the plugin installs but `/flag-sunset` is missing, verify the plugin is enabled in VS Code and the repository contains `commands/flag-sunset.md`.
+- If the plugin installs but `/ld:flag-sunset` is missing, verify the plugin is enabled in VS Code and the repository contains `commands/flag-sunset.md`.
 
 ## Support Notes
 

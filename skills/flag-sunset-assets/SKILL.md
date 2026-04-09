@@ -20,7 +20,7 @@ This workflow is the required entry point for any feature-flag removal request w
 ## Quick Start
 
 ```text
-/flag-sunset [FLAG_KEY]
+/ld:flag-sunset [FLAG_KEY]
 ```
 
 ## User Guide
