@@ -7,7 +7,7 @@
 Command:
 
 ```text
-/flag-sunset [FLAG_KEY]
+/ld:flag-sunset [FLAG_KEY]
 ```
 
 The workflow performs discovery, editing, and static validation across the registered applications without running automated build or test commands.
