@@ -17,6 +17,7 @@ Before any search, derive each app's effective local app path from the registry 
 
 ## Step 1 - Local Definition-File Confirmation
 For each app in the registry, search its definition file for the exact raw flag key.
+Use `rg -n --fixed-strings` when available; otherwise fall back to an OS-appropriate native command scoped to the exact definition target. Do not broaden definition-file confirmation into an all-file repo scan.
 From the results:
 1. Apps whose definition file contains the flag key are affected.
 2. Apps with zero matches are marked `NO_MATCH`.
@@ -40,9 +41,9 @@ If an app matched by key but no identifier can be extracted, stop and ask the us
 ## Step 3 - Local Usage Search
 Search only the affected apps using the exact identifier discovered in Step 2.
 Rules:
-- Use an OS-appropriate terminal grep command for each affected app using registry `Search Scope`.
-- If `Search Scope` is omitted for an app row, use the effective app path as the default search scope.
-- For QaAutomation, search `*.feature` files only.
+- Prefer `rg -n --fixed-strings` when available; otherwise fall back to OS-appropriate native search commands with explicit extension filters. Exact command forms live in [preflight-step1.md](./preflight-step1.md#step-1-permissions-and-start-clock).
+- Use an app-scoped search root from registry `Search Scope`; if `Search Scope` is omitted, use the effective app path. Do not fall back to a whole-repository all-file scan when an app search root is known.
+- Keep searches extension-filtered by app language: Angular apps -> `*.ts`, `*.html`; CoreApi -> `*.cs`; QaAutomation -> `*.feature`.
 - Search symbols from Step 2 in this order: primary first, downstream second (if any).
 - When a downstream symbol is found in a TypeScript source file, run a second-hop search in the paired HTML template (for example `x.component.ts` -> `x.component.html`).
 - Search test and mock files with the exact LaunchDarkly key string, not fuzzy variants.
@@ -60,7 +61,7 @@ Rules:
 - Read or write the user-owned home-directory `local-roots.json` file with an OS-appropriate terminal command only when that fallback file is needed outside the active workspace.
 - If any required effective app path is missing from the active workspace, stop with workspace-gate failure instead of triggering external-directory approval prompts.
 - Do not use `list_dir` as part of the default permission envelope.
-- Use terminal grep commands only on workspace-confirmed app paths.
+- Use terminal search commands only on workspace-confirmed app paths, following the scoped and extension-filtered rules above.
 - Use `read_file` only for files in the concrete future work set. Definition files are read in full. All other files are read as targeted ranges anchored to grep-discovered match lines (±30 lines, expanded to contain the full logical block, merged when overlapping). The grep line numbers from Step 3 are the authoritative coverage list; every match line must fall within a read range.
 - Defer `get_errors` until Step 5 and scope it to edited files only, unless a Step 1 fallback requires file-scoped diagnostics for a specific already-approved file.
 - Do not use subagents after Step 1 begins.

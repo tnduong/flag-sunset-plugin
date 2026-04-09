@@ -347,3 +347,40 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 - [ ] Replies `1` and `2` continue.
 - [ ] Reply `3` aborts cleanly.
 - [ ] Invalid or missing Step 0 input does not continue silently.
+
+---
+
+## Scenario 19: Step 1 search prefers rg when available
+
+**Setup**
+
+1. Ensure `rg` is installed and available in the active shell.
+
+**Steps**
+
+2. Run `/flag-sunset [FF KEY]` through Step 1 discovery.
+3. Observe the terminal search commands used for definition-file confirmation and usage discovery.
+
+**Pass criteria**
+
+- [ ] The workflow prefers `rg` for definition-file and usage searches when it is available.
+- [ ] The workflow does not fall back to PowerShell-native search commands when `rg` is already available.
+
+---
+
+## Scenario 20: fallback searches stay extension-filtered and avoid broad PowerShell scans
+
+**Setup**
+
+1. Force a run where `rg` is unavailable in the active shell.
+
+**Steps**
+
+2. Run `/flag-sunset [FF KEY]` through Step 1 discovery.
+3. Observe the fallback search commands.
+
+**Pass criteria**
+
+- [ ] Fallback searches are limited to language-appropriate file types for the target app.
+- [ ] Windows fallback searches use `Select-String -Path ...` with explicit `*.ext` patterns.
+- [ ] The workflow does not use broad `Get-ChildItem ... -Recurse -File | Select-String ...` scans over an app or repository root.
