@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "name": "ld",
+    "name": "flag-sunset-plugin",
     "description": "Source-installable marketplace entry for the flag sunset plugin"
   },
   "plugins": [
     {
-      "name": "ld",
+      "name": "flag-sunset-plugin",
       "version": "1.0.0",
       "description": "Flag sunset workflow helpers",
       "author": {

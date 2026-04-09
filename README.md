@@ -1,6 +1,6 @@
 # Flag Sunset Plugin
 
-Private VS Code agent plugin that provides the `/ld:flag-sunset` prompt for shared LaunchDarkly feature-flag sunset workflows.
+Private VS Code agent plugin that provides the `/flag-sunset` prompt for shared LaunchDarkly feature-flag sunset workflows.
 
 For the recommended internal ownership and onboarding model, see `INTERNAL_ROLLOUT.md`.
 
@@ -18,7 +18,7 @@ To validate the source-install manifest layout locally, run `node scripts/valida
 Run:
 
 ```text
-/ld:flag-sunset [FLAG_KEY]
+/flag-sunset [FLAG_KEY]
 ```
 
 This prompt routes to the dedicated `flag-sunset-executor` custom agent shipped with the plugin.
@@ -28,7 +28,7 @@ The prompt is the only public entry point. The executor agent is internal and is
 Example:
 
 ```text
-/ld:flag-sunset WFD-5487-display-strike-duplication
+/flag-sunset WFD-5487-display-strike-duplication
 ```
 
 ## Notes
