@@ -406,3 +406,29 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 - [ ] The workflow prints `Commit, stash, or discard local changes, then rerun flag-sunset.`.
 - [ ] The workflow stops before Step 0 and makes no edits.
 - [ ] When all required repositories are clean, the workflow continues to Step 0 without printing an additional clean-status line.
+
+---
+
+## Scenario 22: medium workspace autoapproval with rg and scope isolation
+
+**Setup**
+
+1. Create or open the dedicated FF-removal multi-root workspace.
+2. Open the OS-specific shared workspace file that includes the medium profile:
+	- Windows: `onboarding/ff-removal.code-workspace`
+	- macOS: `onboarding/ff-removal.macos.code-workspace`
+3. Ensure user-level settings do not add new FF-removal-specific autoapproval entries for this test.
+
+**Steps**
+
+4. Run `/flag-sunset-plugin:run [FLAG_KEY]` through Step 1 on the normal path.
+5. Observe that Step 1 terminal search uses `rg` when available.
+6. Record prompt count and prompt phase boundaries (Preflight, Step 1, post-Step 1).
+7. Open an unrelated workspace and run a simple chat action that would require approval in that workspace.
+
+**Pass criteria**
+
+- [ ] `rg` is included in workspace terminal autoapproval and Step 1 search prefers `rg` when available.
+- [ ] Prompt volume is reduced on the FF-removal workspace run compared to baseline.
+- [ ] No unexpected approval churn appears after Step 1 on the normal path.
+- [ ] Autoapproval behavior does not leak into the unrelated workspace.

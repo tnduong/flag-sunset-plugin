@@ -70,7 +70,56 @@ https://github.com/AyaHealthcare/flag-sunset-plugin.git
 3. In VS Code, run `Chat: Install Plugin From Source`.
 4. Paste the canonical repository URL.
 5. Enable the plugin when prompted.
-6. Run `/flag-sunset-plugin:run [FLAG_KEY]`.
+6. Open the shared FF-removal workspace file for your OS:
+	- Windows: `onboarding/ff-removal.code-workspace`
+	- macOS: `onboarding/ff-removal.macos.code-workspace`
+7. Confirm the opened workspace file includes `chat.tools.terminal.autoApprove`.
+8. Follow the operator runbook in `onboarding/new-user-onboarding.md`.
+9. Run `/flag-sunset-plugin:run [FLAG_KEY]`.
+
+## Workspace Autoapproval (Medium Profile)
+
+Use workspace-scoped approvals for the FF-removal workspace so settings do not leak into unrelated workspaces.
+
+Recommended medium profile:
+
+- Enable Chat Tools Eligible for Autoapproval for read and search actions used heavily in Step 1.
+- Keep edit-heavy and branch-changing actions gated.
+- Include `rg` and `grep` in terminal autoapproval so Step 1 terminal searches stay low-friction.
+
+Profile selection:
+
+- Windows PowerShell users: use `onboarding/ff-removal.code-workspace`.
+- macOS zsh/bash users: use `onboarding/ff-removal.macos.code-workspace`.
+- macOS users running PowerShell (`pwsh`): either profile works, but the Windows profile matches PowerShell command names.
+
+Workspace settings example:
+
+```json
+{
+	"chat.tools.terminal.autoApprove": {
+		"rg": true,
+		"grep": true,
+		"Get-Content": true,
+		"Test-Path": true,
+		"Get-Location": true,
+		"Write-Output": true,
+		"/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+status\\b/": true,
+		"/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+log\\b/": true,
+		"/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+show\\b/": true,
+		"/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+diff\\b/": true,
+		"/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+branch\\b.*\\s-(d|D|m|M|-delete|-force)\\b/": false
+	}
+}
+```
+
+Notes:
+
+- Keep this in workspace settings, not user settings.
+- Do not use global bypass for this workflow.
+- If your VS Code build exposes tool-level autoapproval UI, use the medium list for read/search tools and keep edit/write tools gated.
+- Keep the workflow validation scenarios in `tests/workflow-regression-scenarios.md` as the rollout pass criteria.
+- `onboarding/new-user-onboarding.md` is the canonical step-by-step setup guide for new operators.
 
 ## Troubleshooting
 
