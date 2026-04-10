@@ -58,7 +58,7 @@ Example:
 }
 ```
 
-If the preferred workspace-local file does not exist, the workflow asks once in chat for the shared parent folder containing both `Applications` and `aya-talent-marketplace`, derives the repository roots, confirms them in chat with the user, then writes the workspace-local file so later runs reuse the same locations without prompting again.
+If the preferred workspace-local file does not exist, the workflow shows setup prompts from [user-prompts.md](./references/user-prompts.md), derives the repository roots, confirms them with the user, then writes the workspace-local file so later runs reuse the same locations without prompting again.
 
 If the workspace-local file cannot be used, the workflow may fall back to the home-directory config file. When the chosen config file lives outside the active workspace, the workflow should read and write it with OS-appropriate terminal commands instead of VS Code filesystem tools. This avoids host-managed external-directory approval prompts for routine config access.
 
@@ -68,14 +68,15 @@ Permission prompts are an expected part of the workflow.
 
 1. Preflight may ask for the shared parent folder if no usable local-roots config is available.
 2. Preflight asks for confirmation before persisting and using the derived repository roots.
-3. Step 0 asks in plain chat for the LaunchDarkly production state and whether to continue.
+3. Step 0 always shows Prompt 3 from [user-prompts.md](./references/user-prompts.md) immediately after the preflight workspace gate passes.
 4. Preflight should prefer the workspace-local `.copilot/flag-sunset/local-roots.json` file under the `Nova` workspace folder and use OS-appropriate terminal commands only when falling back to the home-directory file outside the active workspace.
 5. Preflight should validate repository-root existence with an OS-appropriate terminal check instead of VS Code filesystem reads on parent repository roots.
-6. Step 1 must confirm that every required effective app path is already part of the active VS Code workspace before any VS Code filesystem or search tool runs.
-7. Step 1 establishes a minimal permission envelope in the main agent by using terminal search commands on workspace-confirmed app paths (prefer `rg`, otherwise OS-appropriate fallback) and then reading only the concrete file set needed for edits and validation.
-8. If a permission-bearing Step 1 action is interrupted, the workflow may retry that exact blocked item once after approval, then must stop and ask the user whether to retry again or abort.
-9. The workflow should not rely on interpreting every non-default VS Code external-access approval option; instead, it should avoid triggering those prompts for off-workspace config access in the first place.
-10. After Step 1 completes, the default workflow is expected to proceed without further approval prompts.
+6. Step 1 must begin with serial main-refresh and working-tree-cleanliness gates before discovery.
+7. Step 1 must confirm that every required effective app path is already part of the active VS Code workspace before any VS Code filesystem or search tool runs.
+8. Step 1 establishes a minimal permission envelope in the main agent by using terminal search commands on workspace-confirmed app paths (prefer `rg`, otherwise OS-appropriate fallback) and then reading only the concrete file set needed for edits and validation.
+9. If a permission-bearing Step 1 action is interrupted, the workflow may retry that exact blocked item once after approval, then must stop and ask the user whether to retry again or abort.
+10. The workflow should not rely on interpreting every non-default VS Code external-access approval option; instead, it should avoid triggering those prompts for off-workspace config access in the first place.
+11. After Step 1 completes, the default workflow is expected to proceed without further approval prompts.
 
 `list_dir` is not part of the default Step 1 approval flow, and `get_errors` should be deferred until Step 5 with file-scoped checks on edited files only.
 

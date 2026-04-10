@@ -50,7 +50,7 @@ Each scenario maps to one or more behavioral contracts enforced by `scripts/vali
 6. Verify there is no parent-folder question.
 7. Verify there is no derived-roots confirmation question.
 8. Verify there is no VS Code external-directory prompt for reading `local-roots.json`.
-9. Verify Step 0 appears as a plain chat question with options `1`, `2`, and `3`.
+9. Verify Step 0 shows Prompt 3 from `references/user-prompts.md` with options `1`, `2`, and `3`.
 10. Reply `1` or `2` and verify the workflow continues into Step 1.
 11. Verify Step 1 searches and reads only workspace-confirmed paths.
 
@@ -160,7 +160,7 @@ Each scenario maps to one or more behavioral contracts enforced by `scripts/vali
 
 ---
 
-## Scenario 9: Step 0 plain reply handling
+## Scenario 9: Step 0 reply handling
 
 **Setup**
 
@@ -169,7 +169,7 @@ Each scenario maps to one or more behavioral contracts enforced by `scripts/vali
 **Steps**
 
 2. Run `/flag-sunset-plugin:run [FLAG_KEY]` until Step 0 appears.
-3. Verify Step 0 is printed as plain chat text with the three numbered choices.
+3. Verify Step 0 shows Prompt 3 from `references/user-prompts.md` with the three numbered choices.
 4. Reply `1` and verify the workflow continues.
 5. Repeat and reply `2` and verify the workflow continues.
 6. Repeat and reply `3` and verify the workflow stops with no edits.
@@ -183,7 +183,7 @@ Each scenario maps to one or more behavioral contracts enforced by `scripts/vali
 
 ---
 
-## Scenario 10: dirty working tree preflight gate
+## Scenario 10: dirty working tree Step 1 entry gate
 
 **Setup**
 
@@ -193,14 +193,14 @@ Each scenario maps to one or more behavioral contracts enforced by `scripts/vali
 **Steps**
 
 3. Run `/flag-sunset-plugin:run [FLAG_KEY]`.
-4. Verify preflight reaches the dirty working tree gate.
+4. Verify Step 1 entry reaches the dirty working tree gate.
 5. Verify the workflow prints which repository is dirty and instructs the user to commit, stash, or discard local changes.
-6. Verify the workflow stops before Step 0 and performs no edits.
+6. Verify the workflow stops before Step 1 discovery and performs no edits.
 
 **Pass criteria**
 
 - [ ] Dirty repository state is reported clearly.
-- [ ] The workflow stops before Step 0.
+- [ ] The workflow stops before Step 1 discovery.
 - [ ] No edits are made when the gate fails.
 
 ---
