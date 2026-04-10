@@ -69,6 +69,13 @@ Execution:
    - use OS-appropriate terminal git commands on the resolved repository roots
    - use a fast-forward-only update policy
    - run refresh checks serially, one repository at a time
+    - on Windows PowerShell, run these serial git commands for each repository root, in order:
+       - `git -C '[resolved repository root]' rev-parse --is-inside-work-tree`
+       - `git -C '[resolved repository root]' fetch origin main`
+       - `git -C '[resolved repository root]' switch main`
+       - `git -C '[resolved repository root]' merge --ff-only origin/main`
+    - treat successful completion of all four commands as success evidence for that repository
+    - if one command fails, use the failing command label (`rev-parse`, `fetch`, `switch-main`, or `merge-ff-only`) as the gate-failure reason
    - if every repository refresh succeeds, print:
      - `Main freshness gate passed: [RepoA]=up-to-date, [RepoB]=up-to-date, ...`
    - if any repository refresh fails, print:
