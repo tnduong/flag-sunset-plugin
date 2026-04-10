@@ -1,0 +1,51 @@
+{
+  "folders": [
+    {
+      "path": "C:/src/aya-talent-marketplace"
+    },
+    {
+      "path": "C:/src/Applications/Nova"
+    },
+    {
+      "path": "C:/src/Applications/Aya.Core.Api"
+    },
+    {
+      "path": "C:/src/Applications/QaAutomation"
+    }
+  ],
+  "settings": {
+    "chat.tools.terminal.autoApprove": {
+      "/^\\$p\\s*=\\s*Join-Path\\s+\\$env:USERPROFILE\\s+'.copilot\\/flag-sunset\\/local-roots\\.json';\\s*if\\s*\\(Test-Path\\s+\\$p\\)\\s*\\{\\s*Get-Content\\s+-Raw\\s+\\$p\\s*\\}\\s*else\\s*\\{\\s*'FILE_NOT_FOUND'\\s*\\}$/": true,
+      "/^\\$apps='[^']+';\\s*\\$atm='[^']+';\\s*\"APPS_EXISTS=\\$\\(\\[bool\\]\\(Test-Path\\s+\\$apps\\)\\)\";\\s*\"ATM_EXISTS=\\$\\(\\[bool\\]\\(Test-Path\\s+\\$atm\\)\\)\"$/": true,
+      "/^\\$apps='[^']+';\\s*\\$atm='[^']+';\\s*if\\s*\\(-not\\s*\\(Test-Path\\s+\\$apps\\)\\)\\s*\\{\\s*'MISSING: AyaHealthcare\\/Applications'\\s*\\}\\s*;\\s*if\\s*\\(-not\\s*\\(Test-Path\\s+\\$atm\\)\\)\\s*\\{\\s*'MISSING: AyaHealthcare\\/aya-talent-marketplace'\\s*\\}\\s*;\\s*if\\s*\\(\\(Test-Path\\s+\\$apps\\)\\s*-and\\s*\\(Test-Path\\s+\\$atm\\)\\)\\s*\\{\\s*'ROOTS_OK'\\s*\\}$/": true,
+      "rg": true,
+      "grep": true,
+      "cat": true,
+      "pwd": true,
+      "test": true,
+      "date": true,
+      "echo": true,
+      "Get-Content": true,
+      "Set-Content": true,
+      "Test-Path": true,
+      "Select-String": true,
+      "Get-Date": true,
+      "Get-Location": true,
+      "Write-Output": true,
+      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+status\\b/": true,
+      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+log\\b/": true,
+      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+show\\b/": true,
+      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+diff\\b/": true,
+      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+fetch\\b/": true,
+      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+rev-parse\\b/": true,
+      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+show-ref\\b/": true,
+      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+merge-base\\b/": true,
+      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+update-ref\\b/": true,
+      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+merge\\s+--ff-only\\b/": true,
+      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+switch\\b/": true,
+      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+checkout\\s+(-b|-B)\\b/": true,
+      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+branch\\s+--show-current\\b/": true,
+      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+branch\\b.*\\s-(d|D|m|M|-delete|-force)\\b/": false
+    }
+  }
+}

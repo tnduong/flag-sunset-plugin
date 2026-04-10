@@ -31,11 +31,27 @@ Example:
 /flag-sunset-plugin:run WFD-5487-display-strike-duplication
 ```
 
+## New User Quickstart
+
+If you are new to the plugin, use this order:
+
+1. Install the plugin from source.
+2. Open your team shared FF-removal workspace.
+3. Use the OS-specific shared workspace file with built-in chat approval settings.
+4. Run `/flag-sunset-plugin:run [FLAG_KEY]`.
+
+Use these cutover assets:
+
+- Shared workspace file (Windows): `onboarding/ff-removal.code-workspace`
+- Shared workspace file (macOS): `onboarding/ff-removal.macos.code-workspace`
+- Full step-by-step runbook: `onboarding/new-user-onboarding.md`
+
 ## Notes
 
 - This plugin is distributed outside application repositories.
 - The slash command stays thin and routes to the custom agent; critical safety gates live in the agent plus skill workflow assets.
 - For internal rollout, prefer an organization-owned private repository with team-based access instead of a personal repository.
+- For team onboarding with fewer prompts, use the workspace-scoped medium autoapproval profile in `INTERNAL_ROLLOUT.md` and include `rg` and `grep` in terminal autoapproval.
 - Machine-specific checkout roots are not stored in the plugin.
 - For new users, the workflow should store confirmed checkout roots in `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder and keep that file ignored by Git.
 - The home-directory config at `~/.copilot/flag-sunset/local-roots.json` remains a fallback for existing setups.

@@ -1,22 +1,19 @@
 # Preflight and Step 1 Procedure
-
 This reference is the authoritative detailed procedure for Preflight and Step 1.
-
 ## Preflight
-
 Before Step 0:
-1. Read [applications.md](../applications.md).
-   - Immediately after item 1, print exactly:
-     - `## >>>>>> USER ACTION MAY BE REQUIRED NEXT`
-     - `VS Code may show a permission prompt during Preflight or Step 1. If it appears, approve it. If no prompt appears, Copilot will continue and you can work on something else.`
-2. Resolve machine-specific repository roots using one of these sources, in order:
+1. Print exactly:
+   - `## >>>>>> USER ACTION MAY BE REQUIRED NEXT`
+   - `VS Code may prompt for permission during Preflight or Step 1. Approve if shown; otherwise Copilot continues and you can step away.`
+2. Read [applications.md](../applications.md).
+3. Resolve machine-specific repository roots using one of these sources, in order:
    - workspace-local config file: `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder
      - if this file does not exist (read_file error or file not found), treat it as absent and continue to the next source; this is not a gate failure
    - macOS/Linux user config file: `~/.copilot/flag-sunset/local-roots.json`
    - Windows user config file: `%USERPROFILE%/.copilot/flag-sunset/local-roots.json`
    - a one-time prompt for the shared parent folder that contains both `Applications` and `aya-talent-marketplace`, followed by persisting the confirmed derived roots to the workspace-local config file
    - when the selected config file is outside the active workspace, read it with an OS-appropriate terminal command instead of a VS Code filesystem tool
-3. If no usable config file is found:
+4. If no usable config file is found:
     - ask one plain chat prompt for the shared parent folder
    - when the active OS is macOS, use this exact prompt text:
      - `Provide the macOS parent folder that contains both Applications and aya-talent-marketplace.`
@@ -30,22 +27,22 @@ Before Step 0:
    - create or update the workspace-local `.copilot/flag-sunset/local-roots.json` file with the confirmed derived paths before continuing
    - if the workspace-local file cannot be written, fall back to the user-owned home-directory config file outside the plugin, using an OS-appropriate terminal command when the target is outside the active workspace
    - if the config file cannot be written, stop and ask the user
-4. If repository roots are available and valid, print:
+5. If repository roots are available and valid, print:
    - `Local roots gate passed: [RepoA]=configured, [RepoB]=configured, ...`
    - validate root existence with an OS-appropriate terminal check before printing the pass line
-5. Derive the effective local project path for every project row:
+6. Derive the effective local project path for every project row:
    - local repository root + `Path in Repo`
    - if `Path in Repo` is `./`, the effective local project path is the local repository root
-6. Compare those derived project paths against the folders currently added to the active VS Code workspace.
+7. Compare those derived project paths against the folders currently added to the active VS Code workspace.
    - do not use parent repository roots for workspace-gate filesystem reads; compare the effective project paths directly to the open workspace folders
-7. If every project path is present in the workspace, print:
+8. If every project path is present in the workspace, print:
    - `Workspace gate passed: [ProjectA]=present, [ProjectB]=present, ...`
-8. If any project path is missing from the workspace, print:
+9. If any project path is missing from the workspace, print:
    - `Workspace gate failed: missing [ProjectA]=[PathA], [ProjectB]=[PathB], ...`
    - `Open or create a VS Code workspace that includes every project listed in applications.md, then rerun flag-sunset.`
    - stop immediately with no Step 0 prompt and no edits
    - do not invoke a subagent or use any external mechanism to access the missing project; a workspace-gate failure is terminal for this run
-9. If the workspace gate passed, refresh local `main` from `origin/main` for each unique repository listed in [applications.md](../applications.md) before starting Step 0:
+10. If the workspace gate passed, refresh local `main` from `origin/main` for each unique repository listed in [applications.md](../applications.md) before starting Step 0:
    - use OS-appropriate terminal git commands on the resolved repository roots
    - use a fast-forward-only update policy
    - run refresh checks serially, one repository at a time
@@ -55,7 +52,7 @@ Before Step 0:
      - `Main freshness gate failed: [RepoX]=[reason]`
      - `Resolve the local main update issue, then rerun flag-sunset.`
      - stop immediately with no Step 0 prompt and no edits
-10. If the main freshness gate passed, validate working-tree cleanliness for each unique repository listed in [applications.md](../applications.md) before starting Step 0:
+11. If the main freshness gate passed, validate working-tree cleanliness for each unique repository listed in [applications.md](../applications.md) before starting Step 0:
     - use OS-appropriate terminal git status commands on the resolved repository roots
     - evaluate staged, unstaged, and untracked changes
     - run cleanliness checks serially, one repository at a time
@@ -64,9 +61,7 @@ Before Step 0:
        - `Dirty working tree gate failed: [RepoX]=dirty`
        - `Commit, stash, or discard local changes, then rerun flag-sunset.`
        - stop immediately with no Step 0 prompt and no edits
-
 ## Step 1: Permissions and Start Clock
-
 State model:
 - Capture Step 1 start time immediately on entry to Step 1 and retain it for the current run, including any `STEP_1_INCOMPLETE` resume.
 - Maintain one resumable status line during Step 1:
@@ -79,7 +74,6 @@ State model:
 - On interruption, print `## >>>>>> WAITING ON YOU`, report the exact blocked item, repeat the latest status line verbatim, and stop.
 - On resume after approval, rerun only the exact blocked tool call represented by `next_pending`; do not skip ahead or assume the earlier call completed.
 - If the same `next_pending` item fails again after that automatic retry, stop and ask the user whether to retry again or abort instead of looping.
-
 Execution:
 1. Capture start time immediately on Step 1 entry.
 2. Read [applications.md](../applications.md).
@@ -87,7 +81,7 @@ Execution:
    - first check the workspace-local `.copilot/flag-sunset/local-roots.json` file under the `Nova` workspace folder
    - if this file does not exist (read_file error or file not found), treat it as absent and fall through to the next source; this is not a gate failure
    - if this requires reading the user-owned home-directory local-roots config outside the workspace, use an OS-appropriate terminal command instead of a VS Code filesystem tool
-   - if the terminal read fails because the config file does not exist, continue with the Preflight item 3 first-run prompt-and-confirm path
+   - if the terminal read fails because the config file does not exist, continue with the Preflight item 4 first-run prompt-and-confirm path
    - if the terminal read fails for any other reason, stop and ask the user
 4. Validate each unique local repository root with an OS-appropriate terminal existence check before any permission prompts.
 5. Reuse the required `## >>>>>> USER ACTION MAY BE REQUIRED NEXT` banner that was printed during Preflight; do not print it again in Step 1.
@@ -133,8 +127,6 @@ Execution:
    - if the user approves a prompt after an interrupted call, retry that exact `read_file` call once before doing anything else
    - if the same file read is interrupted again after that retry, stop and ask the user whether to retry again or abort
 12. Capture the current workspace repo branch.
-
 To reduce unnecessary long-running continuation prompts from the chat host, do not emit additional Step 1 status lines for every workspace-confirmed app search or every individual file read while work is progressing normally.
-
 Required line before Step 2:
 `Step 1 complete: permission envelope established; proceeding to Step 2 without further approval prompts.`
