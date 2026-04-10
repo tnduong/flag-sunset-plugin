@@ -81,15 +81,15 @@ const contracts = [
             },
             {
                 label: 'Asks user to confirm derived paths before continuing',
-                text: 'ask the user to confirm the derived paths in chat before continuing',
+                text: 'show Prompt 2 from [user-prompts.md](./user-prompts.md#prompt-2-derived-paths-confirmation-preflight) to confirm derived paths before continuing',
             },
             {
                 label: 'Creates workspace-local local-roots.json after confirmation',
                 text: 'create or update the workspace-local',
             },
             {
-                label: 'First-run parent-folder question is a plain chat prompt',
-                text: 'ask one plain chat prompt for the shared parent folder',
+                label: 'First-run parent-folder question uses canonical Prompt 1',
+                text: 'show Prompt 1 from [user-prompts.md](./user-prompts.md#prompt-1-parent-folder-input-preflight)',
             },
         ],
     },
@@ -112,8 +112,8 @@ const contracts = [
                 text: 'Prefer a workspace-local `local-roots.json` file on workspace-confirmed paths before falling back to the user-owned home-directory file',
             },
             {
-                label: 'Workflow questions use plain chat prompts',
-                text: 'Use plain chat prompts for workflow questions that require a user reply',
+                label: 'Workflow questions use VS Code prompt UI with fallback behavior',
+                text: 'Use VS Code prompt UI for workflow questions that require a user reply',
             },
         ],
     },
@@ -293,7 +293,7 @@ const contracts = [
         checks: [
             {
                 label: 'Grep-discovered lines are the authoritative completeness list',
-                text: 'The grep-discovered line numbers from Step 10 are the authoritative completeness list.',
+                text: 'The grep-discovered line numbers from item 12 are the authoritative completeness list.',
             },
             {
                 label: 'Ranges must be expanded to include any uncovered match lines',
@@ -307,7 +307,7 @@ const contracts = [
         checks: [
             {
                 label: 'Step 10 gate requires app-scoped identifier file-list search from exact resolved scope',
-                text: 'Step 10 completion gate: for each `MATCH` app, run one extension-filtered identifier file-list search from exactly that app\'s resolved scope (`Search Scope` when present, otherwise the effective app path).',
+                text: 'Discovery completion gate: for each `MATCH` app, run one extension-filtered identifier file-list search from exactly that app\'s resolved scope (`Search Scope` when present, otherwise the effective app path).',
             },
             {
                 label: 'Invalid search root must stop with explicit STEP_1_INCOMPLETE message',
@@ -319,7 +319,7 @@ const contracts = [
             },
             {
                 label: 'Step 10 gate must pass for all MATCH apps before continuing to item 11',
-                text: 'Proceed to item 11 only when all `MATCH` apps pass both checks.',
+                text: 'Proceed to item 13 only when all `MATCH` apps pass both checks.',
             },
         ],
     },
@@ -383,11 +383,11 @@ const contracts = [
     },
     {
         file: 'skill',
-        scenario: 'Scenario 18: Step 0 plain reply handling — continue only on 1 or 2',
+        scenario: 'Scenario 18: Step 0 reply handling — continue only on 1 or 2',
         checks: [
             {
-                label: 'Step 0 is presented as a plain chat prompt',
-                text: 'Print one plain chat prompt with options:',
+                label: 'Step 0 uses canonical Prompt 3',
+                text: 'Show Prompt 3 from [user-prompts.md](./references/user-prompts.md#prompt-3-launchdarkly-final-state-step-0).',
             },
             {
                 label: 'Step 0 continues only on replies 1 or 2',
@@ -401,11 +401,11 @@ const contracts = [
     },
     {
         file: 'agent',
-        scenario: 'Scenario 18: Step 0 plain reply handling — continue only on 1 or 2',
+        scenario: 'Scenario 18: Step 0 reply handling — continue only on 1 or 2',
         checks: [
             {
-                label: 'Agent uses the next chat reply for Step 0',
-                text: 'Print the Step 0 question in chat with the three numbered choices and use only the next user reply in this run.',
+                label: 'Agent uses canonical Prompt 3 and the next user reply for Step 0',
+                text: 'Show Prompt 3 from `skills/flag-sunset-assets/references/user-prompts.md` and use only the next user reply in this run.',
             },
             {
                 label: 'Agent blocks Step 1 without a valid Step 0 reply',
@@ -461,33 +461,33 @@ const contracts = [
     },
     {
         file: 'preflight',
-        scenario: 'Scenario 22: dirty working tree gate blocks Step 0 when repositories are not clean',
+        scenario: 'Scenario 22: dirty working tree gate blocks Step 1 discovery when repositories are not clean',
         checks: [
             {
-                label: 'Dirty working tree gate runs after main freshness and before Step 0',
-                text: 'If the main freshness gate passed, validate working-tree cleanliness for each unique repository listed in [applications.md](../applications.md) before starting Step 0',
+                label: 'Dirty working tree gate runs after main freshness and before Step 1 discovery',
+                text: 'If the main freshness gate passed, validate working-tree cleanliness for each unique repository listed in [applications.md](../applications.md) before discovery',
             },
             {
                 label: 'Clean repositories continue without an extra clean-status line',
-                text: 'if every repository is clean, continue to Step 0 with no additional clean-status line',
+                text: 'if every repository is clean, continue to discovery with no additional clean-status line',
             },
             {
                 label: 'Dirty working tree gate has explicit fail line and clean-up instruction',
                 text: '`Dirty working tree gate failed: [RepoX]=dirty`',
             },
             {
-                label: 'Dirty working tree gate fail path stops before Step 0',
-                text: 'stop immediately with no Step 0 prompt and no edits',
+                label: 'Dirty working tree gate fail path stops before Step 1 discovery edits',
+                text: 'stop immediately with no edits',
             },
         ],
     },
     {
         file: 'skill',
-        scenario: 'Scenario 22: dirty working tree validation is required before Step 0',
+        scenario: 'Scenario 22: dirty working tree validation is required at Step 1 entry before discovery',
         checks: [
             {
-                label: 'Top-level runtime policy requires preflight git status checks before Step 0',
-                text: 'Preflight working-tree validation must run on each resolved repository root with OS-appropriate terminal git status checks before Step 0 may begin.',
+                label: 'Top-level runtime policy requires Step 1 git status checks before discovery',
+                text: 'Step 1 entry must run main freshness and working-tree validation on each resolved repository root with OS-appropriate terminal git commands before discovery may begin.',
             },
         ],
     },

@@ -53,7 +53,7 @@ Workflow assets:
 1. **Workspace gate (zero tool calls required).** Read `skills/flag-sunset-assets/applications.md` only. Cross-reference every required project row there against the open folders already present in the injected `<workspace_info>` using effective app paths (`Path in Repo` semantics). If any required project path is absent → print the workspace-gate-failed message and stop. Do not load `SKILL.md`. Do not run any terminal commands. Do not proceed to step 2.
 2. Load and follow the plugin-owned `flag-sunset` workflow assets (`SKILL.md`).
 3. Resolve local roots and validate workspace membership.
-4. Print the Step 0 question in chat with the three numbered choices and use only the next user reply in this run.
+4. Show Prompt 3 from `skills/flag-sunset-assets/references/user-prompts.md` and use only the next user reply in this run.
 5. Continue only on reply `1` or `2`. If the reply is `3`, stop with no edits. If the Step 0 reply is anything else, or no reply arrives, stop and ask whether to retry or abort.
 6. Establish the Step 1 permission envelope and exact edit scope only after that successful Step 0 result.
 7. Create the required `[FLAG_KEY]-ff-removal` branch in each affected repository before editing.

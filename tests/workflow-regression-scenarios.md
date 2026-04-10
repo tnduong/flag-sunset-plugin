@@ -387,7 +387,7 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 
 ---
 
-## Scenario 21: dirty working tree gate blocks Step 0 until repositories are clean
+## Scenario 21: dirty working tree gate blocks Step 1 discovery until repositories are clean
 
 **Setup**
 
@@ -397,15 +397,15 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 
 **Steps**
 
-4. Run `/flag-sunset-plugin:run [FLAG_KEY]` through preflight.
+4. Run `/flag-sunset-plugin:run [FLAG_KEY]` through Step 1 entry.
 5. Observe the dirty working tree gate output.
 
 **Pass criteria**
 
 - [ ] The workflow prints `Dirty working tree gate failed: [RepoX]=dirty` when any repository is not clean.
 - [ ] The workflow prints `Commit, stash, or discard local changes, then rerun flag-sunset.`.
-- [ ] The workflow stops before Step 0 and makes no edits.
-- [ ] When all required repositories are clean, the workflow continues to Step 0 without printing an additional clean-status line.
+- [ ] The workflow stops before Step 1 discovery and makes no edits.
+- [ ] When all required repositories are clean, the workflow continues through Step 1 discovery without printing an additional clean-status line.
 
 ---
 

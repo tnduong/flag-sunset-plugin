@@ -20,6 +20,7 @@ This workflow is the required entry point for any feature-flag removal request w
 Operator onboarding, prerequisites, prompts, and workflow notes are documented in [README.md](./README.md).
 The operator experience goal is documented in [operator-goal.md](./references/operator-goal.md).
 Detailed Preflight and Step 1 procedures are documented in [preflight-step1.md](./references/preflight-step1.md).
+Canonical user-facing prompt text is documented in [user-prompts.md](./references/user-prompts.md).
 ## Runtime Policy
 Print before Step 0:
 `Execution mode locked: flag-sunset (branch creation required, no automated build/test).`
@@ -31,14 +32,13 @@ Rules:
 - Outside the mandatory workflow lines in this skill, keep progress updates to one short sentence per phase transition.
 - Keep the operator goal in [operator-goal.md](./references/operator-goal.md) in force for all workflow changes.
 - A workflow change is not complete if it reintroduces expected permission prompts after Step 1, unless the exception is explicitly documented and justified in the workflow assets.
-- If Step 1 becomes blocked on a permission or read, print exactly:
-   - `## >>>>>> WAITING ON YOU`
-- Use plain chat prompts for workflow questions that require a user reply. `read_file` and `get_errors` remain the default VS Code tools on workspace-confirmed paths. Prefer `rg` when available; otherwise use OS-appropriate terminal search commands with app-scoped, extension-filtered paths for definition-file and usage searches.
+- Use VS Code prompt UI for workflow questions that require a user reply, using the canonical prompt sections in [user-prompts.md](./references/user-prompts.md). If prompt UI is unavailable, fall back to plain chat with equivalent choices and unchanged gate behavior.
+- `read_file` and `get_errors` remain the default VS Code tools on workspace-confirmed paths.
 - Prefer a workspace-local `local-roots.json` file on workspace-confirmed paths before falling back to the user-owned home-directory file.
 - Use OS-appropriate terminal commands for reading or writing the user-owned home-directory `local-roots.json` file and for root validation whenever the target is outside the active workspace.
 - When a terminal command is required, use an OS-appropriate form for the active shell. On Windows PowerShell, prefer `Test-Path` and `Get-Date`; on macOS/Linux, prefer `test -d` and `date`.
 - Preflight local-root validation must use an OS-appropriate terminal existence check on the resolved repository roots; do not use `list_dir`, `read_file`, or other VS Code filesystem tools on parent repository roots for existence checks.
-- Preflight working-tree validation must run on each resolved repository root with OS-appropriate terminal git status checks before Step 0 may begin.
+- Step 1 entry must run main freshness and working-tree validation on each resolved repository root with OS-appropriate terminal git commands before discovery may begin.
 - The default workflow must not use subagents at any point in the run. All permission, discovery, edit, and validation actions must remain in the main agent context. Do not invoke a subagent to access a missing workspace project or to bypass a workspace-gate failure.
 - All file edits must remain in the main agent context.
 - Machine-specific checkout roots must not be stored in the plugin.
@@ -65,10 +65,9 @@ Before Step 0:
 3. Stop immediately with no Step 0 prompt and no edits on any Preflight gate failure.
 ## Step 0: LaunchDarkly Final State
 - Start Step 0 only after all required preflight pass lines were printed in the current run.
-- Print one plain chat prompt with options:
-  1. `FF is TRUE on PROD + YES to continue with FF removal`
-  2. `FF is FALSE on PROD + YES to continue with FF removal (entire feature removal)`
-  3. `NO - Quit`
+- Step 0 is shown immediately after the preflight workspace gate passes (or immediately after Prompt 2 on first-run setup).
+- Step 0 must be captured before any Step 1 main-refresh checks run.
+- Show Prompt 3 from [user-prompts.md](./references/user-prompts.md#prompt-3-launchdarkly-final-state-step-0).
 - Continue only if the next user reply in this run is exactly `1` or `2`.
 - If the next user reply is `3`, stop with no edits.
 - If the next user reply is anything else, or no reply arrives, stop and ask whether to retry or abort.
@@ -134,4 +133,3 @@ Print a compact summary containing:
 - static validation result
 - elapsed time
 - reminder that manual build and unit-test verification is still required
-- one OS-appropriate revert instruction

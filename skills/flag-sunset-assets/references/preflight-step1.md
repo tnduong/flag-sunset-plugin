@@ -14,15 +14,11 @@ Before Step 0:
    - a one-time prompt for the shared parent folder that contains both `Applications` and `aya-talent-marketplace`, followed by persisting the confirmed derived roots to the workspace-local config file
    - when the selected config file is outside the active workspace, read it with an OS-appropriate terminal command instead of a VS Code filesystem tool
 4. If no usable config file is found:
-    - ask one plain chat prompt for the shared parent folder
-   - when the active OS is macOS, use this exact prompt text:
-     - `Provide the macOS parent folder that contains both Applications and aya-talent-marketplace.`
-   - when the active OS is Windows, use this exact prompt text:
-     - `Provide the Windows parent folder that contains both Applications and aya-talent-marketplace.`
+      - show Prompt 1 from [user-prompts.md](./user-prompts.md#prompt-1-parent-folder-input-preflight)
    - derive:
      - `AyaHealthcare/Applications` = `[PARENT]/Applications`
      - `AyaHealthcare/aya-talent-marketplace` = `[PARENT]/aya-talent-marketplace`
-    - ask the user to confirm the derived paths in chat before continuing
+      - show Prompt 2 from [user-prompts.md](./user-prompts.md#prompt-2-derived-paths-confirmation-preflight) to confirm derived paths before continuing
    - if the confirmation is not approved, stop immediately with no Step 0 prompt and no edits
    - create or update the workspace-local `.copilot/flag-sunset/local-roots.json` file with the confirmed derived paths before continuing
    - if the workspace-local file cannot be written, fall back to the user-owned home-directory config file outside the plugin, using an OS-appropriate terminal command when the target is outside the active workspace
@@ -42,25 +38,6 @@ Before Step 0:
    - `Open or create a VS Code workspace that includes every project listed in applications.md, then rerun flag-sunset.`
    - stop immediately with no Step 0 prompt and no edits
    - do not invoke a subagent or use any external mechanism to access the missing project; a workspace-gate failure is terminal for this run
-10. If the workspace gate passed, refresh local `main` from `origin/main` for each unique repository listed in [applications.md](../applications.md) before starting Step 0:
-   - use OS-appropriate terminal git commands on the resolved repository roots
-   - use a fast-forward-only update policy
-   - run refresh checks serially, one repository at a time
-   - if every repository refresh succeeds, print:
-     - `Main freshness gate passed: [RepoA]=up-to-date, [RepoB]=up-to-date, ...`
-   - if any repository refresh fails, print:
-     - `Main freshness gate failed: [RepoX]=[reason]`
-     - `Resolve the local main update issue, then rerun flag-sunset.`
-     - stop immediately with no Step 0 prompt and no edits
-11. If the main freshness gate passed, validate working-tree cleanliness for each unique repository listed in [applications.md](../applications.md) before starting Step 0:
-    - use OS-appropriate terminal git status commands on the resolved repository roots
-    - evaluate staged, unstaged, and untracked changes
-    - run cleanliness checks serially, one repository at a time
-   - if every repository is clean, continue to Step 0 with no additional clean-status line
-    - if any repository is dirty, print:
-       - `Dirty working tree gate failed: [RepoX]=dirty`
-       - `Commit, stash, or discard local changes, then rerun flag-sunset.`
-       - stop immediately with no Step 0 prompt and no edits
 ## Step 1: Permissions and Start Clock
 State model:
 - Capture Step 1 start time immediately on entry to Step 1 and retain it for the current run, including any `STEP_1_INCOMPLETE` resume.
@@ -71,7 +48,7 @@ State model:
 - Treat any canceled, dismissed, timed-out, or interrupted validation or read as `STEP_1_INCOMPLETE`.
 - Track one automatic retry allowance for the current `next_pending` item; reset that allowance only after a different blocked item appears or the current item succeeds.
 - Print the status line after root validation, after the candidate app set is confirmed, after the concrete future work set is fully approved, and on interruption.
-- On interruption, print `## >>>>>> WAITING ON YOU`, report the exact blocked item, repeat the latest status line verbatim, and stop.
+- On interruption, report the exact blocked item, repeat the latest status line verbatim, and stop.
 - On resume after approval, rerun only the exact blocked tool call represented by `next_pending`; do not skip ahead or assume the earlier call completed.
 - If the same `next_pending` item fails again after that automatic retry, stop and ask the user whether to retry again or abort instead of looping.
 Execution:
@@ -88,7 +65,26 @@ Execution:
 6. Derive each app's effective local app path from the registry.
 7. Confirm every effective app path is already present in the active VS Code workspace before any VS Code filesystem or search tool runs.
    - if any required effective app path is missing, stop with workspace-gate failure instead of attempting external reads
-8. No VS Code search pre-seeding is required; all definition-file and usage searches use terminal search commands on workspace-confirmed paths. Search rules:
+8. Refresh local `main` from `origin/main` for each unique repository listed in [applications.md](../applications.md) before discovery:
+   - use OS-appropriate terminal git commands on the resolved repository roots
+   - use a fast-forward-only update policy
+   - run refresh checks serially, one repository at a time
+   - if every repository refresh succeeds, print:
+     - `Main freshness gate passed: [RepoA]=up-to-date, [RepoB]=up-to-date, ...`
+   - if any repository refresh fails, print:
+     - `Main freshness gate failed: [RepoX]=[reason]`
+     - `Resolve the local main update issue, then rerun flag-sunset.`
+     - stop immediately with no edits
+9. If the main freshness gate passed, validate working-tree cleanliness for each unique repository listed in [applications.md](../applications.md) before discovery:
+   - use OS-appropriate terminal git status commands on the resolved repository roots
+   - evaluate staged, unstaged, and untracked changes
+   - run cleanliness checks serially, one repository at a time
+   - if every repository is clean, continue to discovery with no additional clean-status line
+   - if any repository is dirty, print:
+     - `Dirty working tree gate failed: [RepoX]=dirty`
+     - `Commit, stash, or discard local changes, then rerun flag-sunset.`
+     - stop immediately with no edits
+10. No VS Code search pre-seeding is required; all definition-file and usage searches use terminal search commands on workspace-confirmed paths. Search rules:
    - prefer `rg` when it is available in the current shell
    - if `rg` is unavailable, fall back to OS-appropriate native commands
    - keep every search extension-filtered by app language and search purpose; do not search all file types under a repo root
@@ -98,12 +94,12 @@ Execution:
    - do not use `list_dir` as part of the default Step 1 permission envelope
    - do not run `get_errors` at app-root scope during Step 1
    - do not batch permission-bearing `read_file` calls
-9. Using only the main agent, confirm the raw flag key in each app's definition target with a terminal search command and determine the candidate app set.
+11. Using only the main agent, confirm the raw flag key in each app's definition target with a terminal search command and determine the candidate app set.
    - resolve each definition target as: `[effective app path] + [Flag Definition File]`; do not resolve definition targets from repository root alone
    - classify an app as `PATH_ERROR` only after validating that exact derived definition target path is missing or unreadable
    - prefer `rg -n --fixed-strings` when available
    - when falling back, keep the command scoped to the definition file itself or the documented fallback definition search path
-10. Using only the main agent, run exact local usage discovery for the candidate apps with extension-filtered terminal search commands and build the concrete future work set:
+12. Using only the main agent, run exact local usage discovery for the candidate apps with extension-filtered terminal search commands and build the concrete future work set:
     - definition files
     - usage files that may be edited
     - spec, test, or mock files only if they are proven relevant
@@ -113,20 +109,20 @@ Execution:
    - apply the downstream-symbol second-hop rule defined in [search-strategy.md](./search-strategy.md) when building the concrete future work set
    - if a candidate Angular component, service, or similar source file is expected to lose a feature-manager or other cleanup-only library import/provider during flag removal, include the co-located `*.spec.ts` file in the concrete future work set for mirrored cleanup review
    - files that may later be checked with `get_errors` in Step 5 if file-scoped diagnostics are needed
-   - Step 10 completion gate: for each `MATCH` app, run one extension-filtered identifier file-list search from exactly that app's resolved scope (`Search Scope` when present, otherwise the effective app path). If the search runs from any other root, print `STEP_1_INCOMPLETE: invalid search scope for [app]=[actual root]` and stop. If any matched file is not in the concrete future work set, print `STEP_1_INCOMPLETE: untracked matches found for [app]=[untracked files]` and stop. Proceed to item 11 only when all `MATCH` apps pass both checks.
-11. Read each file in the concrete future work set with `read_file` to trigger any remaining file-scoped approvals, using this strategy:
+   - Discovery completion gate: for each `MATCH` app, run one extension-filtered identifier file-list search from exactly that app's resolved scope (`Search Scope` when present, otherwise the effective app path). If the search runs from any other root, print `STEP_1_INCOMPLETE: invalid search scope for [app]=[actual root]` and stop. If any matched file is not in the concrete future work set, print `STEP_1_INCOMPLETE: untracked matches found for [app]=[untracked files]` and stop. Proceed to item 13 only when all `MATCH` apps pass both checks.
+13. Read each file in the concrete future work set with `read_file` to trigger any remaining file-scoped approvals, using this strategy:
    - **Definition files** (the flag enum/const file for each app): read in full - they are small and are the authoritative identifier source.
-   - **All other files**: read only the line ranges anchored to the grep-discovered match lines from Step 10:
+   - **All other files**: read only the line ranges anchored to the grep-discovered match lines from item 12:
      - default context window: +/-30 lines around each match line
      - expand the range if the logical block at the match site (function body, decorator, class, import group) is not fully contained within +/-30 lines
      - merge overlapping or adjacent ranges for the same file into a single `read_file` call
      - the first range read per file triggers the file-scoped permission approval
-   - The grep-discovered line numbers from Step 10 are the authoritative completeness list. Every matched line number for a file must fall within a read range. If any grep-discovered line falls outside all ranges after merging, expand the nearest range to include it.
+   - The grep-discovered line numbers from item 12 are the authoritative completeness list. Every matched line number for a file must fall within a read range. If any grep-discovered line falls outside all ranges after merging, expand the nearest range to include it.
    - Read all ranges for a file before moving to the next file.
    - after each permission-bearing tool call, either continue immediately on success or stop and print the blocked item and latest Step 1 status on interruption
    - if the user approves a prompt after an interrupted call, retry that exact `read_file` call once before doing anything else
    - if the same file read is interrupted again after that retry, stop and ask the user whether to retry again or abort
-12. Capture the current workspace repo branch.
+14. Capture the current workspace repo branch.
 To reduce unnecessary long-running continuation prompts from the chat host, do not emit additional Step 1 status lines for every workspace-confirmed app search or every individual file read while work is progressing normally.
 Required line before Step 2:
 `Step 1 complete: permission envelope established; proceeding to Step 2 without further approval prompts.`
