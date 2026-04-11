@@ -113,15 +113,24 @@ Rules:
 - do not add new comments in edited source or test files as part of flag removal
 - do not modify unrelated tests or neighboring code paths
 - keep changes minimal and deterministic
+- **intermediate-variable propagation:** when removing a flag check that was stored in a local variable (e.g. `var isFlagEnabled = _ldClient.IsEnabled(…)`), search the entire containing method/function for every reference to that variable — not just the declaration site. Replace all downstream ternary expressions, `if` guards, and argument usages that reference the variable. A variable removal is incomplete if any reference to it survives.
+- **orphaned imports / usings (all languages):** after removing flag-related code, check whether any `using` directive (C#), `import` statement (TypeScript/JS), or similar inclusion became unused as a result. If the removed code was the **last** usage of that import in the file, remove the import. This applies to source files, test files, and controller files equally.
 - when a TypeScript source file loses a cleanup-only library import, injected dependency, or provider because of the flag removal, inspect the paired unit test file and remove only the matching stale import/provider/mock/setup there; do not remove broader test scaffolding that is still present in the source file
+- **paired spec cleanup (TypeScript):** when a component or service TypeScript file is edited to remove a flag-derived property or signal (e.g. `isEnabledMyFlag`), the co-located `*.spec.ts` MUST also be edited to remove all assignments, overrides, and test blocks that reference that removed property. Examples: `component.isEnabledMyFlag = signal(true)`, test blocks titled "when feature flag is off". This is not optional — orphaned references in the spec will cause compile errors.
 - before removing any remaining import from the paired unit test file, verify that the imported symbol has no other references anywhere else in that spec; if the symbol is still used for unrelated setup or assertions, keep the import
-- **spec/test files:** when a test suite has both an "FF enabled" (winning-path) test and an "FF disabled" (losing-path) test, remove only the losing-path test; rename and keep the winning-path test without the "when FF is enabled" qualifier (e.g. rename `should display percentage when FF is enabled` → `should display percentage`). The winning-path test continues to verify hardcoded behavior and must not be deleted.
+- **spec/test files — losing-path deletion:** when a test suite has both an "FF enabled" (winning-path) test and an "FF disabled" (losing-path) test, you MUST delete the entire losing-path test method/block. Do not just remove mock setup lines while leaving the test body intact.
+- **spec/test files — winning-path rename:** after deleting the losing-path test, you MUST rename the winning-path test to remove the "when FF is enabled" / "WhenFeatureFlagEnabled" qualifier. Example: rename `CandidateAssignToRecruiter_Should_AssignWfdRecruiter_WhenFeatureFlagEnabled` → `CandidateAssignToRecruiter_Should_AssignWfdRecruiter`. This rename rule applies to all languages (C# `[Fact]`/`[Test]` methods, TypeScript `it()`/`describe()` blocks, etc.). Do NOT skip this rename.
 ## Step 5: Static Validation Only
 Run static validation only.
 Minimum checks:
 - zero remaining references to the removed flag in the edited scope
+- zero remaining references to any intermediate variable that was removed as part of the flag cleanup (e.g. if `isWfdRecruiterFlagEnabled` was removed, grep for it across the entire file to confirm zero surviving references)
 - zero new diagnostics caused by the edits, using `get_errors` scoped to edited files only when diagnostics are needed
-- clean imports and clean structure after dead-code removal
+- clean imports and clean structure after dead-code removal — verify no orphaned `using` (C#) or `import` (TS/JS) directives remain that lost their last consumer
+- **HTML template check:** for every `*.component.ts` that was edited, verify the paired `*.component.html` has zero remaining references to any removed downstream symbol; if references remain, edit the HTML file to remove them
+- **spec file check:** for every `*.component.ts` or `*.service.ts` that was edited, verify the paired `*.spec.ts` has zero remaining references to any removed property/signal; if references remain, edit the spec file to remove orphaned assignments and test blocks
+- **test rename check:** grep all edited test files for method/block names containing `WhenFeatureFlagEnabled`, `WhenFlagEnabled`, `When_FF_Enabled`, or similar flag-conditional qualifiers related to the removed flag; any remaining match must be renamed to remove the qualifier
+- **losing-path test deletion check:** grep all edited test files for method/block names containing `WhenFeatureFlagDisabled`, `WhenFlagDisabled`, `When_FF_Disabled`, or similar; any remaining match must be deleted entirely
 If validation fails, fix the issue and rerun Step 5. Do not run automated build or test commands.
 ## Step 6: Final Output
 Print a compact summary containing:
