@@ -42,13 +42,20 @@ Rules:
 - Use an app-scoped search root from registry `Search Scope`; if `Search Scope` is omitted, use the effective app path. Do not fall back to a whole-repository all-file scan when an app search root is known.
 - Keep searches extension-filtered by app language: Angular apps -> `*.ts`, `*.html`; CoreApi -> `*.cs`; QaAutomation -> `*.feature`.
 - Search symbols from Step 2 in this order: primary first, downstream second (if any).
-- When a downstream symbol is found in a TypeScript source file, run a second-hop search in the paired HTML template (for example `x.component.ts` -> `x.component.html`).
+- When a downstream symbol is found in a TypeScript source file, also search that same TypeScript source file for the downstream symbol and add any newly discovered line numbers to the read-range list.
+- **MANDATORY second-hop (HTML templates):** When a downstream symbol is found in a component TypeScript file (e.g. `x.component.ts`), you MUST run a second-hop search in the paired HTML template (`x.component.html`) for that downstream symbol. Add the HTML file to the future work set if it contains any matches. This step is NOT optional — skipping it causes the HTML template to be missed during edits.
+- **MANDATORY spec/test pairing:** For every TypeScript source file (`*.component.ts`, `*.service.ts`, etc.) that enters the future work set, also add its co-located spec file (`*.spec.ts`) if one exists. The spec file must be searched for both the primary identifier and all downstream symbols. Spec files that reference any removed symbol must be in the future work set for cleanup.
 - Search test and mock files with the exact LaunchDarkly key string, not fuzzy variants.
 - Build the concrete future work set from the results:
 	- definition files
 	- usage files that may be edited
 	- test or mock files only if they are proven relevant
 	- files that will later be checked with `get_errors` if file-scoped diagnostics are needed
+
+**Post-discovery checklist (mandatory before proceeding):**
+1. For every `*.component.ts` in the future work set, verify the paired `*.component.html` is also present if it references any downstream symbol.
+2. For every `*.component.ts` or `*.service.ts` in the future work set, verify the paired `*.spec.ts` is also present if it references any removed symbol.
+3. If either check fails, add the missing file and re-run its search before proceeding.
 
 ## Step 4 - Permission Envelope Use
 Use the same main-agent discovery pass to seed approvals before Step 1 completes.
