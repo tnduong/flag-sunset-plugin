@@ -362,12 +362,12 @@ const contracts = [
         scenario: 'Scenario 16: winning-path tests are preserved and normalized',
         checks: [
             {
-                label: 'Only the losing-path test is removed and the winning path is renamed',
-                text: 'remove only the losing-path test; rename and keep the winning-path test without the "when FF is enabled" qualifier',
+                label: 'Losing-path test block must be deleted',
+                text: 'you MUST delete the entire losing-path test method/block',
             },
             {
-                label: 'Winning-path tests must be preserved',
-                text: 'The winning-path test continues to verify hardcoded behavior and must not be deleted.',
+                label: 'Winning-path test must be renamed to non-FF qualifier form',
+                text: 'after deleting the losing-path test, you MUST rename the winning-path test to remove the "when FF is enabled" / "WhenFeatureFlagEnabled" qualifier',
             },
         ],
     },
