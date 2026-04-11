@@ -1,10 +1,7 @@
 # Search Strategy
 ## Overview
 Preferred flow: local definition-file confirmation -> exact local usage search -> concrete future work set. Read the application registry from [../applications.md](../applications.md) before starting.
-This workflow must resolve machine-specific local repository roots before starting, using either:
-- the workspace-local config file
-- the user's local config file as fallback
-- the session-provided derived roots
+This workflow must resolve machine-specific local repository roots before starting by following [preflight-step1.md](./preflight-step1.md#preflight).
 Why this helps:
 - local confirmation preserves branch-local correctness before edits
 - exact local search still provides the narrow file and line evidence needed for safe edits
@@ -57,8 +54,7 @@ Rules:
 Use the same main-agent discovery pass to seed approvals before Step 1 completes.
 Rules:
 - Before any VS Code filesystem or search tool runs, validate local roots with OS-appropriate terminal existence checks and confirm every effective app path is already present in the active workspace.
-- Prefer the workspace-local `.copilot/flag-sunset/local-roots.json` file under the `Nova` workspace folder.
-- Read or write the user-owned home-directory `local-roots.json` file with an OS-appropriate terminal command only when that fallback file is needed outside the active workspace.
+- Local-roots resolution must follow [preflight-step1.md](./preflight-step1.md#preflight) and use only the workspace-local config path defined there.
 - If any required effective app path is missing from the active workspace, stop with workspace-gate failure instead of triggering external-directory approval prompts.
 - Do not use `list_dir` as part of the default permission envelope.
 - Use terminal search commands only on workspace-confirmed app paths, following the scoped and extension-filtered rules above.

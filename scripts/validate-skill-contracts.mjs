@@ -108,8 +108,8 @@ const contracts = [
         scenario: 'Scenario 2: existing user with valid local-roots — setup is skipped',
         checks: [
             {
-                label: 'Workspace-local config is preferred before home-directory fallback',
-                text: 'Prefer a workspace-local `local-roots.json` file on workspace-confirmed paths before falling back to the user-owned home-directory file',
+                label: 'Local-roots resolution is centralized in preflight procedure',
+                text: 'Local-roots resolution is defined only in [preflight-step1.md](./references/preflight-step1.md#preflight). Do not use alternate config locations outside that procedure.',
             },
             {
                 label: 'Workflow questions use VS Code prompt UI with fallback behavior',
@@ -122,8 +122,8 @@ const contracts = [
         scenario: 'Scenario 2: existing user with valid local-roots — setup is skipped',
         checks: [
             {
-                label: 'Home-directory config is read with OS-appropriate terminal command when outside workspace',
-                text: 'when the selected config file is outside the active workspace, read it with an OS-appropriate terminal command instead of a VS Code filesystem tool',
+                label: 'Missing or invalid workspace-local config triggers setup prompts',
+                text: 'if this file is missing, unreadable, invalid JSON, or missing required local root keys, treat it as not usable and continue to item 4',
             },
         ],
     },
@@ -212,8 +212,8 @@ const contracts = [
         scenario: 'Scenario 8: Windows path variant — cross-platform support',
         checks: [
             {
-                label: 'Windows user config path uses %USERPROFILE%',
-                text: '%USERPROFILE%/.copilot/flag-sunset/local-roots.json',
+                label: 'Workspace-local config path is explicit under Nova workspace folder',
+                text: 'path: `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder',
             },
         ],
     },

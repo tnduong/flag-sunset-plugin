@@ -6,14 +6,15 @@ Before Step 0:
    - `## >>>>>> USER ACTION MAY BE REQUIRED NEXT`
    - `VS Code may prompt for permission during Preflight or Step 1. Approve if shown; otherwise Copilot continues and you can step away.`
 2. Read [applications.md](../applications.md).
-3. Resolve machine-specific repository roots using one of these sources, in order:
-   - workspace-local config file: `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder
-     - if this file does not exist (read_file error or file not found), treat it as absent and continue to the next source; this is not a gate failure
-   - macOS/Linux user config file: `~/.copilot/flag-sunset/local-roots.json`
-   - Windows user config file: `%USERPROFILE%/.copilot/flag-sunset/local-roots.json`
-   - a one-time prompt for the shared parent folder that contains both `Applications` and `aya-talent-marketplace`, followed by persisting the confirmed derived roots to the workspace-local config file
-   - when the selected config file is outside the active workspace, read it with an OS-appropriate terminal command instead of a VS Code filesystem tool
-4. If no usable config file is found:
+3. Resolve machine-specific repository roots from the workspace-local config file only:
+    - path: `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder
+    - required local root keys come from [applications.md](../applications.md) and currently are:
+       - `AyaHealthcare/Applications`
+       - `AyaHealthcare/aya-talent-marketplace`
+    - if this file is missing, unreadable, invalid JSON, or missing required local root keys, treat it as not usable and continue to item 4
+    - if this file is usable, skip item 4 with no setup prompts
+4. If no usable workspace-local config file is found:
+   - this setup path is a one-time prompt for the shared parent folder that contains both `Applications` and `aya-talent-marketplace`
       - show Prompt 1 from [user-prompts.md](./user-prompts.md#prompt-1-parent-folder-input-preflight)
    - derive:
      - `AyaHealthcare/Applications` = `[PARENT]/Applications`
@@ -21,7 +22,6 @@ Before Step 0:
       - show Prompt 2 from [user-prompts.md](./user-prompts.md#prompt-2-derived-paths-confirmation-preflight) to confirm derived paths before continuing
    - if the confirmation is not approved, stop immediately with no Step 0 prompt and no edits
    - create or update the workspace-local `.copilot/flag-sunset/local-roots.json` file with the confirmed derived paths before continuing
-   - if the workspace-local file cannot be written, fall back to the user-owned home-directory config file outside the plugin, using an OS-appropriate terminal command when the target is outside the active workspace
    - if the config file cannot be written, stop and ask the user
 5. If repository roots are available and valid, print:
    - `Local roots gate passed: [RepoA]=configured, [RepoB]=configured, ...`
@@ -56,10 +56,8 @@ Execution:
 2. Read [applications.md](../applications.md).
 3. Resolve the local repository roots for the current run.
    - first check the workspace-local `.copilot/flag-sunset/local-roots.json` file under the `Nova` workspace folder
-   - if this file does not exist (read_file error or file not found), treat it as absent and fall through to the next source; this is not a gate failure
-   - if this requires reading the user-owned home-directory local-roots config outside the workspace, use an OS-appropriate terminal command instead of a VS Code filesystem tool
-   - if the terminal read fails because the config file does not exist, continue with the Preflight item 4 first-run prompt-and-confirm path
-   - if the terminal read fails for any other reason, stop and ask the user
+   - if this file is missing, unreadable, invalid JSON, or missing required local root keys, continue with the Preflight item 4 setup path
+   - do not read local-roots config from any other location
 4. Validate each unique local repository root with an OS-appropriate terminal existence check before any permission prompts.
 5. Reuse the required `## >>>>>> USER ACTION MAY BE REQUIRED NEXT` banner that was printed during Preflight; do not print it again in Step 1.
 6. Derive each app's effective local app path from the registry.
@@ -69,6 +67,13 @@ Execution:
    - use OS-appropriate terminal git commands on the resolved repository roots
    - use a fast-forward-only update policy
    - run refresh checks serially, one repository at a time
+   - on Windows PowerShell, run these serial git commands for each repository root, in order:
+      - `git -C '[resolved repository root]' rev-parse --is-inside-work-tree`
+      - `git -C '[resolved repository root]' fetch origin main`
+      - `git -C '[resolved repository root]' switch main`
+      - `git -C '[resolved repository root]' merge --ff-only origin/main`
+   - treat successful completion of all four commands as success evidence for that repository
+   - if one command fails, use the failing command label (`rev-parse`, `fetch`, `switch-main`, or `merge-ff-only`) as the gate-failure reason
    - if every repository refresh succeeds, print:
      - `Main freshness gate passed: [RepoA]=up-to-date, [RepoB]=up-to-date, ...`
    - if any repository refresh fails, print:
