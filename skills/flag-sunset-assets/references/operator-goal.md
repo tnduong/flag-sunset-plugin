@@ -9,7 +9,7 @@ The operator experience for `flag-sunset` should follow this sequence:
 Implications:
 
 - Preflight and Step 1 are the only phases where user interaction should normally be required.
-- Preflight should not rely on VS Code external-directory approval prompts for routine access to `local-roots.json`; prefer the workspace-local config file under the `Nova` workspace folder and use the home-directory file only as fallback.
+- Preflight should not rely on VS Code external-directory approval prompts for routine access to `local-roots.json`; use the workspace-local config file under the `Nova` workspace folder and the setup prompts path when the file is missing or invalid.
 - Step 2 and beyond should avoid new permission prompts by relying on the Step 1 workspace gate and permission envelope.
 - When possible, reduce long-running continuation pressure after Step 1 so the workflow can proceed unattended.
 - Changes that improve one issue must not reintroduce prompt churn or hanging behavior after Step 1.

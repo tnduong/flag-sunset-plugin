@@ -12,7 +12,7 @@ Each scenario maps to one or more behavioral contracts enforced by `scripts/vali
 
 1. Start in a fresh VS Code profile or fresh window.
 2. Confirm the plugin is not installed.
-3. Confirm `~/.copilot/flag-sunset/local-roots.json` does not exist.
+3. Confirm `Nova/.copilot/flag-sunset/local-roots.json` does not exist.
 4. Install the plugin.
 5. Open a workspace containing the required projects.
 
@@ -31,7 +31,7 @@ Each scenario maps to one or more behavioral contracts enforced by `scripts/vali
 
 - [ ] First-run setup completes.
 - [ ] `local-roots.json` exists afterward.
-- [ ] No host permission prompt was needed for off-workspace config access.
+- [ ] No host permission prompt was needed for local-roots config access.
 
 ---
 
@@ -151,7 +151,7 @@ Each scenario maps to one or more behavioral contracts enforced by `scripts/vali
 **Steps**
 
 1. Run Scenario 1 and Scenario 2 on Windows.
-2. Verify the workflow uses `%USERPROFILE%/.copilot/flag-sunset/local-roots.json`.
+2. Verify the workflow uses `C:/src/Applications/Nova/.copilot/flag-sunset/local-roots.json` in the shared workspace layout.
 3. Verify path handling and terminal commands remain valid.
 
 **Pass criteria**

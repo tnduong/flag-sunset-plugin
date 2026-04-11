@@ -32,14 +32,10 @@ The intended operator experience is documented in [operator-goal.md](./reference
 
 ## One-Time Machine Setup
 
-The workflow should prefer a workspace-local local-roots configuration file and keep the home-directory file as a fallback.
+Local-roots behavior is defined by the Preflight contract in [preflight-step1.md](./references/preflight-step1.md#preflight).
 
 Preferred path for new users:
 - `Nova/.copilot/flag-sunset/local-roots.json`
-
-Fallback path for existing users:
-- macOS/Linux: `~/.copilot/flag-sunset/local-roots.json`
-- Windows: `%USERPROFILE%/.copilot/flag-sunset/local-roots.json`
 
 Purpose:
 - maps repository names to local checkout roots
@@ -60,8 +56,6 @@ Example:
 
 If the preferred workspace-local file does not exist, the workflow shows setup prompts from [user-prompts.md](./references/user-prompts.md), derives the repository roots, confirms them with the user, then writes the workspace-local file so later runs reuse the same locations without prompting again.
 
-If the workspace-local file cannot be used, the workflow may fall back to the home-directory config file. When the chosen config file lives outside the active workspace, the workflow should read and write it with OS-appropriate terminal commands instead of VS Code filesystem tools. This avoids host-managed external-directory approval prompts for routine config access.
-
 ## Permission Prompts
 
 Permission prompts are an expected part of the workflow.
@@ -69,7 +63,7 @@ Permission prompts are an expected part of the workflow.
 1. Preflight may ask for the shared parent folder if no usable local-roots config is available.
 2. Preflight asks for confirmation before persisting and using the derived repository roots.
 3. Step 0 always shows Prompt 3 from [user-prompts.md](./references/user-prompts.md) immediately after the preflight workspace gate passes.
-4. Preflight should prefer the workspace-local `.copilot/flag-sunset/local-roots.json` file under the `Nova` workspace folder and use OS-appropriate terminal commands only when falling back to the home-directory file outside the active workspace.
+4. Preflight local-roots resolution follows [preflight-step1.md](./references/preflight-step1.md#preflight) exactly.
 5. Preflight should validate repository-root existence with an OS-appropriate terminal check instead of VS Code filesystem reads on parent repository roots.
 6. Step 1 must begin with serial main-refresh and working-tree-cleanliness gates before discovery.
 7. Step 1 must confirm that every required effective app path is already part of the active VS Code workspace before any VS Code filesystem or search tool runs.
@@ -89,7 +83,6 @@ Step 1 permission-bearing operations must run serially. Do not batch them in par
 - No edits are allowed before the branch gate passes.
 - Before creating a removal branch, each affected repository must refresh its local `main` branch from `origin/main`.
 - Step 1 permission-sensitive actions must run serially, not in parallel.
-- Off-workspace config access must use OS-appropriate terminal commands instead of VS Code filesystem tools.
 - Preflight root existence checks must not use VS Code filesystem tools on parent repository roots.
 - If any required effective app path is not already in the active workspace, the workflow must stop instead of attempting external-directory reads.
 - If any permission-bearing tool call is interrupted, the workflow should stop and print the blocked item plus resumable status instead of silently appearing to work.

@@ -54,7 +54,6 @@ Use these cutover assets:
 - For team onboarding with fewer prompts, use the workspace-scoped medium autoapproval profile in `INTERNAL_ROLLOUT.md` and include `rg` and `grep` in terminal autoapproval.
 - Machine-specific checkout roots are not stored in the plugin.
 - For new users, the workflow should store confirmed checkout roots in `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder and keep that file ignored by Git.
-- The home-directory config at `~/.copilot/flag-sunset/local-roots.json` remains a fallback for existing setups.
 - The installed plugin location, including `%APPDATA%\Code\agentPlugins\github.com\tnduong\flag-sunset-plugin`, is not used for machine-specific config reads or writes.
 
 ## Dev Testing

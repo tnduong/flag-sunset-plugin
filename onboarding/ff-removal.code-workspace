@@ -18,6 +18,7 @@
       "/^\\$p\\s*=\\s*Join-Path\\s+\\$env:USERPROFILE\\s+'.copilot\\/flag-sunset\\/local-roots\\.json';\\s*if\\s*\\(Test-Path\\s+\\$p\\)\\s*\\{\\s*Get-Content\\s+-Raw\\s+\\$p\\s*\\}\\s*else\\s*\\{\\s*'FILE_NOT_FOUND'\\s*\\}$/": true,
       "/^\\$apps='[^']+';\\s*\\$atm='[^']+';\\s*\"APPS_EXISTS=\\$\\(\\[bool\\]\\(Test-Path\\s+\\$apps\\)\\)\";\\s*\"ATM_EXISTS=\\$\\(\\[bool\\]\\(Test-Path\\s+\\$atm\\)\\)\"$/": true,
       "/^\\$apps='[^']+';\\s*\\$atm='[^']+';\\s*if\\s*\\(-not\\s*\\(Test-Path\\s+\\$apps\\)\\)\\s*\\{\\s*'MISSING: AyaHealthcare\\/Applications'\\s*\\}\\s*;\\s*if\\s*\\(-not\\s*\\(Test-Path\\s+\\$atm\\)\\)\\s*\\{\\s*'MISSING: AyaHealthcare\\/aya-talent-marketplace'\\s*\\}\\s*;\\s*if\\s*\\(\\(Test-Path\\s+\\$apps\\)\\s*-and\\s*\\(Test-Path\\s+\\$atm\\)\\)\\s*\\{\\s*'ROOTS_OK'\\s*\\}$/": true,
+      "/^if\\s*\\(Get-Command\\s+rg\\s+-ErrorAction\\s+SilentlyContinue\\)\\s*\\{\\s*'RG_AVAILABLE'\\s*\\}\\s*else\\s*\\{\\s*'RG_MISSING'\\s*\\}$/": true,
       "rg": true,
       "grep": true,
       "cat": true,
@@ -45,6 +46,7 @@
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+switch\\b/": true,
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+checkout\\s+(-b|-B)\\b/": true,
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+branch\\s+--show-current\\b/": true,
+      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+config\\s+--get\\s+alias\\.status\\b/": true,
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+branch\\b.*\\s-(d|D|m|M|-delete|-force)\\b/": false
     }
   }

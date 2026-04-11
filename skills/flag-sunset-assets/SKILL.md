@@ -34,8 +34,7 @@ Rules:
 - A workflow change is not complete if it reintroduces expected permission prompts after Step 1, unless the exception is explicitly documented and justified in the workflow assets.
 - Use VS Code prompt UI for workflow questions that require a user reply, using the canonical prompt sections in [user-prompts.md](./references/user-prompts.md). If prompt UI is unavailable, fall back to plain chat with equivalent choices and unchanged gate behavior.
 - `read_file` and `get_errors` remain the default VS Code tools on workspace-confirmed paths.
-- Prefer a workspace-local `local-roots.json` file on workspace-confirmed paths before falling back to the user-owned home-directory file.
-- Use OS-appropriate terminal commands for reading or writing the user-owned home-directory `local-roots.json` file and for root validation whenever the target is outside the active workspace.
+- Local-roots resolution is defined only in [preflight-step1.md](./references/preflight-step1.md#preflight). Do not use alternate config locations outside that procedure.
 - When a terminal command is required, use an OS-appropriate form for the active shell. On Windows PowerShell, prefer `Test-Path` and `Get-Date`; on macOS/Linux, prefer `test -d` and `date`.
 - Preflight local-root validation must use an OS-appropriate terminal existence check on the resolved repository roots; do not use `list_dir`, `read_file`, or other VS Code filesystem tools on parent repository roots for existence checks.
 - Step 1 entry must run main freshness and working-tree validation on each resolved repository root with OS-appropriate terminal git commands before discovery may begin.
@@ -43,7 +42,6 @@ Rules:
 - All file edits must remain in the main agent context.
 - Machine-specific checkout roots must not be stored in the plugin.
 - Prefer storing machine-specific checkout roots in a workspace-local config file at `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder, ignored by Git.
-- Preserve support for the user-owned home-directory config file as a fallback for existing users.
 - The current VS Code workspace must include every project listed in [applications.md](./applications.md) before Step 0 may begin.
 - Do not create, repair, or write configuration files inside the plugin directory.
 - No file edits before branch proof is printed.
