@@ -114,7 +114,11 @@ Execution:
    - apply the downstream-symbol second-hop rule defined in [search-strategy.md](./search-strategy.md) when building the concrete future work set
    - if a candidate Angular component, service, or similar source file is expected to lose a feature-manager or other cleanup-only library import/provider during flag removal, include the co-located `*.spec.ts` file in the concrete future work set for mirrored cleanup review
    - files that may later be checked with `get_errors` in Step 5 if file-scoped diagnostics are needed
-   - Discovery completion gate: for each `MATCH` app, run one extension-filtered identifier file-list search from exactly that app's resolved scope (`Search Scope` when present, otherwise the effective app path). If the search runs from any other root, print `STEP_1_INCOMPLETE: invalid search scope for [app]=[actual root]` and stop. If any matched file is not in the concrete future work set, print `STEP_1_INCOMPLETE: untracked matches found for [app]=[untracked files]` and stop. Proceed to item 13 only when all `MATCH` apps pass both checks.
+    - Discovery completion gate: for each `MATCH` app, run one extension-filtered identifier file-list search from exactly that app's resolved scope (`Search Scope` when present, otherwise the effective app path).
+    - If the search runs from any other root, print `STEP_1_INCOMPLETE: invalid search scope for [app]=[actual root]` and stop.
+    - If any matched file is not in the concrete future work set, print `STEP_1_INCOMPLETE: untracked matches found for [app]=[untracked files]` and stop.
+    - Proceed to item 13 only when all `MATCH` apps pass both checks.
+    - Additional downstream coverage gate for Step 2/3 parity: for each `MATCH` app, parse `Search Scope` as comma-separated scope entries (trim whitespace, ignore empties, and convert trailing `/**` to concrete terminal roots), run extension-filtered file-list searches for each downstream symbol captured in Step 2 across those resolved scope roots, and stop with `STEP_1_INCOMPLETE: untracked matches found for [app]=[untracked files]` if any downstream-matched file is missing from the concrete future work set.
 13. Read each file in the concrete future work set with `read_file` to trigger any remaining file-scoped approvals, using this strategy:
    - **Definition files** (the flag enum/const file for each app): read in full - they are small and are the authoritative identifier source.
    - **All other files**: read only the line ranges anchored to the grep-discovered match lines from item 12:

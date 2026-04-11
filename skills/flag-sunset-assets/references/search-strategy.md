@@ -11,6 +11,10 @@ Before any search, derive each app's effective local app path from the registry 
 - effective app path = local repository root + `Path in Repo`
 - if `Path in Repo` is `./`, the effective app path is the local repository root
 - derive app discovery scope from `Search Scope` (repository-root-relative); if omitted, default to the effective app path
+- parse `Search Scope` as a comma-separated list of scope entries; trim whitespace and ignore empty entries
+- treat each parsed scope entry as an independent search root; do not concatenate multiple entries into one path
+- for terminal root resolution, if a scope entry ends with `/**`, resolve the concrete root by dropping the trailing `/**`; keep extension filtering in the search command
+- print the resolved per-app scope roots before Step 3 searches begin
 
 ## Step 1 - Local Definition-File Confirmation
 For each app in the registry, search its definition file for the exact raw flag key.
@@ -33,21 +37,25 @@ Example:
 - Step 2 outputs: primary identifier = `FlagSymbol`; downstream symbol = `DerivedSymbol`
 Before proceeding, print the full mapping:
 `Identifier mapping: [AppA]=[IdentifierA|NO_MATCH], [AppB]=[IdentifierB|NO_MATCH], ...`
+Also print the downstream mapping per matched app:
+`Downstream mapping: [AppA]=[Sym1|Sym2|none], [AppB]=[Sym1|none], ...`
 If an app matched by key but no identifier can be extracted, stop and ask the user.
 
 ## Step 3 - Local Usage Search
 Search only the affected apps using the exact identifier discovered in Step 2.
 Rules:
 - Prefer `rg -n --fixed-strings` when available; otherwise fall back to OS-appropriate native search commands with explicit extension filters. Exact command forms live in [preflight-step1.md](./preflight-step1.md#step-1-permissions-and-start-clock).
-- Use an app-scoped search root from registry `Search Scope`; if `Search Scope` is omitted, use the effective app path. Do not fall back to a whole-repository all-file scan when an app search root is known.
+- Use app-scoped search roots derived from registry `Search Scope`; if `Search Scope` is omitted, use the effective app path as a single scope root. Do not fall back to a whole-repository all-file scan when app scope roots are known.
+- For multi-scope apps, execute the same extension-filtered symbol search for each resolved scope root and union/de-duplicate the results.
 - Keep searches extension-filtered by app language: Angular apps -> `*.ts`, `*.html`; CoreApi -> `*.cs`; QaAutomation -> `*.feature`.
 - Search symbols from Step 2 in this order: primary first, downstream second (if any).
 - When a downstream symbol is found in a TypeScript source file, run a second-hop search in the paired HTML template (for example `x.component.ts` -> `x.component.html`).
 - Search test and mock files with the exact LaunchDarkly key string, not fuzzy variants.
 - Build the concrete future work set from the results:
 	- definition files
-	- usage files that may be edited
+	- usage files that may be edited (from both primary and downstream symbol results)
 	- test or mock files only if they are proven relevant
+	- paired HTML files discovered by second-hop propagation
 	- files that will later be checked with `get_errors` if file-scoped diagnostics are needed
 
 ## Step 4 - Permission Envelope Use

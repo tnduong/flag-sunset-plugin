@@ -8,6 +8,7 @@ Derivation rule:
 - effective app path = local repository root + `Path in Repo`
 - if `Path in Repo` is `./`, the effective app path is the local repository root
 - `Search Scope` defines discovery globs relative to the repository root; if omitted, default to the effective app path
+- when `Search Scope` contains multiple entries, parse it as a comma-separated list, trim each entry, and execute discovery against each scope independently
 Required local root keys:
 
 | Repository |
