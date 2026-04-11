@@ -33,6 +33,8 @@ Example:
 - Step 2 outputs: primary identifier = `FlagSymbol`; downstream symbol = `DerivedSymbol`
 Before proceeding, print the full mapping:
 `Identifier mapping: [AppA]=[IdentifierA|NO_MATCH], [AppB]=[IdentifierB|NO_MATCH], ...`
+For debugging evidence, also print one line per affected app using this format:
+`DEBUG_STEP2_APP: app=[App], definition=[DefinitionPath], raw_matches=[Count], identifier=[Identifier|none], downstream=[Sym1|Sym2|none]`
 If an app matched by key but no identifier can be extracted, stop and ask the user.
 
 ## Step 3 - Local Usage Search
@@ -40,15 +42,23 @@ Search only the affected apps using the exact identifier discovered in Step 2.
 Rules:
 - Prefer `rg -n --fixed-strings` when available; otherwise fall back to OS-appropriate native search commands with explicit extension filters. Exact command forms live in [preflight-step1.md](./preflight-step1.md#step-1-permissions-and-start-clock).
 - Use an app-scoped search root from registry `Search Scope`; if `Search Scope` is omitted, use the effective app path. Do not fall back to a whole-repository all-file scan when an app search root is known.
+- For debugging evidence, print resolved search roots before searching each app:
+`DEBUG_STEP3_SCOPE: app=[App], search_scope=[SearchScope|effective app path], resolved_roots=[Root1|Root2|...]`
 - Keep searches extension-filtered by app language: Angular apps -> `*.ts`, `*.html`; CoreApi -> `*.cs`; QaAutomation -> `*.feature`.
 - Search symbols from Step 2 in this order: primary first, downstream second (if any).
+- For debugging evidence, print one search line for each symbol/root pair:
+`DEBUG_STEP3_SEARCH: app=[App], symbol=[Symbol], root=[Root], exts=[Ext1|Ext2|...], matches=[Count]`
 - When a downstream symbol is found in a TypeScript source file, run a second-hop search in the paired HTML template (for example `x.component.ts` -> `x.component.html`).
+- For debugging evidence, print second-hop propagation lines:
+`DEBUG_STEP3_SECOND_HOP: app=[App], source=[TsFile], template=[HtmlFile], symbol=[Symbol], matches=[Count]`
 - Search test and mock files with the exact LaunchDarkly key string, not fuzzy variants.
 - Build the concrete future work set from the results:
 	- definition files
 	- usage files that may be edited
 	- test or mock files only if they are proven relevant
 	- files that will later be checked with `get_errors` if file-scoped diagnostics are needed
+- For debugging evidence, print one summary per affected app after building the set:
+`DEBUG_STEP3_FUTURE_WORK: app=[App], file_count=[Count], files=[File1|File2|...]`
 
 ## Step 4 - Permission Envelope Use
 Use the same main-agent discovery pass to seed approvals before Step 1 completes.
