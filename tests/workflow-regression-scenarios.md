@@ -350,40 +350,43 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 
 ---
 
-## Scenario 19: Step 1 search prefers rg when available
+## Scenario 19: Step 1 search uses grep_search as primary discovery tool
 
 **Setup**
 
-1. Ensure `rg` is installed and available in the active shell.
+1. Use a workspace that passes all preflight gates.
 
 **Steps**
 
 2. Run `/flag-sunset-plugin:run [FLAG_KEY]` through Step 1 discovery.
-3. Observe the terminal search commands used for definition-file confirmation and usage discovery.
+3. Observe the search tools used for definition-file confirmation and usage discovery.
 
 **Pass criteria**
 
-- [ ] The workflow prefers `rg` for definition-file and usage searches when it is available.
-- [ ] The workflow does not fall back to PowerShell-native search commands when `rg` is already available.
+- [ ] The workflow uses `grep_search` (VS Code workspace tool) for definition-file confirmation and usage discovery.
+- [ ] The workflow does not use terminal search commands (`rg`, `grep`, `Select-String`) for file discovery.
+- [ ] Terminal commands are used only for git operations and path validation.
 
 ---
 
-## Scenario 20: fallback searches stay extension-filtered and avoid broad PowerShell scans
+## Scenario 20: searches stay extension-filtered via includePattern and use maxResults retry on zero results
 
 **Setup**
 
-1. Force a run where `rg` is unavailable in the active shell.
+1. Use a workspace that passes all preflight gates.
+2. Use a flag that matches in at least one app's definition file.
 
 **Steps**
 
 2. Run `/flag-sunset-plugin:run [FLAG_KEY]` through Step 1 discovery.
-3. Observe the fallback search commands.
+3. Observe the `grep_search` calls for usage discovery.
 
 **Pass criteria**
 
-- [ ] Fallback searches are limited to language-appropriate file types for the target app.
-- [ ] Windows fallback searches use `Select-String -Path ...` with explicit `*.ext` patterns.
-- [ ] The workflow does not use broad `Get-ChildItem ... -Recurse -File | Select-String ...` scans over an app or repository root.
+- [ ] All `grep_search` calls use `includePattern` globs scoped to the app's resolved search path with language-appropriate extensions (`**/*.ts`, `**/*.html`, `**/*.cs`, `**/*.feature`).
+- [ ] `maxResults` is not set on the initial search calls.
+- [ ] If a `MATCH` app's usage search returns 0 results, the workflow retries once with `maxResults: 100` before classifying the result.
+- [ ] No terminal search commands are used for file discovery.
 
 ---
 
@@ -409,7 +412,7 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 
 ---
 
-## Scenario 22: medium workspace autoapproval with rg and scope isolation
+## Scenario 22: medium workspace autoapproval with grep_search and scope isolation
 
 **Setup**
 
@@ -422,13 +425,13 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 **Steps**
 
 4. Run `/flag-sunset-plugin:run [FLAG_KEY]` through Step 1 on the normal path.
-5. Observe that Step 1 terminal search uses `rg` when available.
+5. Observe that Step 1 uses `grep_search` for all file discovery searches.
 6. Record prompt count and prompt phase boundaries (Preflight, Step 1, post-Step 1).
 7. Open an unrelated workspace and run a simple chat action that would require approval in that workspace.
 
 **Pass criteria**
 
-- [ ] `rg` is included in workspace terminal autoapproval and Step 1 search prefers `rg` when available.
+- [ ] `grep_search` is autoapproved and Step 1 uses it for all file discovery.
 - [ ] Prompt volume is reduced on the FF-removal workspace run compared to baseline.
 - [ ] No unexpected approval churn appears after Step 1 on the normal path.
 - [ ] Autoapproval behavior does not leak into the unrelated workspace.
