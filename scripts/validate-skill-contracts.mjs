@@ -292,8 +292,8 @@ const contracts = [
         scenario: 'Scenario 12: targeted-read completeness including a trailing match near end-of-file',
         checks: [
             {
-                label: 'Grep-discovered lines are the authoritative completeness list',
-                text: 'The grep-discovered line numbers from item 12 are the authoritative completeness list.',
+                label: 'grep_search-discovered lines are the authoritative completeness list',
+                text: 'The `grep_search`-discovered line numbers from item 12 are the authoritative completeness list.',
             },
             {
                 label: 'Ranges must be expanded to include any uncovered match lines',
@@ -306,20 +306,20 @@ const contracts = [
         scenario: 'Scenario 12B: Step 10 completion gate remains mandatory and fail-closed',
         checks: [
             {
-                label: 'Step 10 gate requires app-scoped identifier file-list search from exact resolved scope',
-                text: 'Discovery completion gate: for each `MATCH` app, run one extension-filtered identifier file-list search from exactly that app\'s resolved scope (`Search Scope` when present, otherwise the effective app path).',
+                label: 'Discovery completion gate verifies grep_search results against future work set',
+                text: 'Discovery completion gate: for each `MATCH` app, verify that every file returned by the `grep_search` calls in this item is present in the concrete future work set.',
             },
             {
                 label: 'Invalid search root must stop with explicit STEP_1_INCOMPLETE message',
-                text: 'If the search runs from any other root, print `STEP_1_INCOMPLETE: invalid search scope for [app]=[actual root]` and stop.',
+                text: 'print `STEP_1_INCOMPLETE: invalid search scope for [app]=[actual root]` and stop.',
             },
             {
                 label: 'Untracked identifier matches must stop with explicit STEP_1_INCOMPLETE message',
-                text: 'If any matched file is not in the concrete future work set, print `STEP_1_INCOMPLETE: untracked matches found for [app]=[untracked files]` and stop.',
+                text: 'print `STEP_1_INCOMPLETE: untracked matches found for [app]=[untracked files]` and stop.',
             },
             {
-                label: 'Step 10 gate must pass for all MATCH apps before continuing to item 11',
-                text: 'Proceed to item 13 only when all `MATCH` apps pass both checks.',
+                label: 'Completion gate must pass for all MATCH apps before continuing to item 13',
+                text: 'Proceed to item 13 only when all `MATCH` apps pass the completion gate.',
             },
         ],
     },
@@ -415,33 +415,37 @@ const contracts = [
     },
     {
         file: 'preflight',
-        scenario: 'Scenario 19: Step 1 search prefers rg when available',
+        scenario: 'Scenario 19: Step 1 search uses grep_search as primary discovery tool',
         checks: [
             {
-                label: 'Step 1 prefers rg for definition-file confirmation',
-                text: 'prefer `rg -n --fixed-strings` when available',
+                label: 'Step 1 uses grep_search for definition-file confirmation',
+                text: 'confirm the raw flag key in each app\'s definition target with `grep_search`',
             },
             {
-                label: 'Step 1 prefers rg for usage discovery',
-                text: 'prefer `rg -n --fixed-strings` with extension globs when available',
+                label: 'Step 1 uses grep_search for usage discovery',
+                text: 'run exact local usage discovery for the candidate apps with `grep_search`',
+            },
+            {
+                label: 'Terminal search commands are not used for file discovery',
+                text: 'do not fall back to terminal search commands (`rg`, `grep`, `Select-String`) for file discovery',
             },
         ],
     },
     {
         file: 'preflight',
-        scenario: 'Scenario 20: fallback searches stay extension-filtered and avoid broad PowerShell scans',
+        scenario: 'Scenario 20: searches stay extension-filtered via includePattern and use maxResults retry on zero results',
         checks: [
             {
-                label: 'Step 1 keeps searches extension-filtered by app language',
-                text: 'file extensions by app language: Angular apps (Nova, aya-talent-marketplace) -> `*.ts`, `*.html`, plus `*.spec.ts` only when the spec is already proven relevant; CoreApi -> `*.cs`; QaAutomation -> `*.feature`',
+                label: 'Step 1 keeps searches extension-filtered by app language via includePattern',
+                text: 'Angular apps (Nova, aya-talent-marketplace) -> `**/*.ts` and `**/*.html` (separate calls)',
             },
             {
-                label: 'Windows fallback uses Select-String with explicit extension patterns',
-                text: 'use `Select-String -Path "[path1]\\**\\*.ext1","[path1]\\**\\*.ext2",... -Pattern "IDENTIFIER"`',
+                label: 'maxResults is not set by default',
+                text: 'do not set `maxResults` by default',
             },
             {
-                label: 'Broad Get-ChildItem whole-tree scans are explicitly blocked',
-                text: 'do not use `Get-ChildItem ... -Recurse -File` pipelines for usage discovery',
+                label: 'Zero-result retry uses maxResults: 100',
+                text: 'retry once with `maxResults: 100` before classifying the result',
             },
         ],
     },

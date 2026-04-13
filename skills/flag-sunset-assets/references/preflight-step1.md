@@ -89,40 +89,46 @@ Execution:
      - `Dirty working tree gate failed: [RepoX]=dirty`
      - `Commit, stash, or discard local changes, then rerun flag-sunset.`
      - stop immediately with no edits
-10. No VS Code search pre-seeding is required; all definition-file and usage searches use terminal search commands on workspace-confirmed paths. Search rules:
-   - prefer `rg` when it is available in the current shell
-   - if `rg` is unavailable, fall back to OS-appropriate native commands
-   - keep every search extension-filtered by app language and search purpose; do not search all file types under a repo root
-   - on Windows fallback paths, use `Select-String -Path ...` with explicit `*.ext` patterns; do not use broad `Get-ChildItem ... -Recurse -File | Select-String ...` scans over an app or repository root
-   - use the narrowest workspace-confirmed search roots available from the registry and candidate app set; do not run whole-repo fallback scans when an app-scoped search root is known
+10. All definition-file and usage searches use `grep_search` (VS Code workspace tool) on workspace-confirmed paths. Search rules:
+   - use `grep_search` with `isRegexp: false` for all identifier and raw-key searches
+   - scope every search to the app's resolved search path via `includePattern`; use the `Search Scope` from the registry when present, otherwise use the effective app path
+   - keep every search extension-filtered by app language via `includePattern` glob: Angular apps -> `**/*.ts` and `**/*.html` (separate calls); CoreApi -> `**/*.cs`; QaAutomation -> `**/*.feature`
+   - do not set `maxResults` by default; if a search for a `MATCH` app returns 0 usage results, retry once with `maxResults: 100` before classifying the result
+   - do not fall back to terminal search commands (`rg`, `grep`, `Select-String`) for file discovery; terminal commands are reserved for git operations and path validation only
    Negative constraints still apply:
    - do not use `list_dir` as part of the default Step 1 permission envelope
    - do not run `get_errors` at app-root scope during Step 1
    - do not batch permission-bearing `read_file` calls
-11. Using only the main agent, confirm the raw flag key in each app's definition target with a terminal search command and determine the candidate app set.
+11. Using only the main agent, confirm the raw flag key in each app's definition target with `grep_search` and determine the candidate app set.
    - resolve each definition target as: `[effective app path] + [Flag Definition File]`; do not resolve definition targets from repository root alone
    - classify an app as `PATH_ERROR` only after validating that exact derived definition target path is missing or unreadable
-   - prefer `rg -n --fixed-strings` when available
-   - when falling back, keep the command scoped to the definition file itself or the documented fallback definition search path
-12. Using only the main agent, run exact local usage discovery for the candidate apps with extension-filtered terminal search commands and build the concrete future work set:
+   - use `grep_search` with `isRegexp: false` and `includePattern` scoped to the definition file's containing directory with the appropriate extension glob
+   - for apps with no definition file (e.g. QaAutomation with `—`), search the app's `Search Scope` for the raw flag key string using `grep_search` with the app's language extension filter
+12. Using only the main agent, run exact local usage discovery for the candidate apps with `grep_search` and build the concrete future work set:
     - definition files
     - usage files that may be edited
     - spec, test, or mock files only if they are proven relevant
-   - file extensions by app language: Angular apps (Nova, aya-talent-marketplace) -> `*.ts`, `*.html`, plus `*.spec.ts` only when the spec is already proven relevant; CoreApi -> `*.cs`; QaAutomation -> `*.feature`
-   - prefer `rg -n --fixed-strings` with extension globs when available
-   - when falling back on Windows, use `Select-String -Path "[path1]\**\*.ext1","[path1]\**\*.ext2",... -Pattern "IDENTIFIER"`; do not use `Get-ChildItem ... -Recurse -File` pipelines for usage discovery
+   - file extensions by app language, enforced via `includePattern` glob:
+     - Angular apps (Nova, aya-talent-marketplace) -> `**/*.ts` and `**/*.html` (separate calls), plus `**/*.spec.ts` only when the spec is already proven relevant
+     - CoreApi -> `**/*.cs`
+     - QaAutomation -> `**/*.feature`
+   - use `grep_search` with `isRegexp: false` for each search; do not use terminal search commands for file discovery
    - apply the downstream-symbol second-hop rule defined in [search-strategy.md](./search-strategy.md) when building the concrete future work set
    - if a candidate Angular component, service, or similar source file is expected to lose a feature-manager or other cleanup-only library import/provider during flag removal, include the co-located `*.spec.ts` file in the concrete future work set for mirrored cleanup review
    - files that may later be checked with `get_errors` in Step 5 if file-scoped diagnostics are needed
-   - Discovery completion gate: for each `MATCH` app, run one extension-filtered identifier file-list search from exactly that app's resolved scope (`Search Scope` when present, otherwise the effective app path). If the search runs from any other root, print `STEP_1_INCOMPLETE: invalid search scope for [app]=[actual root]` and stop. If any matched file is not in the concrete future work set, print `STEP_1_INCOMPLETE: untracked matches found for [app]=[untracked files]` and stop. Proceed to item 13 only when all `MATCH` apps pass both checks.
+   - Discovery completion gate: for each `MATCH` app, verify that every file returned by the `grep_search` calls in this item is present in the concrete future work set.
+     - If any matched file is not in the concrete future work set, add the missing file(s), run targeted `read_file` ranges for the new match lines, and update the future work set before proceeding.
+     - If the `grep_search` scope does not match the app's resolved scope (`Search Scope` when present, otherwise the effective app path), print `STEP_1_INCOMPLETE: invalid search scope for [app]=[actual root]` and stop.
+     - If any matched file remains untracked after the update, print `STEP_1_INCOMPLETE: untracked matches found for [app]=[untracked files]` and stop.
+     - Proceed to item 13 only when all `MATCH` apps pass the completion gate.
 13. Read each file in the concrete future work set with `read_file` to trigger any remaining file-scoped approvals, using this strategy:
    - **Definition files** (the flag enum/const file for each app): read in full - they are small and are the authoritative identifier source.
-   - **All other files**: read only the line ranges anchored to the grep-discovered match lines from item 12:
+   - **All other files**: read only the line ranges anchored to the `grep_search`-discovered match lines from item 12:
      - default context window: +/-30 lines around each match line
      - expand the range if the logical block at the match site (function body, decorator, class, import group) is not fully contained within +/-30 lines
      - merge overlapping or adjacent ranges for the same file into a single `read_file` call
      - the first range read per file triggers the file-scoped permission approval
-   - The grep-discovered line numbers from item 12 are the authoritative completeness list. Every matched line number for a file must fall within a read range. If any grep-discovered line falls outside all ranges after merging, expand the nearest range to include it.
+   - The `grep_search`-discovered line numbers from item 12 are the authoritative completeness list. Every matched line number for a file must fall within a read range. If any discovered line falls outside all ranges after merging, expand the nearest range to include it.
    - Read all ranges for a file before moving to the next file.
    - after each permission-bearing tool call, either continue immediately on success or stop and print the blocked item and latest Step 1 status on interruption
    - if the user approves a prompt after an interrupted call, retry that exact `read_file` call once before doing anything else

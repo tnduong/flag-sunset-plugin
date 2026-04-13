@@ -205,7 +205,7 @@ Each scenario maps to one or more behavioral contracts enforced by `scripts/vali
 
 ---
 
-## Scenario 11: medium workspace autoapproval with rg and scope isolation
+## Scenario 11: medium workspace autoapproval with grep_search and scope isolation
 
 **Setup**
 
@@ -218,13 +218,13 @@ Each scenario maps to one or more behavioral contracts enforced by `scripts/vali
 **Steps**
 
 4. Run `/flag-sunset-plugin:run [FLAG_KEY]` through Step 1 on the normal path.
-5. Observe that Step 1 terminal search uses `rg` when available.
+5. Observe that Step 1 uses `grep_search` for all file discovery searches.
 6. Record prompt count and prompt phase boundaries (Preflight, Step 1, post-Step 1).
 7. Open an unrelated workspace and run a simple chat action that would require approval in that workspace.
 
 **Pass criteria**
 
-- [ ] `rg` is included in workspace terminal autoapproval and Step 1 search prefers `rg` when available.
+- [ ] `grep_search` is autoapproved and Step 1 uses it for all file discovery.
 - [ ] Prompt volume is reduced on the FF-removal workspace run compared to baseline.
 - [ ] No unexpected approval churn appears after Step 1 on the normal path.
 - [ ] Autoapproval behavior does not leak into the unrelated workspace.

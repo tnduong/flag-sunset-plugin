@@ -14,7 +14,7 @@ Before any search, derive each app's effective local app path from the registry 
 
 ## Step 1 - Local Definition-File Confirmation
 For each app in the registry, search its definition file for the exact raw flag key.
-Use `rg -n --fixed-strings` when available; otherwise fall back to an OS-appropriate native command scoped to the exact definition target. Do not broaden definition-file confirmation into an all-file repo scan.
+Use `grep_search` with `isRegexp: false` and `includePattern` scoped to the definition file's containing directory with the appropriate extension glob. Do not broaden definition-file confirmation into an all-file repo scan.
 From the results:
 1. Apps whose definition file contains the flag key are affected.
 2. Apps with zero matches are marked `NO_MATCH`.
@@ -38,9 +38,10 @@ If an app matched by key but no identifier can be extracted, stop and ask the us
 ## Step 3 - Local Usage Search
 Search only the affected apps using the exact identifier discovered in Step 2.
 Rules:
-- Prefer `rg -n --fixed-strings` when available; otherwise fall back to OS-appropriate native search commands with explicit extension filters. Exact command forms live in [preflight-step1.md](./preflight-step1.md#step-1-permissions-and-start-clock).
-- Use an app-scoped search root from registry `Search Scope`; if `Search Scope` is omitted, use the effective app path. Do not fall back to a whole-repository all-file scan when an app search root is known.
-- Keep searches extension-filtered by app language: Angular apps -> `*.ts`, `*.html`; CoreApi -> `*.cs`; QaAutomation -> `*.feature`.
+- Use `grep_search` (VS Code workspace tool) with `isRegexp: false` for all identifier searches. Do not use terminal search commands (`rg`, `grep`, `Select-String`) for file discovery.
+- Scope every search to the app's resolved search path via `includePattern`; use the `Search Scope` from the registry when present, otherwise use the effective app path. Do not fall back to a whole-repository all-file scan when an app search root is known.
+- Keep searches extension-filtered by app language via `includePattern` glob: Angular apps -> `**/*.ts` and `**/*.html` (separate calls); CoreApi -> `**/*.cs`; QaAutomation -> `**/*.feature`.
+- Do not set `maxResults` by default. If a search for a `MATCH` app returns 0 usage results, retry once with `maxResults: 100` before classifying the result.
 - Search symbols from Step 2 in this order: primary first, downstream second (if any).
 - When a downstream symbol is found in a TypeScript source file, also search that same TypeScript source file for the downstream symbol and add any newly discovered line numbers to the read-range list.
 - **MANDATORY second-hop (HTML templates):** When a downstream symbol is found in a component TypeScript file (e.g. `x.component.ts`), you MUST run a second-hop search in the paired HTML template (`x.component.html`) for that downstream symbol. Add the HTML file to the future work set if it contains any matches. This step is NOT optional — skipping it causes the HTML template to be missed during edits.
@@ -56,6 +57,7 @@ Rules:
 1. For every `*.component.ts` in the future work set, verify the paired `*.component.html` is also present if it references any downstream symbol.
 2. For every `*.component.ts` or `*.service.ts` in the future work set, verify the paired `*.spec.ts` is also present if it references any removed symbol.
 3. If either check fails, add the missing file and re-run its search before proceeding.
+4. **Zero-result retry:** If any `grep_search` call for a `MATCH` app returned 0 results during Step 3, and the search did not use `maxResults`, retry that search once with `maxResults: 100`. If the retry also returns 0 results, accept the result. If the retry surfaces new files, add them to the future work set and search them for downstream symbols before proceeding. This guards against the rare case where the default result cap is lower than expected for a given workspace configuration.
 
 ## Step 4 - Permission Envelope Use
 Use the same main-agent discovery pass to seed approvals before Step 1 completes.
@@ -64,7 +66,7 @@ Rules:
 - Local-roots resolution must follow [preflight-step1.md](./preflight-step1.md#preflight) and use only the workspace-local config path defined there.
 - If any required effective app path is missing from the active workspace, stop with workspace-gate failure instead of triggering external-directory approval prompts.
 - Do not use `list_dir` as part of the default permission envelope.
-- Use terminal search commands only on workspace-confirmed app paths, following the scoped and extension-filtered rules above.
+- Use `grep_search` for all file discovery searches on workspace-confirmed app paths, following the scoped and extension-filtered rules above. Terminal commands are reserved for git operations and path validation only.
 - Use `read_file` only for files in the concrete future work set. Definition files are read in full. All other files are read as targeted ranges anchored to grep-discovered match lines (±30 lines, expanded to contain the full logical block, merged when overlapping). The grep line numbers from Step 3 are the authoritative coverage list; every match line must fall within a read range.
 - Defer `get_errors` until Step 5 and scope it to edited files only, unless a Step 1 fallback requires file-scoped diagnostics for a specific already-approved file.
 - Do not use subagents after Step 1 begins.
