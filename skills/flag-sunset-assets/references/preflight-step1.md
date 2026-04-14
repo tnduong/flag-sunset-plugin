@@ -67,11 +67,17 @@ Execution:
    - use OS-appropriate terminal git commands on the resolved repository roots
    - use a fast-forward-only update policy
    - run refresh checks serially, one repository at a time
+   - prevent local Husky post-merge hooks from blocking the gate by disabling Husky for the merge command only
    - on Windows PowerShell, run these serial git commands for each repository root, in order:
       - `git -C '[resolved repository root]' rev-parse --is-inside-work-tree`
       - `git -C '[resolved repository root]' fetch origin main`
       - `git -C '[resolved repository root]' switch main`
-      - `git -C '[resolved repository root]' merge --ff-only origin/main`
+      - `$env:HUSKY='0'; git -C '[resolved repository root]' merge --ff-only origin/main; Remove-Item Env:HUSKY -ErrorAction SilentlyContinue`
+   - on macOS/Linux shells, run these serial git commands for each repository root, in order:
+      - `git -C '[resolved repository root]' rev-parse --is-inside-work-tree`
+      - `git -C '[resolved repository root]' fetch origin main`
+      - `git -C '[resolved repository root]' switch main`
+      - `HUSKY=0 git -C '[resolved repository root]' merge --ff-only origin/main`
    - treat successful completion of all four commands as success evidence for that repository
    - if one command fails, use the failing command label (`rev-parse`, `fetch`, `switch-main`, or `merge-ff-only`) as the gate-failure reason
    - if every repository refresh succeeds, print:
