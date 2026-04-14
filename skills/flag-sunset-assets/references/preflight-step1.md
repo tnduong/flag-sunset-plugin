@@ -89,12 +89,7 @@ Execution:
      - `Dirty working tree gate failed: [RepoX]=dirty`
      - `Commit, stash, or discard local changes, then rerun flag-sunset.`
      - stop immediately with no edits
-10. All definition-file and usage searches use `grep_search` (VS Code workspace tool) on workspace-confirmed paths. Search rules:
-   - use `grep_search` with `isRegexp: false` for all identifier and raw-key searches
-   - scope every search to the app's resolved search path via `includePattern`; use the `Search Scope` from the registry when present, otherwise use the effective app path
-   - keep every search extension-filtered by app language via `includePattern` glob: Angular apps -> `**/*.ts` and `**/*.html` (separate calls); CoreApi -> `**/*.cs`; QaAutomation -> `**/*.feature`
-   - do not set `maxResults` by default; if a search for a `MATCH` app returns 0 usage results, retry once with `maxResults: 100` before classifying the result
-   - do not fall back to terminal search commands (`rg`, `grep`, `Select-String`) for file discovery; terminal commands are reserved for git operations and path validation only
+10. All definition-file and usage searches use `grep_search` (VS Code workspace tool) on workspace-confirmed paths. Apply the [Canonical Search Rules](./search-strategy.md#canonical-search-rules) from search-strategy.md for tool choice, scope, extension filters, and maxResults policy.
    Negative constraints still apply:
    - do not use `list_dir` as part of the default Step 1 permission envelope
    - do not run `get_errors` at app-root scope during Step 1
@@ -108,11 +103,7 @@ Execution:
     - definition files
     - usage files that may be edited
     - spec, test, or mock files only if they are proven relevant
-   - file extensions by app language, enforced via `includePattern` glob:
-     - Angular apps (Nova, aya-talent-marketplace) -> `**/*.ts` and `**/*.html` (separate calls), plus `**/*.spec.ts` only when the spec is already proven relevant
-     - CoreApi -> `**/*.cs`
-     - QaAutomation -> `**/*.feature`
-   - use `grep_search` with `isRegexp: false` for each search; do not use terminal search commands for file discovery
+   - Apply the [Canonical Search Rules](./search-strategy.md#canonical-search-rules) for tool choice, scope, extension filters, and maxResults policy. Additional refinement: for Angular apps, include `**/*.spec.ts` only when the spec is already proven relevant.
    - apply the downstream-symbol second-hop rule defined in [search-strategy.md](./search-strategy.md) when building the concrete future work set
    - if a candidate Angular component, service, or similar source file is expected to lose a feature-manager or other cleanup-only library import/provider during flag removal, include the co-located `*.spec.ts` file in the concrete future work set for mirrored cleanup review
    - files that may later be checked with `get_errors` in Step 5 if file-scoped diagnostics are needed

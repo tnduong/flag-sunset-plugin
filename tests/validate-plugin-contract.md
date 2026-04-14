@@ -2,7 +2,7 @@
 
 Use this checklist as the formal test reference when validating the plugin. For each scenario, work through the numbered steps, then confirm all pass criteria are true.
 
-Each scenario maps to one or more behavioral contracts enforced by `scripts/validate-skill-contracts.mjs`. If the contracts script passes in CI but a scenario fails during manual testing, the contract patterns need to be tightened.
+Most scenarios map to one or more static clauses enforced by `scripts/validate-skill-contracts.mjs`. A small number of operational rollout scenarios remain manual-only. If the contracts script passes in CI but a scenario fails during manual testing, the contract patterns need to be tightened.
 
 ---
 
@@ -50,7 +50,7 @@ Each scenario maps to one or more behavioral contracts enforced by `scripts/vali
 6. Verify there is no parent-folder question.
 7. Verify there is no derived-roots confirmation question.
 8. Verify there is no VS Code external-directory prompt for reading `local-roots.json`.
-9. Verify Step 0 shows Prompt 3 from `references/user-prompts.md` with options `1`, `2`, and `3`.
+9. Verify Step 0 appears as a plain chat question with options `1`, `2`, and `3`.
 10. Reply `1` or `2` and verify the workflow continues into Step 1.
 11. Verify Step 1 searches and reads only workspace-confirmed paths.
 
@@ -160,7 +160,174 @@ Each scenario maps to one or more behavioral contracts enforced by `scripts/vali
 
 ---
 
-## Scenario 9: Step 0 reply handling
+## Scenario 9: no new permission prompts after Step 1 on the normal path
+
+**Setup**
+
+1. Use a workspace that passes both preflight gates.
+2. Choose a flag whose discovery and edit scope can be completed without interruption.
+
+**Steps**
+
+3. Run `/flag-sunset-plugin:run [FLAG_KEY]`.
+4. Allow Preflight and Step 1 to complete successfully.
+5. Continue through Step 2 and Step 4 on the normal path.
+
+**Pass criteria**
+
+- [ ] No new expected approval prompts appear after Step 1 completes.
+- [ ] Any later prompt is treated as a workflow regression unless the workflow assets explicitly document and justify it.
+
+---
+
+## Scenario 10: branch proof before edits
+
+**Setup**
+
+1. Use a flag with at least one affected repository.
+
+**Steps**
+
+2. Run `/flag-sunset-plugin:run [FLAG_KEY]` through discovery.
+3. Observe Step 3 and the first edit action.
+
+**Pass criteria**
+
+- [ ] The workflow prints branch proof for every affected repository before any edit is attempted.
+- [ ] If branch proof cannot be established, the workflow stops with no edits.
+
+---
+
+## Scenario 11: static validation remains file-scoped and build-free
+
+**Setup**
+
+1. Complete a representative flag-removal run.
+
+**Steps**
+
+2. Observe Step 5 validation behavior.
+
+**Pass criteria**
+
+- [ ] Validation checks the edited scope for remaining references.
+- [ ] Diagnostics are scoped to edited files only when diagnostics are needed.
+- [ ] No automated build or test commands are run.
+
+---
+
+## Scenario 12: targeted-read completeness including a trailing match near end-of-file
+
+**Setup**
+
+1. Use a file where `grep_search` finds multiple feature-flag matches.
+2. Ensure one of those matches is near the bottom of the file.
+
+**Steps**
+
+3. Run Step 1 discovery and inspect the read evidence for that file.
+4. Compare the `grep_search` line numbers against the `read_file` ranges used for the file.
+
+**Pass criteria**
+
+- [ ] Every grep-discovered line falls within at least one read range.
+- [ ] The trailing match near end-of-file is not skipped.
+- [ ] The workflow does not finalize edit reasoning while any discovered match remains unread.
+
+---
+
+## Scenario 13: paired spec file enters scope when source cleanup implies stale test wiring
+
+**Setup**
+
+1. Use a TypeScript source file whose flag removal eliminates a cleanup-only import, provider, or injected dependency.
+
+**Steps**
+
+2. Run Step 1 discovery.
+3. Inspect the resulting concrete future work set.
+
+**Pass criteria**
+
+- [ ] The co-located `*.spec.ts` file is added to the concrete future work set for mirrored cleanup review.
+
+---
+
+## Scenario 14: minimal mirrored unit-test cleanup
+
+**Setup**
+
+1. Use a source and spec pair where the flag removal makes some unit-test setup stale but leaves other setup valid.
+
+**Steps**
+
+2. Run the workflow through the proposed edits.
+3. Compare the source cleanup with the paired spec cleanup.
+
+**Pass criteria**
+
+- [ ] Only the stale mirrored imports, providers, mocks, or setup are removed from the spec.
+- [ ] Unrelated scaffolding remains intact.
+
+---
+
+## Scenario 15: still-used spec imports are retained
+
+**Setup**
+
+1. Use a paired spec file where one import is used both by stale FF-specific setup and by unrelated remaining setup or assertions.
+
+**Steps**
+
+2. Run the workflow through the proposed edits.
+3. Inspect the paired spec import cleanup.
+
+**Pass criteria**
+
+- [ ] The workflow verifies whether the imported symbol still has references elsewhere in the spec before deleting the import.
+- [ ] If the symbol is still used for unrelated setup or assertions, the import is kept.
+
+---
+
+## Scenario 16: winning-path tests are preserved and normalized
+
+**Setup**
+
+1. Use a spec file with both FF-enabled and FF-disabled tests for the same behavior.
+
+**Steps**
+
+2. Run the workflow through the proposed edits.
+3. Inspect the resulting spec changes.
+
+**Pass criteria**
+
+- [ ] The losing-path test is removed.
+- [ ] The winning-path test is kept.
+- [ ] The winning-path test description is renamed to the non-FF form.
+
+---
+
+## Scenario 17: compound-condition cleanup removes only the targeted flag term
+
+**Setup**
+
+1. Use code with a condition such as `A && !B` where `B` is the flag being removed and `A` still matters.
+
+**Steps**
+
+2. Run the workflow through the proposed edits.
+3. Inspect the resulting condition.
+
+**Pass criteria**
+
+- [ ] Only the removed flag sub-expression is eliminated.
+- [ ] The unrelated condition remains intact.
+- [ ] The workflow does not collapse the logic to the wrong branch.
+
+---
+
+## Scenario 18: Step 0 plain reply handling
 
 **Setup**
 
@@ -169,7 +336,7 @@ Each scenario maps to one or more behavioral contracts enforced by `scripts/vali
 **Steps**
 
 2. Run `/flag-sunset-plugin:run [FLAG_KEY]` until Step 0 appears.
-3. Verify Step 0 shows Prompt 3 from `references/user-prompts.md` with the three numbered choices.
+3. Verify Step 0 is printed as plain chat text with the three numbered choices.
 4. Reply `1` and verify the workflow continues.
 5. Repeat and reply `2` and verify the workflow continues.
 6. Repeat and reply `3` and verify the workflow stops with no edits.
@@ -183,29 +350,88 @@ Each scenario maps to one or more behavioral contracts enforced by `scripts/vali
 
 ---
 
-## Scenario 10: dirty working tree Step 1 entry gate
+## Scenario 19: Step 1 search uses grep_search as primary discovery tool
+
+**Setup**
+
+1. Use a workspace that passes all preflight gates.
+
+**Steps**
+
+2. Run `/flag-sunset-plugin:run [FLAG_KEY]` through Step 1 discovery.
+3. Observe the search tools used for definition-file confirmation and usage discovery.
+
+**Pass criteria**
+
+- [ ] The workflow uses `grep_search` (VS Code workspace tool) for definition-file confirmation and usage discovery.
+- [ ] The workflow does not use terminal search commands (`rg`, `grep`, `Select-String`) for file discovery.
+- [ ] Terminal commands are used only for git operations and path validation.
+
+---
+
+## Scenario 20: searches stay extension-filtered via includePattern and use maxResults retry on zero results
+
+**Setup**
+
+1. Use a workspace that passes all preflight gates.
+2. Use a flag that matches in at least one app's definition file.
+
+**Steps**
+
+2. Run `/flag-sunset-plugin:run [FLAG_KEY]` through Step 1 discovery.
+3. Observe the `grep_search` calls for usage discovery.
+
+**Pass criteria**
+
+- [ ] All `grep_search` calls use `includePattern` globs scoped to the app's resolved search path with language-appropriate extensions (`**/*.ts`, `**/*.html`, `**/*.cs`, `**/*.feature`).
+- [ ] `maxResults` is not set on the initial search calls.
+- [ ] If a `MATCH` app's usage search returns 0 results, the workflow retries once with `maxResults: 100` before classifying the result.
+- [ ] No terminal search commands are used for file discovery.
+
+---
+
+## Scenario 21: definition targets resolve from effective app paths before PATH_ERROR classification
+
+**Setup**
+
+1. Use a workspace that passes all preflight gates.
+2. Use a flag whose definition file lives under an app path that differs from the repository root.
+
+**Steps**
+
+3. Run `/flag-sunset-plugin:run [FLAG_KEY]` through Step 1 definition-file confirmation.
+4. Observe how the workflow derives each definition target and classifies failures.
+
+**Pass criteria**
+
+- [ ] Definition targets are derived from `[effective app path] + [Flag Definition File]`, not from the repository root alone.
+- [ ] `PATH_ERROR` is used only after the exact derived definition target is validated as missing or unreadable.
+
+---
+
+## Scenario 22: dirty working tree gate blocks Step 1 discovery until repositories are clean
 
 **Setup**
 
 1. Use valid local roots and a workspace that passes the workspace gate.
-2. Make at least one staged, unstaged, or untracked change in one required repository.
+2. Ensure the main freshness gate can pass.
+3. Leave one required repository with staged, unstaged, or untracked changes.
 
 **Steps**
 
-3. Run `/flag-sunset-plugin:run [FLAG_KEY]`.
-4. Verify Step 1 entry reaches the dirty working tree gate.
-5. Verify the workflow prints which repository is dirty and instructs the user to commit, stash, or discard local changes.
-6. Verify the workflow stops before Step 1 discovery and performs no edits.
+4. Run `/flag-sunset-plugin:run [FLAG_KEY]` through Step 1 entry.
+5. Observe the dirty working tree gate output.
 
 **Pass criteria**
 
-- [ ] Dirty repository state is reported clearly.
-- [ ] The workflow stops before Step 1 discovery.
-- [ ] No edits are made when the gate fails.
+- [ ] The workflow prints `Dirty working tree gate failed: [RepoX]=dirty` when any repository is not clean.
+- [ ] The workflow prints `Commit, stash, or discard local changes, then rerun flag-sunset.`.
+- [ ] The workflow stops before Step 1 discovery and makes no edits.
+- [ ] When all required repositories are clean, the workflow continues through Step 1 discovery without printing an additional clean-status line.
 
 ---
 
-## Scenario 11: medium workspace autoapproval with grep_search and scope isolation
+## Scenario 23: medium workspace autoapproval with grep_search and scope isolation
 
 **Setup**
 
