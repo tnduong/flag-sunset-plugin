@@ -7,7 +7,6 @@ Review the flag-sunset plugin. The relevant files are:
 
 #file:skills/flag-sunset-assets/SKILL.md
 #file:scripts/validate-skill-contracts.mjs
-#file:tests/validate-plugin-contract.md
 #file:tests/workflow-regression-scenarios.md
 #file:CONTRIBUTING.md
 #file:plugin.json

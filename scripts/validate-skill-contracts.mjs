@@ -3,9 +3,8 @@
  *
  * Static content validator for the flag-sunset prompt, agent, and shared skill.
  *
- * Each entry in `contracts` maps one scenario from the deployment/readiness and
- * regression checklists (see tests/validate-plugin-contract.md and
- * tests/workflow-regression-scenarios.md)
+ * Each entry in `contracts` maps one scenario from the regression checklist
+ * (see tests/workflow-regression-scenarios.md)
  * to the specific clauses in the relevant plugin file that make it pass. If a clause
  * is removed or reworded without updating these checks, this script exits non-zero
  * and CI fails.

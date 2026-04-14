@@ -6,52 +6,41 @@ In VS Code, open **Command Palette** and run:
 
 - **Chat: Install Plugin from Source**
 
-Paste one of the following GitHub URLs.
+Paste the following GitHub URL:
 
-### Frozen fallback (recommended for 2026-04-09 fallback)
+```
+https://github.com/tnduong/flag-sunset-plugin
+```
 
-This pins to the immutable tag **v0.1.0**.
+> **Why this URL?** VS Code's plugin installer runs `git clone` on the URL you paste, which clones the **default branch** of the repository. The default branch is set to `stable`, which is only advanced when a new release is approved — so users always get tested code, never in-progress work from `main`.
 
-- `https://github.com/tnduong/flag-sunset-plugin/tree/v0.1.0`
+> **Important:** If installation fails with "repository not found", do not use GitHub web page URLs like `/tree/v1.0.0` or `/releases/tag/v1.0.0` — those are not valid git clone targets.
 
-Notes:
-- Tag: **v0.1.0**
-- Purpose: **deploy for 2026-04-09-fallback**
-- Frozen commit: **66e713bf54993c5635d9c08e66ea68809ae2181e**
+## One-Time GitHub Setup (repo owner only)
 
-### Frozen fallback (release branch)
+After the first release is pushed, set `stable` as the default branch:
 
-This points to a branch created from the same frozen commit:
+1. Go to `https://github.com/tnduong/flag-sunset-plugin/settings/branches`
+2. Under **Default branch**, click the ↕ icon and switch to `stable`
+3. Confirm the change
 
-- `https://github.com/tnduong/flag-sunset-plugin/tree/release/2026-04-09`
-
-Notes:
-- Branch: **release/2026-04-09**
-- Frozen commit: **66e713bf54993c5635d9c08e66ea68809ae2181e**
+This only needs to be done once. All future releases automatically advance `stable` via `create-release.mjs`.
 
 ## How new users should install
 
 1. Ensure you have GitHub access to the private repo **tnduong/flag-sunset-plugin**.
 2. Sign in to GitHub in VS Code if prompted.
-3. Use **Chat: Install Plugin from Source** and paste the **tag URL** for the version you want.
-
-## Deployment plan for Thu 2026-04-09
-
-- If recent changes are not stable: deploy/install from **v0.1.0** (fallback).
-- If recent changes are stable: create a new tag (e.g., **v0.2.0**) on the approved commit and deploy/install from that tag.
+3. Use **Chat: Install Plugin from Source** and paste: `https://github.com/tnduong/flag-sunset-plugin`
 
 ## Upgrading to a New Version
 
-Source-installed plugins pinned to a frozen tag **do not auto-update**. When a new version is released, you must reinstall manually.
+Source-installed plugins do not auto-update. When a new version is released, reinstall manually:
 
 1. Open **Command Palette** in VS Code.
 2. Run **Chat: Install Plugin From Source**.
-3. Paste the new tag URL:
-   ```
-   https://github.com/tnduong/flag-sunset-plugin/tree/vX.Y.Z
-   ```
+3. Paste: `https://github.com/tnduong/flag-sunset-plugin`
 4. Enable the plugin if prompted.
 5. Confirm the upgrade by running `/flag-sunset-plugin:run` — the first output line will show the new version.
 
-The new tag URL for each release is included in the DM notification sent when a version ships.
+The release notification DM will confirm when a new version has been pushed to `stable`.
 

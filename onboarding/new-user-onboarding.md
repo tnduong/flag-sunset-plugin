@@ -81,7 +81,6 @@ Example:
 
 ## 7) Validate setup
 
-Use these checklists:
+Use this checklist:
 
-- `tests/workflow-regression-scenarios.md` (Scenario 22)
-- `tests/validate-plugin-contract.md` (Scenario 11)
+- `tests/workflow-regression-scenarios.md` (Scenarios 11 and 22)
