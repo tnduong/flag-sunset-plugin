@@ -2,7 +2,7 @@
 
 Use this checklist as the formal workflow-regression reference when validating the flag-sunset workflow. For each scenario, work through the numbered steps, then confirm all pass criteria are true.
 
-Each scenario maps to one or more static clauses enforced by `scripts/validate-skill-contracts.mjs`. If the contracts script passes in CI but a scenario fails during manual testing, the contract patterns need to be tightened.
+Most scenarios map to one or more static clauses enforced by `scripts/validate-skill-contracts.mjs`. A small number of operational rollout scenarios remain manual-only. If the contracts script passes in CI but a scenario fails during manual testing, the contract patterns need to be tightened.
 
 ---
 
@@ -390,7 +390,26 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 
 ---
 
-## Scenario 21: dirty working tree gate blocks Step 1 discovery until repositories are clean
+## Scenario 21: definition targets resolve from effective app paths before PATH_ERROR classification
+
+**Setup**
+
+1. Use a workspace that passes all preflight gates.
+2. Use a flag whose definition file lives under an app path that differs from the repository root.
+
+**Steps**
+
+3. Run `/flag-sunset-plugin:run [FLAG_KEY]` through Step 1 definition-file confirmation.
+4. Observe how the workflow derives each definition target and classifies failures.
+
+**Pass criteria**
+
+- [ ] Definition targets are derived from `[effective app path] + [Flag Definition File]`, not from the repository root alone.
+- [ ] `PATH_ERROR` is used only after the exact derived definition target is validated as missing or unreadable.
+
+---
+
+## Scenario 22: dirty working tree gate blocks Step 1 discovery until repositories are clean
 
 **Setup**
 
@@ -412,7 +431,7 @@ Each scenario maps to one or more static clauses enforced by `scripts/validate-s
 
 ---
 
-## Scenario 22: medium workspace autoapproval with grep_search and scope isolation
+## Scenario 23: medium workspace autoapproval with grep_search and scope isolation
 
 **Setup**
 

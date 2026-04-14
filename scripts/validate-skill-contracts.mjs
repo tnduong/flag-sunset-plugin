@@ -25,6 +25,7 @@ const commandPath = path.join(repoRoot, 'commands/flag-sunset.md');
 const agentPath = path.join(repoRoot, 'agents/flag-sunset.agent.md');
 const skillPath = path.join(repoRoot, 'skills/flag-sunset-assets/SKILL.md');
 const preflightPath = path.join(repoRoot, 'skills/flag-sunset-assets/references/preflight-step1.md');
+const searchStrategyPath = path.join(repoRoot, 'skills/flag-sunset-assets/references/search-strategy.md');
 const operatorGoalPath = path.join(repoRoot, 'skills/flag-sunset-assets/references/operator-goal.md');
 
 const files = {
@@ -32,6 +33,7 @@ const files = {
     agent: await readFile(agentPath, 'utf8'),
     skill: await readFile(skillPath, 'utf8'),
     preflight: await readFile(preflightPath, 'utf8'),
+    searchStrategy: await readFile(searchStrategyPath, 'utf8'),
     operatorGoal: await readFile(operatorGoalPath, 'utf8'),
 };
 
@@ -426,22 +428,32 @@ const contracts = [
                 text: 'run exact local usage discovery for the candidate apps with `grep_search`',
             },
             {
-                label: 'Terminal search commands are not used for file discovery',
-                text: 'do not fall back to terminal search commands (`rg`, `grep`, `Select-String`) for file discovery',
+                label: 'Preflight delegates search rules to Canonical Search Rules in search-strategy',
+                text: 'Apply the [Canonical Search Rules](./search-strategy.md#canonical-search-rules) from search-strategy.md',
             },
         ],
     },
     {
-        file: 'preflight',
+        file: 'searchStrategy',
+        scenario: 'Scenario 19: Step 1 search uses grep_search as primary discovery tool (canonical rules)',
+        checks: [
+            {
+                label: 'Terminal search commands are not used for file discovery',
+                text: 'Do not use terminal search commands (`rg`, `grep`, `Select-String`) for file discovery',
+            },
+        ],
+    },
+    {
+        file: 'searchStrategy',
         scenario: 'Scenario 20: searches stay extension-filtered via includePattern and use maxResults retry on zero results',
         checks: [
             {
-                label: 'Step 1 keeps searches extension-filtered by app language via includePattern',
-                text: 'Angular apps (Nova, aya-talent-marketplace) -> `**/*.ts` and `**/*.html` (separate calls)',
+                label: 'Canonical rules keep searches extension-filtered by app language',
+                text: 'Angular apps',
             },
             {
                 label: 'maxResults is not set by default',
-                text: 'do not set `maxResults` by default',
+                text: 'Do not set `maxResults` by default',
             },
             {
                 label: 'Zero-result retry uses maxResults: 100',
