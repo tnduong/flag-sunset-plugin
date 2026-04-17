@@ -26,6 +26,8 @@ Before Step 0:
 5. If repository roots are available and valid, print:
    - `Local roots gate passed: [RepoA]=configured, [RepoB]=configured, ...`
    - validate root existence with an OS-appropriate terminal check before printing the pass line
+   - on Windows PowerShell, use exactly: `$roots = @('[AyaHealthcare/Applications resolved root]', '[AyaHealthcare/aya-talent-marketplace resolved root]'); foreach ($r in $roots) { Write-Output "$r`t$(Test-Path $r)" }`
+   - on macOS/Linux bash/zsh, use exactly: `for d in '[AyaHealthcare/Applications resolved root]' '[AyaHealthcare/aya-talent-marketplace resolved root]'; do echo "$d\t$(test -d "$d" && echo true || echo false)"; done`
 6. Derive the effective local project path for every project row:
    - local repository root + `Path in Repo`
    - if `Path in Repo` is `./`, the effective local project path is the local repository root
@@ -59,6 +61,7 @@ Execution:
    - if this file is missing, unreadable, invalid JSON, or missing required local root keys, continue with the Preflight item 4 setup path
    - do not read local-roots config from any other location
 4. Validate each unique local repository root with an OS-appropriate terminal existence check before any permission prompts.
+   - use the same prescribed command forms as Preflight item 5 above
 5. Reuse the required `## >>>>>> USER ACTION MAY BE REQUIRED NEXT` banner that was printed during Preflight; do not print it again in Step 1.
 6. Derive each app's effective local app path from the registry.
 7. Confirm every effective app path is already present in the active VS Code workspace before any VS Code filesystem or search tool runs.
