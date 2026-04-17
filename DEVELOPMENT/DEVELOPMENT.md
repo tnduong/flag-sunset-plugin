@@ -1,4 +1,4 @@
-# Developer Guide — Flag Sunset Plugin
+# DEVELOPMENT — Flag Sunset Plugin
 
 This guide covers the full loop: workspace setup, making changes, local testing, and shipping to users.
 
@@ -22,7 +22,7 @@ git clone https://github.com/tnduong/flag-sunset-plugin.git
 cd flag-sunset-plugin
 ```
 
-Open the folder in VS Code. When the active workspace is this plugin source repo, Copilot Chat is in **developer mode** — the instructions in `.github/copilot-instructions.md` apply.
+Open the folder in VS Code. When the active workspace is this plugin source repo, Copilot Chat is in **developer mode** — the instructions in `../.github/copilot-instructions.md` apply.
 
 ### 2. Understand the two locations
 

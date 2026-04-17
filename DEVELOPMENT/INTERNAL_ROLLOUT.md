@@ -85,7 +85,7 @@ Recommended medium profile:
 
 - Enable Chat Tools Eligible for Autoapproval for read and search actions used heavily in Step 1.
 - Keep edit-heavy and branch-changing actions gated.
-- Include `rg` and `grep` in terminal autoapproval so Step 1 terminal searches stay low-friction.
+- Keep terminal autoapproval focused on preflight and git branch-gate commands.
 
 Profile selection:
 
@@ -98,8 +98,6 @@ Workspace settings example:
 ```json
 {
 	"chat.tools.terminal.autoApprove": {
-		"rg": true,
-		"grep": true,
 		"Get-Content": true,
 		"Test-Path": true,
 		"Get-Location": true,

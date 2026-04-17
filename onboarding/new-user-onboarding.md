@@ -47,7 +47,7 @@ The workflow will stop at preflight if any required project path is missing.
 Important:
 
 - Keep this at workspace scope, not user scope.
-- `rg` and `grep` are intentionally included for Step 1 search operations.
+- Step 1 file discovery uses VS Code `grep_search` on workspace-confirmed paths.
 - Destructive branch/delete patterns remain gated.
 
 If you use `pwsh` on macOS, you can also use the Windows profile because command names are PowerShell-native.
@@ -77,10 +77,11 @@ Example:
 - `Focus Terminal` prompts can still appear for gated terminal actions.
 - Verify your opened workspace file includes the medium profile.
 - Confirm you edited workspace settings, not user settings.
-- Confirm `rg` is available in the active shell.
 
-## 7) Validate setup
+## 7) Quick setup check
 
-Use this checklist:
+Use this quick check:
 
-- `tests/workflow-regression-scenarios.md` (Scenarios 11 and 22)
+1. Start a new chat session.
+2. Run `/flag-sunset-plugin:run [FLAG_KEY]`.
+3. Confirm you see the preflight output and the Step 0 LaunchDarkly prompt.

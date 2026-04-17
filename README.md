@@ -2,9 +2,12 @@
 
 Private VS Code agent plugin that provides the `/flag-sunset-plugin:run` command for shared LaunchDarkly feature-flag sunset workflows.
 
-For the recommended internal ownership and onboarding model, see `INTERNAL_ROLLOUT.md`.
+For maintainers and plugin developers, see `DEVELOPMENT/README.md`.
 
-To validate the source-install manifest layout locally, run `node scripts/validate-plugin-layout.mjs`.
+## Audience
+
+- USER/Operator docs: this README and `onboarding/new-user-onboarding.md`
+- DEV/Maintainer docs: `DEVELOPMENT/README.md`
 
 ## Install
 
@@ -50,14 +53,7 @@ Use these cutover assets:
 
 - This plugin is distributed outside application repositories.
 - The slash command stays thin and routes to the custom agent; critical safety gates live in the agent plus skill workflow assets.
-- For internal rollout, prefer an organization-owned private repository with team-based access instead of a personal repository.
-- For team onboarding with fewer prompts, use the workspace-scoped medium autoapproval profile in `INTERNAL_ROLLOUT.md` and include `rg` and `grep` in terminal autoapproval.
+- For internal rollout and distribution guidance, see `DEVELOPMENT/INTERNAL_ROLLOUT.md`.
 - Machine-specific checkout roots are not stored in the plugin.
 - For new users, the workflow should store confirmed checkout roots in `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder and keep that file ignored by Git.
 - The installed plugin location, including `%APPDATA%\Code\agentPlugins\github.com\tnduong\flag-sunset-plugin`, is not used for machine-specific config reads or writes.
-
-## Dev Testing
-
-- Dev-only reset helpers are maintained outside this plugin deployment.
-- Current repo-tracked copies live in the Nova workspace under `.github/skills/flag-sunset/` on your testing branch.
-- Use `node scripts/validate-plugin-layout.mjs` before merging manifest-related changes.
