@@ -67,7 +67,7 @@ Permission prompts are an expected part of the workflow.
 5. Preflight should validate repository-root existence with an OS-appropriate terminal check instead of VS Code filesystem reads on parent repository roots.
 6. Step 1 must begin with serial main-refresh and working-tree-cleanliness gates before discovery.
 7. Step 1 must confirm that every required effective app path is already part of the active VS Code workspace before any VS Code filesystem or search tool runs.
-8. Step 1 establishes a minimal permission envelope in the main agent by using terminal search commands on workspace-confirmed app paths (prefer `rg`, otherwise OS-appropriate fallback) and then reading only the concrete file set needed for edits and validation.
+8. Step 1 establishes a minimal permission envelope in the main agent by using `grep_search` on workspace-confirmed app paths and then reading only the concrete file set needed for edits and validation.
 9. If a permission-bearing Step 1 action is interrupted, the workflow may retry that exact blocked item once after approval, then must stop and ask the user whether to retry again or abort.
 10. The workflow should not rely on interpreting every non-default VS Code external-access approval option; instead, it should avoid triggering those prompts for off-workspace config access in the first place.
 11. After Step 1 completes, the default workflow is expected to proceed without further approval prompts.
