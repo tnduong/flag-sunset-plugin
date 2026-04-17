@@ -45,3 +45,25 @@ Opening the same workspace name helps with consistency, but mode is determined b
 If paths differ per machine, keep the same role split:
 - Development mode => edit plugin source repo
 - Operator mode => run installed plugin workflow in the FF-removal workspace
+
+## Why chat.tools.terminal.autoApprove (not alternatives)
+
+The operator workspace file (`ff-removal.code-workspace`) pre-populates `chat.tools.terminal.autoApprove` with scoped regex patterns.
+This is the deliberate choice. The alternatives were evaluated and rejected:
+
+| Option | Pre-configurable in workspace file | Operator friction | Security trade-off |
+|---|---|---|---|
+| `chat.tools.terminal.autoApprove` (current) | ✅ Yes | None after setup | Low — scoped to exact patterns |
+| Autopilot mode | ❌ No (per-session UI choice) | Once per session | Medium |
+| `chat.tools.global.autoApprove` | ✅ Yes | None | High — approves everything |
+| Sandbox (macOS/Linux only) | ✅ Yes | None | Medium — restricted env |
+
+`chat.tools.terminal.autoApprove` is the only option that is pre-configurable in a shared workspace file, scoped to specific safe commands, and works on Windows.
+
+`"Allow for session"` (the runtime prompt option) is ephemeral — it lives in VS Code in-memory state only and resets on every window reload or new session. It cannot be pre-configured in any settings file.
+
+## Why github.copilot.chat.additionalReadAccessFolders
+
+Plugin skill/reference files (SKILL.md, applications.md, preflight-step1.md, etc.) live in the plugin cache folder, which is outside the operator workspace. Without additional access, VS Code prompts once per file per session ("Allow reading external files?").
+
+Setting `github.copilot.chat.additionalReadAccessFolders` to `~/.vscode/agent-plugins/github.com/tnduong/flag-sunset-plugin` in the workspace file grants silent read access to the entire plugin cache. The `~` expansion works on both Windows and macOS. This reduces the operator's required approvals from 5-6 file prompts per run down to 1.

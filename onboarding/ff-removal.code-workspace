@@ -41,6 +41,7 @@
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+update-ref\\b/": true,
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+merge\\s+--ff-only\\b/": true,
       "/^HUSKY=0\\s+git(\\s+(-C\\s+\\S+|--no-pager))*\\s+merge\\s+--ff-only\\b/": true,
+      "/^\\$env:HUSKY='0';\\s*git\\s+-C\\s+'[^']*'\\s+merge\\s+--ff-only\\s+origin\/main;\\s*\\$env:HUSKY=\\$null$/": true,
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+switch\\b/": true,
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+checkout\\s+(-b|-B)\\b/": true,
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+branch\\s+--show-current\\b/": true,

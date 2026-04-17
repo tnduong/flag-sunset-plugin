@@ -75,7 +75,7 @@ Execution:
       - `git -C '[resolved repository root]' rev-parse --is-inside-work-tree`
       - `git -C '[resolved repository root]' fetch origin main`
       - `git -C '[resolved repository root]' switch main`
-      - `$env:HUSKY='0'; git -C '[resolved repository root]' merge --ff-only origin/main; Remove-Item Env:HUSKY -ErrorAction SilentlyContinue`
+      - `$env:HUSKY='0'; git -C '[resolved repository root]' merge --ff-only origin/main; $env:HUSKY=$null`
    - on macOS/Linux shells, run these serial git commands for each repository root, in order:
       - `git -C '[resolved repository root]' rev-parse --is-inside-work-tree`
       - `git -C '[resolved repository root]' fetch origin main`
