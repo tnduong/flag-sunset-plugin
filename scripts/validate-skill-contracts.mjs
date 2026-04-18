@@ -144,6 +144,20 @@ const contracts = [
     },
     {
         file: 'preflight',
+        scenario: 'Scenario 3: stale local-roots — exact cross-platform root check command forms are preserved',
+        checks: [
+            {
+                label: 'Windows PowerShell root existence check command is preserved',
+                text: "on Windows PowerShell, use exactly: `$roots = @('[AyaHealthcare/Applications resolved root]', '[AyaHealthcare/aya-talent-marketplace resolved root]'); foreach ($r in $roots) { Write-Output \"$r`t$(Test-Path $r)\" }`",
+            },
+            {
+                label: 'macOS/Linux root existence check command is preserved',
+                text: "on macOS/Linux bash/zsh, use exactly: `for d in '[AyaHealthcare/Applications resolved root]' '[AyaHealthcare/aya-talent-marketplace resolved root]'; do echo \"$d\\t$(test -d \"$d\" && echo true || echo false)\"; done`",
+            },
+        ],
+    },
+    {
+        file: 'preflight',
         scenario: 'Scenario 4: missing workspace folder — workspace gate fails early',
         checks: [
             {
@@ -493,6 +507,20 @@ const contracts = [
             {
                 label: 'Dirty working tree gate fail path stops before Step 1 discovery edits',
                 text: 'stop immediately with no edits',
+            },
+        ],
+    },
+    {
+        file: 'preflight',
+        scenario: 'Scenario 22: main freshness gate prevents Husky post-merge hook interference with core.hooksPath override',
+        checks: [
+            {
+                label: 'Main freshness guidance requires core.hooksPath override for merge command only',
+                text: 'prevent local Husky post-merge hooks from blocking the gate by overriding `core.hooksPath` for the merge command only',
+            },
+            {
+                label: 'Main freshness merge command uses core.hooksPath override',
+                text: "`git -c core.hooksPath=/dev/null -C '[resolved repository root]' merge --ff-only origin/main`",
             },
         ],
     },
