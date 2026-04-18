@@ -18,6 +18,7 @@
       "/^\\$p\\s*=\\s*Join-Path\\s+\\$env:USERPROFILE\\s+'.copilot\\/flag-sunset\\/local-roots\\.json';\\s*if\\s*\\(Test-Path\\s+\\$p\\)\\s*\\{\\s*Get-Content\\s+-Raw\\s+\\$p\\s*\\}\\s*else\\s*\\{\\s*'FILE_NOT_FOUND'\\s*\\}$/": true,
       "/^\\$apps='[^']+';\\s*\\$atm='[^']+';\\s*\"APPS_EXISTS=\\$\\(\\[bool\\]\\(Test-Path\\s+\\$apps\\)\\)\";\\s*\"ATM_EXISTS=\\$\\(\\[bool\\]\\(Test-Path\\s+\\$atm\\)\\)\"$/": true,
       "/^\\$apps='[^']+';\\s*\\$atm='[^']+';\\s*if\\s*\\(-not\\s*\\(Test-Path\\s+\\$apps\\)\\)\\s*\\{\\s*'MISSING: AyaHealthcare\\/Applications'\\s*\\}\\s*;\\s*if\\s*\\(-not\\s*\\(Test-Path\\s+\\$atm\\)\\)\\s*\\{\\s*'MISSING: AyaHealthcare\\/aya-talent-marketplace'\\s*\\}\\s*;\\s*if\\s*\\(\\(Test-Path\\s+\\$apps\\)\\s*-and\\s*\\(Test-Path\\s+\\$atm\\)\\)\\s*\\{\\s*'ROOTS_OK'\\s*\\}$/": true,
+      "/^\\$roots\\s*=\\s*@\\([^)]*\\);\\s*foreach\\s*\\(\\$r\\s+in\\s+\\$roots\\)\\s*\\{\\s*Write-Output\\s+\"\\$r`t\\$\\(Test-Path\\s+\\$r\\)\"\\s*\\}$/": true,
       "cat": true,
       "pwd": true,
       "test": true,
@@ -38,13 +39,15 @@
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+show-ref\\b/": true,
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+merge-base\\b/": true,
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+update-ref\\b/": true,
-      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+merge\\s+--ff-only\\b/": true,
-      "/^HUSKY=0\\s+git(\\s+(-C\\s+\\S+|--no-pager))*\\s+merge\\s+--ff-only\\b/": true,
+      "/^git(\\s+(-c\\s+\\S+|-C\\s+\\S+|--no-pager))*\\s+merge\\s+--ff-only\\b/": true,
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+switch\\b/": true,
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+checkout\\s+(-b|-B)\\b/": true,
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+branch\\s+--show-current\\b/": true,
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+config\\s+--get\\s+alias\\.status\\b/": true,
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+branch\\b.*\\s-(d|D|m|M|-delete|-force)\\b/": false
-    }
+    },
+    "github.copilot.chat.additionalReadAccessFolders": [
+      "~/.vscode/agent-plugins/github.com/tnduong/flag-sunset-plugin"
+    ]
   }
 }

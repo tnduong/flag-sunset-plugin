@@ -26,6 +26,8 @@ Before Step 0:
 5. If repository roots are available and valid, print:
    - `Local roots gate passed: [RepoA]=configured, [RepoB]=configured, ...`
    - validate root existence with an OS-appropriate terminal check before printing the pass line
+   - on Windows PowerShell, use exactly: `$roots = @('[AyaHealthcare/Applications resolved root]', '[AyaHealthcare/aya-talent-marketplace resolved root]'); foreach ($r in $roots) { Write-Output "$r`t$(Test-Path $r)" }`
+   - on macOS/Linux bash/zsh, use exactly: `for d in '[AyaHealthcare/Applications resolved root]' '[AyaHealthcare/aya-talent-marketplace resolved root]'; do echo "$d\t$(test -d "$d" && echo true || echo false)"; done`
 6. Derive the effective local project path for every project row:
    - local repository root + `Path in Repo`
    - if `Path in Repo` is `./`, the effective local project path is the local repository root
@@ -59,6 +61,7 @@ Execution:
    - if this file is missing, unreadable, invalid JSON, or missing required local root keys, continue with the Preflight item 4 setup path
    - do not read local-roots config from any other location
 4. Validate each unique local repository root with an OS-appropriate terminal existence check before any permission prompts.
+   - use the same prescribed command forms as Preflight item 5 above
 5. Reuse the required `## >>>>>> USER ACTION MAY BE REQUIRED NEXT` banner that was printed during Preflight; do not print it again in Step 1.
 6. Derive each app's effective local app path from the registry.
 7. Confirm every effective app path is already present in the active VS Code workspace before any VS Code filesystem or search tool runs.
@@ -67,17 +70,17 @@ Execution:
    - use OS-appropriate terminal git commands on the resolved repository roots
    - use a fast-forward-only update policy
    - run refresh checks serially, one repository at a time
-   - prevent local Husky post-merge hooks from blocking the gate by disabling Husky for the merge command only
+   - prevent local Husky post-merge hooks from blocking the gate by overriding `core.hooksPath` for the merge command only
    - on Windows PowerShell, run these serial git commands for each repository root, in order:
       - `git -C '[resolved repository root]' rev-parse --is-inside-work-tree`
       - `git -C '[resolved repository root]' fetch origin main`
       - `git -C '[resolved repository root]' switch main`
-      - `$env:HUSKY='0'; git -C '[resolved repository root]' merge --ff-only origin/main; Remove-Item Env:HUSKY -ErrorAction SilentlyContinue`
+      - `git -c core.hooksPath=/dev/null -C '[resolved repository root]' merge --ff-only origin/main`
    - on macOS/Linux shells, run these serial git commands for each repository root, in order:
       - `git -C '[resolved repository root]' rev-parse --is-inside-work-tree`
       - `git -C '[resolved repository root]' fetch origin main`
       - `git -C '[resolved repository root]' switch main`
-      - `HUSKY=0 git -C '[resolved repository root]' merge --ff-only origin/main`
+      - `git -c core.hooksPath=/dev/null -C '[resolved repository root]' merge --ff-only origin/main`
    - treat successful completion of all four commands as success evidence for that repository
    - if one command fails, use the failing command label (`rev-parse`, `fetch`, `switch-main`, or `merge-ff-only`) as the gate-failure reason
    - if every repository refresh succeeds, print:

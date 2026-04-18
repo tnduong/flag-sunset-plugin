@@ -431,7 +431,7 @@ Most scenarios map to one or more static clauses enforced by `scripts/validate-s
 
 ---
 
-## Scenario 23: medium workspace autoapproval with grep_search and scope isolation
+## Scenario 23: medium workspace approval profile and scope isolation
 
 **Setup**
 
@@ -445,12 +445,14 @@ Most scenarios map to one or more static clauses enforced by `scripts/validate-s
 
 4. Run `/flag-sunset-plugin:run [FLAG_KEY]` through Step 1 on the normal path.
 5. Observe that Step 1 uses `grep_search` for all file discovery searches.
-6. Record prompt count and prompt phase boundaries (Preflight, Step 1, post-Step 1).
-7. Open an unrelated workspace and run a simple chat action that would require approval in that workspace.
+6. Confirm plugin-cache skill/reference reads do not prompt in this workspace after opening a new chat.
+7. Record prompt count and prompt phase boundaries (Preflight, Step 1, post-Step 1).
+8. Open an unrelated workspace and run a simple chat action that would require approval in that workspace.
 
 **Pass criteria**
 
-- [ ] `grep_search` is autoapproved and Step 1 uses it for all file discovery.
+- [ ] Step 1 uses `grep_search` for all file discovery searches.
+- [ ] Plugin-cache reads are silent in the FF-removal workspace due to workspace-scoped additional read access.
 - [ ] Prompt volume is reduced on the FF-removal workspace run compared to baseline.
 - [ ] No unexpected approval churn appears after Step 1 on the normal path.
 - [ ] Autoapproval behavior does not leak into the unrelated workspace.
