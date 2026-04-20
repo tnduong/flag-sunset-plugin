@@ -30,6 +30,7 @@
       "Get-Date": true,
       "Get-Location": true,
       "Write-Output": true,
+      "/^\\$start=\\[datetimeoffset\\]'[^']+';\\s*\\$end=Get-Date;\\s*\\$elapsed=\\[math\\]::Round\\(\\(New-TimeSpan\\s+-Start\\s+\\$start\\s+-End\\s+\\$end\\)\\.TotalMinutes,2\\);\\s*Write-Output\\s+\"Step1Start=.*\";\\s*Write-Output\\s+\"RunEnd=.*\";\\s*Write-Output\\s+\"ElapsedMinutes=.*\"$/": true,
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+status\\b/": true,
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+log\\b/": true,
       "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+show\\b/": true,
