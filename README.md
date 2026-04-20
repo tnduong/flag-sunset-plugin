@@ -1,5 +1,7 @@
 # Flag Sunset Plugin
 
+![version](https://img.shields.io/badge/version-1.0.1-blue)
+
 Private VS Code agent plugin that provides the `/flag-sunset-plugin:run` command for shared LaunchDarkly feature-flag sunset workflows.
 
 For maintainers and plugin developers, see `DEVELOPMENT/README.md`.
