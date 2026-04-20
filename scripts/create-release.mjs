@@ -4,9 +4,10 @@
  *
  * Automates the flag-sunset-plugin release process:
  *   1. Validates the repo state (branch, cleanliness, layout, version consistency)
- *   2. Commits plugin.json if it is the only staged/unstaged change
- *   3. Creates an annotated git tag
- *   4. Pushes the commit and tag to origin
+ *   2. Updates the version badge in README.md
+ *   3. Commits plugin.json and README.md
+ *   4. Creates an annotated git tag
+ *   5. Pushes the commit and tag to origin
  *
  * Usage:
  *   node scripts/create-release.mjs [--dry-run]
@@ -21,7 +22,7 @@
  */
 
 import { execSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -102,6 +103,20 @@ if (nestedManifest.version !== version) {
 }
 ok(`Version consistent across manifests (${version})`);
 
+// 4a. README badge must reference the current version (or will be patched)
+const readmePath = path.join(repoRoot, 'README.md');
+const readmeContent = readFileSync(readmePath, 'utf8');
+const badgeRegex = /!\[version\]\(https:\/\/img\.shields\.io\/badge\/version-([\d.]+)-blue\)/;
+const badgeMatch = readmeContent.match(badgeRegex);
+if (!badgeMatch) {
+    fail('README.md is missing the version badge. Expected: ![version](https://img.shields.io/badge/version-X.Y.Z-blue)');
+}
+if (badgeMatch[1] !== version) {
+    info(`README.md badge is on ${badgeMatch[1]} — will be updated to ${version}`);
+} else {
+    ok(`README.md badge already at ${version}`);
+}
+
 // 4. Run the layout validator
 try {
     execSync('node scripts/validate-plugin-layout.mjs', { cwd: repoRoot, stdio: 'pipe' });
@@ -173,7 +188,7 @@ console.log(`
 ─────────────────────────────────────────────
   Release plan for ${tag}${isDryRun ? '  [DRY RUN]' : ''}
 ─────────────────────────────────────────────
-  git add plugin.json
+  git add plugin.json README.md
   git commit -m "release: ${version}"
   git tag -a ${tag} -m "Release ${tag}"
   git branch -f stable main
@@ -203,7 +218,16 @@ if (!isDryRun) {
 // Execute
 // ---------------------------------------------------------------------------
 
-run('git add plugin.json');
+// Patch README badge to the release version
+const updatedReadme = readmeContent.replace(badgeRegex, `![version](https://img.shields.io/badge/version-${version}-blue)`);
+if (!isDryRun) {
+    writeFileSync(readmePath, updatedReadme, 'utf8');
+    ok(`README.md badge updated to ${version}`);
+} else {
+    info(`${label}Would update README.md badge to ${version}`);
+}
+
+run('git add plugin.json README.md');
 run(`git commit -m "release: ${version}"`);
 run(`git tag -a ${tag} -m "Release ${tag}"`);
 
