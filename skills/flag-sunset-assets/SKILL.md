@@ -57,6 +57,7 @@ Rules:
 - If a permission-bearing tool call does not return a success result, do not continue with additional reads, searches, or reasoning-only progress messages in the same run state.
 - Do not ask the Step 0 LaunchDarkly question until all required preflight gates have passed and those pass lines have been printed.
 - If any gate fails, stop and ask the user.
+- After `Step 1 complete` is printed, the concrete future work set is frozen. Do not run new discovery or confirmation searches at any later step.
 ## Preflight
 Before Step 0:
 1. Run the full Preflight procedure in [preflight-step1.md](./references/preflight-step1.md#preflight).
@@ -98,12 +99,14 @@ Minimum required output from Step 2:
 Print the full per-app mapping before any usage scan using the exact format defined in [search-strategy.md](./references/search-strategy.md#step-2---read-the-exact-constant-name).
 If the mapping cannot be completed, stop and ask the user.
 ## Step 3: Branch Gate
+Print immediately on entering Step 3: `Step 3 started: creating removal branch.`
+Do not run any discovery or confirmation searches before or during branch creation. All edit evidence comes from the frozen Step 2 future work set.
 Before any edits:
 1. Determine the affected repositories.
 2. For each affected repository, update the local `main` branch from `origin/main` before creating the removal branch.
 3. Create or switch each affected repository to `[FLAG_KEY]-ff-removal` from the updated `main` branch.
 4. Print branch proof for each affected repository.
-5. If branch proof cannot be established, stop with no edits.
+5. If branch proof cannot be established, print `Blocked item: [command] [repo]` and stop with no edits.
 ## Step 4: Edit Scope
 Edit only files proven by Step 2.
 Rules:
@@ -127,6 +130,7 @@ Rules:
   - count or length assertions on collections modified by the now-unconditional code (e.g. `.toEqual(7)` when the unconditional splice produces 8 entries)
   - C#: `Assert.Null(result.Property)` when the property is now unconditionally populated, `Assert.Equal(oldValue, ...)` on values that changed, or `Mock.Verify(...)` call counts that changed because a conditional call became unconditional
   Update these assertions to match the new unconditional behavior. These assertions do not reference the removed flag symbol directly, so symbol-driven grep will not find them — you must trace from each source-file edit to determine what downstream values changed and check the spec for stale expectations.
+  **Required:** as each source edit is applied, append a behavioral change entry: `file:property old→new` (e.g. `team-info.component.ts:showWfdRecruiter false→true`, `team-info.component.ts:entries.length 7→8`). This inventory is mandatory input for Step 5.
 ## Step 5: Static Validation Only
 Run static validation only.
 Minimum checks:
@@ -139,7 +143,9 @@ Minimum checks:
 - **test file check (C#):** for every edited Service or Repository class, verify the paired `*Tests.cs` has zero remaining `Mock.Setup(...)` calls for the removed flag constant and no surviving losing-path test methods; if references remain, edit the test file to remove them
 - **test rename check:** grep all edited test files for method/block names containing `WhenFeatureFlagEnabled`, `WhenFlagEnabled`, `When_FF_Enabled`, or similar flag-conditional qualifiers related to the removed flag; any remaining match must be renamed to remove the qualifier
 - **losing-path test deletion check:** grep all edited test files for method/block names containing `WhenFeatureFlagDisabled`, `WhenFlagDisabled`, `When_FF_Disabled`, or similar; any remaining match must be deleted entirely
-- **behavioral assertion check:** for every source-file edit that changed a conditional value to unconditional or made a conditional code path always-execute (e.g. an array splice, a property assignment, a ternary collapse), verify that co-located spec/test files have no stale assertions on the affected output values. For each such edit, identify the concrete old losing-path value and search the test file for that literal value in assertion contexts. TS: `expect(…).toEqual(OLD_VALUE)`, object literals with `property: OLD_VALUE`. C#: `Assert.Equal(OLD_VALUE, …)`, `Assert.Null(result.Property)`, `Mock.Verify(…, Times.Never)`. If a match is found and the value has changed due to the removal, update the assertion to the new value.
+- **behavioral assertion check:** for every entry in the Step 4 behavioral change inventory, grep the paired spec/test file for the old literal value in assertion contexts (TS: `expect(…).toEqual(OLD)`, object literals with `property: OLD`; C#: `Assert.Equal(OLD, …)`, `Assert.Null(…)`, `Mock.Verify(…, Times.Never)`). If found, update the assertion to the new value. This grep is not optional — run it for every inventory entry even if you believe no spec references it.
+Each check listed above runs exactly once per file. Do not repeat a check that already passed.
+Scope all reference searches to source files only. Exclude generated outputs, build artifacts, and cache directories (e.g. `.angular/cache`, `bin/`, `obj/`, `dist/`).
 If validation fails, fix the issue and rerun Step 5. Do not run automated build or test commands.
 ## Step 6: Final Output
 Print a compact summary containing:
