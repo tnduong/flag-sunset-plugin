@@ -79,8 +79,8 @@ Execution:
      - `Commit, stash, or discard local changes, then rerun flag-sunset.`
      - stop immediately with no edits
 10. Before discovery, run this serially for each unique repository in [applications.md](../applications.md): `git -C '[resolved repository root]' show-ref --verify --quiet 'refs/heads/[FLAG_KEY]-ff-removal'`.
-   - if any branch exists, print `Branch precheck failed: [RepoX]=[FLAG_KEY]-ff-removal already exists` and `Delete the existing local removal branch, then rerun flag-sunset.`, then stop immediately with no edits
-   - otherwise continue to discovery with no pass line
+   - Determine branch existence by command exit status only (not command output); in Windows PowerShell, read `$LASTEXITCODE` immediately after the command.
+   - Exit status outcomes (all shells): `0` => branch exists; print `Branch precheck failed: [RepoX]=[FLAG_KEY]-ff-removal already exists` and `Delete the existing local removal branch, then rerun flag-sunset.`, then stop immediately with no edits. `1` => branch missing; continue with no pass line. Any other code => git error; stop and ask the user.
 11. Using only the main agent, confirm the raw flag key in each app's definition target with `grep_search` and determine the candidate app set.
    - all definition-file and usage searches use `grep_search` (VS Code workspace tool) on workspace-confirmed paths; Apply the [Canonical Search Rules](./search-strategy.md#canonical-search-rules) from search-strategy.md for tool choice, scope, extension filters, and maxResults policy; do not use `list_dir`, run `get_errors` at app-root scope, or batch permission-bearing `read_file` calls during Step 1
    - resolve each definition target as: `[effective app path] + [Flag Definition File]`; do not resolve definition targets from repository root alone
