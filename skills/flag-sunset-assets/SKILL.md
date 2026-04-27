@@ -82,10 +82,10 @@ Print immediately on entering Step 3: `Step 3 started: creating removal branch.`
 Do not run any discovery or confirmation searches before or during branch creation. All edit evidence comes from the frozen Step 2 future work set.
 Before any edits:
 1. Determine the affected repositories.
-2. For each affected repository, update the local `main` branch from `origin/main` before creating the removal branch.
-3. Create or switch each affected repository to `[FLAG_KEY]-ff-removal` from the updated `main` branch.
-4. Print branch proof for each affected repository.
-5. If branch proof cannot be established, stop with no edits. Print `Blocked item: [command] [repo]` before stopping.
+2. For each affected repository, update the local `main` branch from `origin/main`.
+3. If a local branch `[FLAG_KEY]-ff-removal` already exists in any affected repository, stop with no edits and tell the user to delete it.
+4. Create `[FLAG_KEY]-ff-removal` from `main` using `switch -c` in each affected repository.
+5. Print branch proof for each affected repository. If branch proof fails, stop with no edits.
 ## Step 4: Edit Scope
 Edit only files proven by Step 2.
 Rules:

@@ -78,8 +78,11 @@ Execution:
      - `Dirty working tree gate failed: [RepoX]=dirty`
      - `Commit, stash, or discard local changes, then rerun flag-sunset.`
      - stop immediately with no edits
-10. All definition-file and usage searches use `grep_search` (VS Code workspace tool) on workspace-confirmed paths. Apply the [Canonical Search Rules](./search-strategy.md#canonical-search-rules) from search-strategy.md for tool choice, scope, extension filters, and maxResults policy. Do not use `list_dir`, run `get_errors` at app-root scope, or batch permission-bearing `read_file` calls during Step 1.
+10. Before discovery, run this serially for each unique repository in [applications.md](../applications.md): `git -C '[resolved repository root]' show-ref --verify --quiet 'refs/heads/[FLAG_KEY]-ff-removal'`.
+   - if any branch exists, print `Branch precheck failed: [RepoX]=[FLAG_KEY]-ff-removal already exists` and `Delete the existing local removal branch, then rerun flag-sunset.`, then stop immediately with no edits
+   - otherwise continue to discovery with no pass line
 11. Using only the main agent, confirm the raw flag key in each app's definition target with `grep_search` and determine the candidate app set.
+   - all definition-file and usage searches use `grep_search` (VS Code workspace tool) on workspace-confirmed paths; Apply the [Canonical Search Rules](./search-strategy.md#canonical-search-rules) from search-strategy.md for tool choice, scope, extension filters, and maxResults policy; do not use `list_dir`, run `get_errors` at app-root scope, or batch permission-bearing `read_file` calls during Step 1
    - resolve each definition target as: `[effective app path] + [Flag Definition File]`; do not resolve definition targets from repository root alone
    - classify an app as `PATH_ERROR` only after validating that exact derived definition target path is missing or unreadable
    - use `grep_search` with `isRegexp: false` and `includePattern` scoped to the definition file's containing directory with the appropriate extension glob; for apps with no definition file (e.g. QaAutomation), search the app's `Search Scope` for the raw flag key string with the app's language extension filter
@@ -91,7 +94,7 @@ Execution:
      - If any matched file is missing, add it, run targeted `read_file` ranges for the new match lines, and update before proceeding.
      - If the `grep_search` scope does not match the app's resolved scope (`Search Scope` when present, otherwise the effective app path), print `STEP_1_INCOMPLETE: invalid search scope for [app]=[actual root]` and stop.
      - If any matched file remains untracked after the update, print `STEP_1_INCOMPLETE: untracked matches found for [app]=[untracked files]` and stop.
-     - Proceed to item 13 only when all `MATCH` apps pass the completion gate.
+   - Proceed to item 13 only when all `MATCH` apps pass the completion gate.
 13. Read each file in the concrete future work set with `read_file` to trigger any remaining file-scoped approvals:
    - **Definition files**: read in full (small, authoritative identifier source).
    - **All other files**: read ±30 lines around each `grep_search` match line from item 12; expand if the logical block is not fully contained; merge overlapping ranges into one call per file; complete all ranges for a file before moving to the next.

@@ -280,7 +280,19 @@ const contracts = [
             },
             {
                 label: 'Branch proof failure stops with no edits',
-                text: 'If branch proof cannot be established, stop with no edits.',
+                text: 'If branch proof fails, stop with no edits.',
+            },
+            {
+                label: 'Existing ff-removal branch blocks Step 3',
+                text: 'already exists in any affected repository, stop with no edits',
+            },
+            {
+                label: 'Stale branch gate tells user to delete existing branch',
+                text: 'tell the user to delete it',
+            },
+            {
+                label: 'Branch creation uses switch -c to ensure new branch from main',
+                text: 'switch -c',
             },
         ],
     },
