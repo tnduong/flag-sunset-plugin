@@ -23,7 +23,7 @@ Canonical user-facing prompt text is documented in [user-prompts.md](./reference
 Print before Step 0:
 `Execution mode locked: flag-sunset (branch creation required, no automated build/test).`
 Print immediately after the execution-mode line:
-- `Plugin version: 1.0.0`
+- `Plugin version: 1.0.1`
 - `Preflight start: validating local repository roots and workspace membership.`
 Rules:
 - No automated build or test commands.

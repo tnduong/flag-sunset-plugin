@@ -7,7 +7,7 @@ This folder is for plugin developers and maintainers.
 - `DEVELOPMENT.md`: primary developer workflow (edit, test, validate, release)
 - `INTERNAL_ROLLOUT.md`: org rollout, ownership, and distribution guidance
 - `workspace-modes.md`: developer vs operator mode contract and source-vs-cache rules
-- `cutover/`: benchmark and transition scripts used by maintainers
+- `helper/`: test-state reset scripts for macOS and Windows
 
 ## Audience Split
 

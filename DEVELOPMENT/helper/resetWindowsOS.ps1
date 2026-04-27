@@ -25,11 +25,9 @@ if (-not $novaRoot) {
 }
 
 $workspaceLocalRootsFile = Join-Path $novaRoot '.copilot/flag-sunset/local-roots.json'
-$localRootsFile = Join-Path $HOME '.copilot/flag-sunset/local-roots.json'
 
 $standardPaths = @(
     $workspaceLocalRootsFile,
-    $localRootsFile,
     (Join-Path $codeAppSupport 'Cache'),
     (Join-Path $codeAppSupport 'CachedData'),
     (Join-Path $codeAppSupport 'GPUCache')
@@ -49,7 +47,7 @@ foreach ($arg in $args) {
         }
         '--help' {
             Write-Host 'Usage:'
-            Write-Host '  pwsh -ExecutionPolicy Bypass -File .\cleanup.ps1 [--aggressive]'
+            Write-Host '  pwsh -ExecutionPolicy Bypass -File .\resetWindowsOS.ps1 [--aggressive]'
             Write-Host ''
             Write-Host 'Behavior:'
             Write-Host '  - Removes the saved flag-sunset local-roots file.'
