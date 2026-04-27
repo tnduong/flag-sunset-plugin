@@ -3,17 +3,21 @@ $ErrorActionPreference = 'Stop'
 $scriptLabel = 'flag-sunset test reset (Windows)'
 $codeAppSupport = Join-Path $env:APPDATA 'Code'
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$candidateNovaRoots = @(
-    (Join-Path (Split-Path -Parent $scriptDir) 'Applications\Nova'),
-    (Join-Path (Split-Path -Parent $scriptDir) 'Nova')
-)
 
 $novaRoot = $null
-foreach ($candidate in $candidateNovaRoots) {
-    if (Test-Path $candidate) {
-        $novaRoot = (Resolve-Path $candidate).Path
-        break
+$searchDir = $scriptDir
+while ($searchDir) {
+    $parent = Split-Path -Parent $searchDir
+    if (-not $parent -or $parent -eq $searchDir) { break }
+    foreach ($suffix in @('Applications\Nova', 'Nova')) {
+        $candidate = Join-Path $parent $suffix
+        if (Test-Path $candidate) {
+            $novaRoot = (Resolve-Path $candidate).Path
+            break
+        }
     }
+    if ($novaRoot) { break }
+    $searchDir = $parent
 }
 
 if (-not $novaRoot) {
