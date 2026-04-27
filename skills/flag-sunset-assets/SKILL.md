@@ -17,7 +17,7 @@ This workflow is the required entry point for any feature-flag removal request w
 ## User Guide
 Operator onboarding, prerequisites, prompts, and workflow notes are documented in [README.md](./README.md).
 The operator experience goal is documented in [operator-goal.md](./references/operator-goal.md).
-Detailed Preflight and Step 1 procedures are documented in [preflight-step1.md](./references/preflight-step1.md).
+Detailed Preflight and Step 1 procedures are documented in [preflight-and-discovery.md](./references/preflight-and-discovery.md).
 Canonical user-facing prompt text is documented in [user-prompts.md](./references/user-prompts.md).
 ## Runtime Policy
 Print before Step 0:
@@ -33,7 +33,7 @@ Rules:
 - A workflow change is not complete if it reintroduces expected permission prompts after Step 1, unless the exception is explicitly documented and justified in the workflow assets.
 - Use VS Code prompt UI for workflow questions that require a user reply, using the canonical prompt sections in [user-prompts.md](./references/user-prompts.md). If prompt UI is unavailable, fall back to plain chat with equivalent choices and unchanged gate behavior.
 - `read_file` and `get_errors` remain the default VS Code tools on workspace-confirmed paths.
-- Local-roots resolution is defined only in [preflight-step1.md](./references/preflight-step1.md#preflight). Do not use alternate config locations outside that procedure.
+- Local-roots resolution is defined only in [preflight-and-discovery.md](./references/preflight-and-discovery.md#preflight). Do not use alternate config locations outside that procedure.
 - When a terminal command is required, use an OS-appropriate form for the active shell. On Windows PowerShell, prefer `Test-Path` and `Get-Date`; on macOS/Linux, prefer `test -d` and `date`.
 - Preflight local-root validation must use an OS-appropriate terminal existence check on the resolved repository roots; do not use `list_dir`, `read_file`, or other VS Code filesystem tools on parent repository roots for existence checks.
 - Step 1 entry must run main freshness and working-tree validation on each resolved repository root with OS-appropriate terminal git commands before discovery may begin.
@@ -41,13 +41,13 @@ Rules:
 - Machine-specific checkout roots must not be stored in the plugin. Prefer `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder, ignored by Git. Do not create, repair, or write configuration files inside the plugin directory.
 - The current VS Code workspace must include every project listed in [applications.md](./applications.md) before Step 0 may begin.
 - No file edits before branch proof is printed.
-- Permission-bearing tool calls in Step 1 must run serially; do not batch them. Any canceled, dismissed, timed-out, or interrupted result is `STEP_1_INCOMPLETE` — stop and print the current blocked item and latest resumable status line; do not continue with further tool calls, reads, searches, or reasoning-only progress messages. Do not automatically retry the same blocked item more than once in the same run; follow the full state model in [preflight-step1.md](./references/preflight-step1.md#step-1-permissions-and-start-clock).
+- Permission-bearing tool calls in Step 1 must run serially; do not batch them. Any canceled, dismissed, timed-out, or interrupted result is `STEP_1_INCOMPLETE` — stop and print the current blocked item and latest resumable status line; do not continue with further tool calls, reads, searches, or reasoning-only progress messages. Do not automatically retry the same blocked item more than once in the same run; follow the full state model in [preflight-and-discovery.md](./references/preflight-and-discovery.md#step-1-permissions-and-start-clock).
 - Do not ask the Step 0 LaunchDarkly question until all required preflight gates have passed and those pass lines have been printed.
 - If any gate fails, stop and ask the user.
 - After `Step 1 complete` is printed, the concrete future work set is frozen. Do not run new discovery or confirmation searches at any later step.
 ## Preflight
 Before Step 0:
-1. Run the full Preflight procedure in [preflight-step1.md](./references/preflight-step1.md#preflight).
+1. Run the full Preflight procedure in [preflight-and-discovery.md](./references/preflight-and-discovery.md#preflight).
 2. Print all required pass and fail lines exactly as defined there.
 3. Stop immediately with no Step 0 prompt and no edits on any Preflight gate failure.
 ## Step 0: LaunchDarkly Final State
@@ -61,7 +61,7 @@ Before Step 0:
 Required line before Step 1:
 `Step 0 complete: LaunchDarkly PROD state captured; proceeding to Step 1 permissions.`
 ## Step 1: Permissions and Start Clock
-Run the full Step 1 state model and execution procedure in [preflight-step1.md](./references/preflight-step1.md#step-1-permissions-and-start-clock).
+Run the full Step 1 state model and execution procedure in [preflight-and-discovery.md](./references/preflight-and-discovery.md#step-1-permissions-and-start-clock).
 Required line before Step 2:
 `Step 1 complete: permission envelope established; proceeding to Step 2 without further approval prompts.`
 ## Step 2: Discover Impact

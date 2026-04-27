@@ -32,7 +32,7 @@ The intended operator experience is documented in [operator-goal.md](./reference
 
 ## One-Time Machine Setup
 
-Local-roots behavior is defined by the Preflight contract in [preflight-step1.md](./references/preflight-step1.md#preflight).
+Local-roots behavior is defined by the Preflight contract in [preflight-and-discovery.md](./references/preflight-and-discovery.md#preflight).
 
 Preferred path for new users:
 - `Nova/.copilot/flag-sunset/local-roots.json`
@@ -63,7 +63,7 @@ Permission prompts are an expected part of the workflow.
 1. Preflight may ask for the shared parent folder if no usable local-roots config is available.
 2. Preflight asks for confirmation before persisting and using the derived repository roots.
 3. Step 0 always shows Prompt 3 from [user-prompts.md](./references/user-prompts.md) immediately after the preflight workspace gate passes.
-4. Preflight local-roots resolution follows [preflight-step1.md](./references/preflight-step1.md#preflight) exactly.
+4. Preflight local-roots resolution follows [preflight-and-discovery.md](./references/preflight-and-discovery.md#preflight) exactly.
 5. Preflight should validate repository-root existence with an OS-appropriate terminal check instead of VS Code filesystem reads on parent repository roots.
 6. Step 1 must begin with serial main-refresh and working-tree-cleanliness gates before discovery.
 7. Step 1 must confirm that every required effective app path is already part of the active VS Code workspace before any VS Code filesystem or search tool runs.

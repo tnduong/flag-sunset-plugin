@@ -64,6 +64,6 @@ This is the deliberate choice. The alternatives were evaluated and rejected:
 
 ## Why github.copilot.chat.additionalReadAccessFolders
 
-Plugin skill/reference files (SKILL.md, applications.md, preflight-step1.md, etc.) live in the plugin cache folder, which is outside the operator workspace. Without additional access, VS Code prompts once per file per session ("Allow reading external files?").
+Plugin skill/reference files (SKILL.md, applications.md, preflight-and-discovery.md, etc.) live in the plugin cache folder, which is outside the operator workspace. Without additional access, VS Code prompts once per file per session ("Allow reading external files?").
 
 Setting `github.copilot.chat.additionalReadAccessFolders` to `~/.vscode/agent-plugins/github.com/tnduong/flag-sunset-plugin` in the workspace file grants silent read access to the entire plugin cache. The `~` expansion works on both Windows and macOS. This reduces the operator's required approvals from 5-6 file prompts per run down to 1.

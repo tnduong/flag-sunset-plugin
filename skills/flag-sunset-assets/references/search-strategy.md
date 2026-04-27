@@ -1,11 +1,11 @@
 # Search Strategy
 ## Overview
 Preferred flow: local definition-file confirmation -> exact local usage search -> concrete future work set. Read the application registry from [../applications.md](../applications.md) before starting.
-This workflow must resolve machine-specific local repository roots before starting by following [preflight-step1.md](./preflight-step1.md#preflight). Local-first discovery preserves branch-local correctness, provides narrow file/line evidence for safe edits, and seeds the permission envelope to avoid post-Step-1 prompts.
+This workflow must resolve machine-specific local repository roots before starting by following [preflight-and-discovery.md](./preflight-and-discovery.md#preflight). Local-first discovery preserves branch-local correctness, provides narrow file/line evidence for safe edits, and seeds the permission envelope to avoid post-Step-1 prompts.
 Before any search, derive each app's effective local app path: map `Repository` to the resolved local root, then effective app path = local repository root + `Path in Repo` (if `./`, use the root itself). Derive app discovery scope from `Search Scope` (repository-root-relative); if omitted, default to the effective app path.
 
 ## Canonical Search Rules
-All `grep_search` calls in this workflow must follow these rules, referenced by [preflight-step1.md](./preflight-step1.md) and the steps below as the single source of truth.
+All `grep_search` calls in this workflow must follow these rules, referenced by [preflight-and-discovery.md](./preflight-and-discovery.md) and the steps below as the single source of truth.
 
 1. **Tool choice:** Use `grep_search` (VS Code workspace tool) with `isRegexp: false` for all identifier and raw-key searches. Do not use terminal search commands (`rg`, `grep`, `Select-String`) for file discovery. Terminal commands are reserved for git operations and path validation only.
 2. **Scope:** Scope every search to the app's resolved search path via `includePattern`; use the `Search Scope` from the registry when present, otherwise use the effective app path. Do not fall back to a whole-repository all-file scan when an app search root is known.
@@ -48,7 +48,7 @@ Apply the [Canonical Search Rules](#canonical-search-rules) for every `grep_sear
 ## Step 4 - Permission Envelope Use
 Use the same main-agent discovery pass to seed approvals before Step 1 completes.
 Rules:
-- Before any VS Code filesystem or search tool runs, validate local roots with OS-appropriate terminal existence checks and confirm every effective app path is present in the active workspace. Local-roots resolution must follow [preflight-step1.md](./preflight-step1.md#preflight). If any required path is missing, stop with workspace-gate failure.
+- Before any VS Code filesystem or search tool runs, validate local roots with OS-appropriate terminal existence checks and confirm every effective app path is present in the active workspace. Local-roots resolution must follow [preflight-and-discovery.md](./preflight-and-discovery.md#preflight). If any required path is missing, stop with workspace-gate failure.
 - Apply the [Canonical Search Rules](#canonical-search-rules) for all file discovery searches. Do not use `list_dir` as part of the default permission envelope.
 - Use `read_file` only for files in the concrete future work set: definition files in full; all others as targeted ranges anchored to grep-discovered match lines (±30 lines, expanded to contain the full logical block, merged when overlapping). The grep line numbers from Step 3 are the authoritative coverage list. Defer `get_errors` until Step 5 and scope it to edited files only, unless a Step 1 fallback requires file-scoped diagnostics.
 - Do not use subagents after Step 1 begins. Use OS-appropriate terminal commands for path validation.
