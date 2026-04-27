@@ -23,7 +23,7 @@ const repoRoot = path.resolve(__dirname, '..');
 const commandPath = path.join(repoRoot, 'commands/flag-sunset.md');
 const agentPath = path.join(repoRoot, 'agents/flag-sunset.agent.md');
 const skillPath = path.join(repoRoot, 'skills/flag-sunset-assets/SKILL.md');
-const preflightPath = path.join(repoRoot, 'skills/flag-sunset-assets/references/preflight-step1.md');
+const preflightPath = path.join(repoRoot, 'skills/flag-sunset-assets/references/preflight-and-discovery.md');
 const searchStrategyPath = path.join(repoRoot, 'skills/flag-sunset-assets/references/search-strategy.md');
 const operatorGoalPath = path.join(repoRoot, 'skills/flag-sunset-assets/references/operator-goal.md');
 
@@ -110,7 +110,7 @@ const contracts = [
         checks: [
             {
                 label: 'Local-roots resolution is centralized in preflight procedure',
-                text: 'Local-roots resolution is defined only in [preflight-step1.md](./references/preflight-step1.md#preflight). Do not use alternate config locations outside that procedure.',
+                text: 'Local-roots resolution is defined only in [preflight-and-discovery.md](./references/preflight-and-discovery.md#preflight). Do not use alternate config locations outside that procedure.',
             },
             {
                 label: 'Workflow questions use VS Code prompt UI with fallback behavior',
@@ -280,7 +280,19 @@ const contracts = [
             },
             {
                 label: 'Branch proof failure stops with no edits',
-                text: 'If branch proof cannot be established, stop with no edits.',
+                text: 'If branch proof fails, stop with no edits.',
+            },
+            {
+                label: 'Existing ff-removal branch blocks Step 3',
+                text: 'already exists in any affected repository, stop with no edits',
+            },
+            {
+                label: 'Stale branch gate tells user to delete existing branch',
+                text: 'tell the user to delete it',
+            },
+            {
+                label: 'Branch creation uses switch -c to ensure new branch from main',
+                text: 'switch -c',
             },
         ],
     },

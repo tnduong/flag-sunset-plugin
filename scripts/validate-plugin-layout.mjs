@@ -26,8 +26,11 @@ const assertExists = async (relativePath, message) => {
   }
 };
 
+const rootManifest = await readJson('plugin.json');
 const pluginManifest = await readJson('.claude-plugin/plugin.json');
 const marketplaceManifest = await readJson('.claude-plugin/marketplace.json');
+
+assertEqual(pluginManifest.version, rootManifest.version, 'Nested plugin manifest version must match root plugin.json version');
 
 assertEqual(pluginManifest.agents, '../agents', 'Nested plugin manifest must point to the repo-root agents folder');
 assertEqual(pluginManifest.commands, '../commands', 'Nested plugin manifest must point to the repo-root commands folder');

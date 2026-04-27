@@ -167,6 +167,8 @@ node scripts/validate-skill-contracts.mjs
 
 Both scripts exit non-zero on failure and print a specific error message. Fix all errors before requesting review.
 
+These same scripts also run in CI via `.github/workflows/validate-plugin-layout.yml` on every push to `main` and on pull requests.
+
 ---
 
 ## Shipping a Release to Users

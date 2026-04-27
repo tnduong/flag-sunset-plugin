@@ -30,21 +30,13 @@
       "Get-Date": true,
       "Get-Location": true,
       "Write-Output": true,
-      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+status\\b/": true,
-      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+log\\b/": true,
-      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+show\\b/": true,
-      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+diff\\b/": true,
-      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+fetch\\b/": true,
-      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+rev-parse\\b/": true,
-      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+show-ref\\b/": true,
-      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+merge-base\\b/": true,
-      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+update-ref\\b/": true,
-      "/^git(\\s+(-c\\s+\\S+|-C\\s+\\S+|--no-pager))*\\s+merge\\s+--ff-only\\b/": true,
-      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+switch\\b/": true,
-      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+checkout\\s+(-b|-B)\\b/": true,
-      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+branch\\s+--show-current\\b/": true,
-      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+config\\s+--get\\s+alias\\.status\\b/": true,
-      "/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+branch\\b.*\\s-(d|D|m|M|-delete|-force)\\b/": false
+      "/^\\$start=\\[datetimeoffset\\]'[^']+';\\s*\\$end=Get-Date;\\s*\\$elapsed=\\[math\\]::Round\\(\\(New-TimeSpan\\s+-Start\\s+\\$start\\s+-End\\s+\\$end\\)\\.TotalMinutes,2\\);\\s*Write-Output\\s+\"Step1Start=.*\";\\s*Write-Output\\s+\"RunEnd=.*\";\\s*Write-Output\\s+\"ElapsedMinutes=.*\"$/": true,
+      "/^git(\\s+(-[cC]\\s+\\S+|--no-pager))*\\s+\\w/": true,
+      // Deny destructive git commands: branch delete/force, push --force, reset --hard, clean
+      "/^git(\\s+(-[cC]\\s+\\S+|--no-pager))*\\s+branch\\b.*\\s-(d|D|m|M|-delete|-force)\\b/": false,
+      "/^git(\\s+(-[cC]\\s+\\S+|--no-pager))*\\s+push\\b.*\\s(--force|-f)\\b/": false,
+      "/^git(\\s+(-[cC]\\s+\\S+|--no-pager))*\\s+reset\\s+--hard\\b/": false,
+      "/^git(\\s+(-[cC]\\s+\\S+|--no-pager))*\\s+clean\\b/": false
     },
     "github.copilot.chat.additionalReadAccessFolders": [
       "~/.vscode/agent-plugins/github.com/tnduong/flag-sunset-plugin"

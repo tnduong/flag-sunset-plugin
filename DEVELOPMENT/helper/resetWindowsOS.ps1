@@ -3,17 +3,21 @@ $ErrorActionPreference = 'Stop'
 $scriptLabel = 'flag-sunset test reset (Windows)'
 $codeAppSupport = Join-Path $env:APPDATA 'Code'
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$candidateNovaRoots = @(
-    (Join-Path (Split-Path -Parent $scriptDir) 'Applications\Nova'),
-    (Join-Path (Split-Path -Parent $scriptDir) 'Nova')
-)
 
 $novaRoot = $null
-foreach ($candidate in $candidateNovaRoots) {
-    if (Test-Path $candidate) {
-        $novaRoot = (Resolve-Path $candidate).Path
-        break
+$searchDir = $scriptDir
+while ($searchDir) {
+    $parent = Split-Path -Parent $searchDir
+    if (-not $parent -or $parent -eq $searchDir) { break }
+    foreach ($suffix in @('Applications\Nova', 'Nova')) {
+        $candidate = Join-Path $parent $suffix
+        if (Test-Path $candidate) {
+            $novaRoot = (Resolve-Path $candidate).Path
+            break
+        }
     }
+    if ($novaRoot) { break }
+    $searchDir = $parent
 }
 
 if (-not $novaRoot) {
@@ -21,11 +25,9 @@ if (-not $novaRoot) {
 }
 
 $workspaceLocalRootsFile = Join-Path $novaRoot '.copilot/flag-sunset/local-roots.json'
-$localRootsFile = Join-Path $HOME '.copilot/flag-sunset/local-roots.json'
 
 $standardPaths = @(
     $workspaceLocalRootsFile,
-    $localRootsFile,
     (Join-Path $codeAppSupport 'Cache'),
     (Join-Path $codeAppSupport 'CachedData'),
     (Join-Path $codeAppSupport 'GPUCache')
@@ -45,7 +47,7 @@ foreach ($arg in $args) {
         }
         '--help' {
             Write-Host 'Usage:'
-            Write-Host '  pwsh -ExecutionPolicy Bypass -File .\cleanup.ps1 [--aggressive]'
+            Write-Host '  pwsh -ExecutionPolicy Bypass -File .\resetWindowsOS.ps1 [--aggressive]'
             Write-Host ''
             Write-Host 'Behavior:'
             Write-Host '  - Removes the saved flag-sunset local-roots file.'
