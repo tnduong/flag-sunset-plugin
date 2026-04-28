@@ -140,30 +140,32 @@ try {
 }
 ok(`Tag ${tag} does not yet exist on origin`);
 
-// 6. Check for uncommitted changes — only plugin.json is expected to be dirty
+// 6. Check for uncommitted changes — only release manifests are expected to be dirty
 const statusLines = execSync('git status --porcelain', {
     cwd: repoRoot,
     encoding: 'utf8',
     stdio: 'pipe',
 }).split('\n').filter((line) => line.length > 0);
 
+const allowedDirtyFiles = new Set(['plugin.json', '.claude-plugin/plugin.json']);
+
 const unexpectedChanges = statusLines.filter((line) => {
     const xy = line.substring(0, 2);
     const file = line.substring(3);
     // Untracked files won't be included in the commit unless explicitly staged — ignore them
     if (xy === '??') return false;
-    // Allow plugin.json to be modified (staged, unstaged, or both)
-    if (file === 'plugin.json') return false;
+    // Allow both manifests to be modified (staged, unstaged, or both)
+    if (allowedDirtyFiles.has(file)) return false;
     return true;
 });
 
 if (unexpectedChanges.length > 0) {
     fail(
         `Unexpected staged/modified files found:\n${unexpectedChanges.join('\n')}\n\n` +
-        `Either commit/stash them before releasing, or ensure only plugin.json is modified.`,
+        `Either commit/stash them before releasing, or ensure only plugin.json and .claude-plugin/plugin.json are modified.`,
     );
 }
-ok('Working tree is clean (only plugin.json allowed to be modified)');
+ok('Working tree is clean (only plugin manifests allowed to be modified)');
 
 // 7. Remote must be reachable (only warn — push will fail explicitly if not)
 try {
@@ -188,7 +190,7 @@ console.log(`
 ─────────────────────────────────────────────
   Release plan for ${tag}${isDryRun ? '  [DRY RUN]' : ''}
 ─────────────────────────────────────────────
-  git add plugin.json README.md
+    git add plugin.json .claude-plugin/plugin.json README.md
   git commit -m "release: ${version}"
   git tag -a ${tag} -m "Release ${tag}"
   git branch -f stable main
@@ -227,7 +229,7 @@ if (!isDryRun) {
     info(`${label}Would update README.md badge to ${version}`);
 }
 
-run('git add plugin.json README.md');
+run('git add plugin.json .claude-plugin/plugin.json README.md');
 run(`git commit -m "release: ${version}"`);
 run(`git tag -a ${tag} -m "Release ${tag}"`);
 
