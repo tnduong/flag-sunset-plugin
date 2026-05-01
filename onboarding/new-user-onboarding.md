@@ -2,6 +2,24 @@
 
 Use this runbook after installing the plugin.
 
+## Private Repo Install Access (One-Time)
+
+If the plugin repo is private and you have been granted access, use this one-time setup so **Chat: Install Plugin from Source** works consistently.
+
+1. Verify SSH access to GitHub:
+	- `ssh -T git@github.com`
+2. Add a repo-scoped HTTPS-to-SSH rewrite (recommended for this plugin only):
+	- `git config --global url."ssh://git@github.com/tnduong/flag-sunset-plugin".insteadOf "https://github.com/tnduong/flag-sunset-plugin"`
+	- `git config --global --add url."ssh://git@github.com/tnduong/flag-sunset-plugin".insteadOf "https://github.com/tnduong/flag-sunset-plugin.git"`
+3. Verify repo access with the same HTTPS URL used by the installer:
+	- `git ls-remote https://github.com/tnduong/flag-sunset-plugin`
+4. In VS Code, run **Chat: Install Plugin from Source** and paste:
+	- `https://github.com/tnduong/flag-sunset-plugin`
+
+Notes:
+
+- This keeps onboarding URL guidance unchanged while avoiding HTTPS token scope issues.
+
 ## Goal
 
 Set up one shared FF-removal workspace where:
