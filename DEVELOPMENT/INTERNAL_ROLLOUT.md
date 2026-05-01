@@ -1,6 +1,8 @@
-# Internal Rollout
+# Internal Rollout (Optional Private/Org Mode)
 
-This plugin is best distributed as an internal private repository owned by an organization rather than a personal account.
+Current default distribution mode is public source install from `https://github.com/tnduong/flag-sunset-plugin`.
+
+This document is for teams that want to switch to a stricter private, organization-owned rollout model.
 
 ## Recommended Ownership
 
@@ -55,9 +57,9 @@ If the repository name changes during transfer, treat the final repository URL a
 7. Re-run `node scripts/validate-plugin-layout.mjs` after the URL changes.
 8. Test installation from the final URL using a fresh VS Code profile or a user who has never installed the plugin before.
 
-## Canonical Install URL
+## Canonical Install URL (Private/Org Mode)
 
-After transfer, prefer one documented URL format and keep it stable across onboarding docs:
+If you complete transfer to an organization-owned repository, prefer one documented URL format and keep it stable across onboarding docs:
 
 ```text
 https://github.com/AyaHealthcare/flag-sunset-plugin.git
@@ -121,14 +123,14 @@ Notes:
 
 ## Troubleshooting
 
-- If install fails before any plugin prompt appears, verify the user can access the private repository in the browser and is a member of the `copilot` team.
+- If install fails before any plugin prompt appears in private/org mode, verify the user can access the repository in the browser and is a member of the `copilot` team.
 - If install fails after manifest changes, run `node scripts/validate-plugin-layout.mjs` and confirm the nested `.claude-plugin` paths still point at the repository root assets.
 - If install works for existing users but fails for new users, treat it as an access-provisioning problem first, not a plugin-content problem.
 - If the plugin installs but `/flag-sunset-plugin:run` is missing, verify the plugin is enabled in VS Code and the repository contains `commands/flag-sunset.md`.
 
 ## Support Notes
 
-- Private source install depends on repository access. If the repo becomes organization-owned, onboarding becomes a team membership problem instead of a per-user repository invitation problem.
+- Public source install does not require per-user repository access setup. If the repo becomes organization-owned and private, onboarding becomes a team membership and access-provisioning problem.
 - Source-install regressions are likely to come from plugin manifest layout changes. Keep the nested `.claude-plugin` manifests aligned with the repository root asset paths.
 - If you want stronger change control, install from a release tag instead of the moving default branch.
 

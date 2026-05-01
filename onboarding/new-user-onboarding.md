@@ -2,23 +2,18 @@
 
 Use this runbook after installing the plugin.
 
-## Private Repo Install Access (One-Time)
+## Install Access and URL (One-Time)
 
-If the plugin repo is private and you have been granted access, use this one-time setup so **Chat: Install Plugin from Source** works consistently.
+The repository is public, so no SSH rewrite or team access setup is required for standard installs.
 
-1. Verify SSH access to GitHub:
-	- `ssh -T git@github.com`
-2. Add a repo-scoped HTTPS-to-SSH rewrite (recommended for this plugin only):
-	- `git config --global url."ssh://git@github.com/tnduong/flag-sunset-plugin".insteadOf "https://github.com/tnduong/flag-sunset-plugin"`
-	- `git config --global --add url."ssh://git@github.com/tnduong/flag-sunset-plugin".insteadOf "https://github.com/tnduong/flag-sunset-plugin.git"`
-3. Verify repo access with the same HTTPS URL used by the installer:
+1. Verify the canonical URL is reachable:
 	- `git ls-remote https://github.com/tnduong/flag-sunset-plugin`
-4. In VS Code, run **Chat: Install Plugin from Source** and paste:
+2. In VS Code, run **Chat: Install Plugin from Source** and paste:
 	- `https://github.com/tnduong/flag-sunset-plugin`
 
-Notes:
+Optional cleanup for users who previously configured private-repo rewrites:
 
-- This keeps onboarding URL guidance unchanged while avoiding HTTPS token scope issues.
+- `git config --global --unset-all url."ssh://git@github.com/tnduong/flag-sunset-plugin".insteadOf`
 
 ## Goal
 

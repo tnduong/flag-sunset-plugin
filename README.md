@@ -2,7 +2,7 @@
 
 ![version](https://img.shields.io/badge/version-1.0.2-blue)
 
-Private VS Code agent plugin that provides the `/flag-sunset-plugin:run` command for shared LaunchDarkly feature-flag sunset workflows.
+Public VS Code agent plugin that provides the `/flag-sunset-plugin:run` command for shared LaunchDarkly feature-flag sunset workflows.
 
 For maintainers and plugin developers, see `DEVELOPMENT/README.md`.
 
@@ -54,8 +54,7 @@ Use these cutover assets:
 ## Notes
 
 - This plugin is distributed outside application repositories.
-- The slash command stays thin and routes to the custom agent; critical safety gates live in the agent plus skill workflow assets.
-- For internal rollout and distribution guidance, see `DEVELOPMENT/INTERNAL_ROLLOUT.md`.
-- Machine-specific checkout roots are not stored in the plugin.
-- For new users, the workflow should store confirmed checkout roots in `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder and keep that file ignored by Git.
-- The installed plugin location, including `%APPDATA%\Code\agentPlugins\github.com\tnduong\flag-sunset-plugin`, is not used for machine-specific config reads or writes.
+- Installed plugin cache locations: macOS `~/.vscode/agent-plugins/github.com/tnduong/flag-sunset-plugin/`; Windows `%USERPROFILE%\.vscode\agent-plugins\github.com\tnduong\flag-sunset-plugin\`.
+- For distribution and ownership options (current public mode plus optional private/org mode), see `DEVELOPMENT/INTERNAL_ROLLOUT.md`.
+- For repository protection rules and release-branch guardrails, see `DEVELOPMENT/REPO-INFO.md`.
+- Store confirmed checkout roots in `.copilot/flag-sunset/local-roots.json` under the `Nova` workspace folder, and keep that file ignored by Git.

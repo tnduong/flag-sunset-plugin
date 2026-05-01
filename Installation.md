@@ -1,4 +1,4 @@
-# Installation (Private Repo)
+# Installation
 
 ## Install from Source (VS Code)
 
@@ -16,7 +16,7 @@ https://github.com/tnduong/flag-sunset-plugin
 
 > **Important:** If installation fails with "repository not found", do not use GitHub web page URLs like `/tree/v1.0.0` or `/releases/tag/v1.0.0` — those are not valid git clone targets.
 
-## One-Time GitHub Setup (repo owner only)
+## One-Time Repository Setup (maintainer only)
 
 After the first release is pushed, set `stable` as the default branch:
 
@@ -28,9 +28,11 @@ This only needs to be done once. All future releases automatically advance `stab
 
 ## How new users should install
 
-1. Ensure you have GitHub access to the private repo **tnduong/flag-sunset-plugin**.
+1. Use the canonical install URL: `https://github.com/tnduong/flag-sunset-plugin`.
 2. Sign in to GitHub in VS Code if prompted.
-3. Use **Chat: Install Plugin from Source** and paste: `https://github.com/tnduong/flag-sunset-plugin`
+3. Use **Chat: Install Plugin from Source** and paste the same URL.
+
+Because the repository is public, no team membership or SSH rewrite setup is required for standard installs.
 
 ## Upgrading to a New Version
 
