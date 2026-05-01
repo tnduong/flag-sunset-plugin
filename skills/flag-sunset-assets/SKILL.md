@@ -14,6 +14,11 @@ This workflow is the required entry point for any feature-flag removal request w
 ```text
 /flag-sunset-plugin:run [FLAG_KEY]
 ```
+## Invocation Gate
+Before Preflight:
+- Require `/flag-sunset-plugin:run [FLAG_KEY]` with a non-empty `FLAG_KEY` after trimming whitespace.
+- If invalid, print: `Invocation invalid. Use: /flag-sunset-plugin:run [FLAG_KEY]`
+- Stop immediately (no Preflight, tool calls, or edits).
 ## User Guide
 Operator onboarding, prerequisites, prompts, and workflow notes are documented in [README.md](./README.md).
 The operator experience goal is documented in [operator-goal.md](./references/operator-goal.md).

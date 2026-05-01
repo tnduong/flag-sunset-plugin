@@ -7,6 +7,7 @@ agent: "flag-sunset-executor"
 
 Route this request to the configured custom agent.
 
-Treat the slash-command argument as the raw LaunchDarkly feature flag key.
+Before routing, apply invocation validation from `skills/flag-sunset-assets/SKILL.md` (`## Invocation Gate`).
+If validation fails, stop immediately with the exact failure message defined there.
 
-The command is intentionally thin. Workspace gating, workflow preflight, and execution rules are owned by the agent and skill assets.
+Treat the slash-command argument as the raw LaunchDarkly feature flag key.
