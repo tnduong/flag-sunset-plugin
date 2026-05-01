@@ -8,7 +8,7 @@ This guide covers the full loop: workspace setup, making changes, local testing,
 
 - VS Code with GitHub Copilot Chat installed
 - Node.js ≥ 20 (`node --version`)
-- GitHub access to `tnduong/flag-sunset-plugin`
+- GitHub access to `tnduong/flag-sunset-plugin` (public read access is sufficient)
 - The plugin installed in VS Code at least once (creates the plugin cache folder)
 
 ---
@@ -41,8 +41,10 @@ ls ~/.vscode/agent-plugins/github.com/tnduong/flag-sunset-plugin/
 
 If the folder is missing, install the plugin first using **Chat: Install Plugin from Source** with:
 ```
-https://github.com/tnduong/flag-sunset-plugin/tree/main
+https://github.com/tnduong/flag-sunset-plugin
 ```
+
+The canonical install path uses the repository default branch (`stable`).
 
 ---
 
@@ -134,20 +136,18 @@ Work through the relevant scenario(s) from `tests/workflow-regression-scenarios.
 
 ---
 
-## Testing a Pushed Branch (Pre-Tag Validation)
+## Testing a Source Reinstall (Post-Merge Validation)
 
-After merging to `main` (or from any branch), install directly into VS Code using a branch URL:
+After merging to `main`, validate the install path by reinstalling from the canonical URL:
 
 1. Open **Command Palette** → **Chat: Install Plugin from Source**
 2. Paste:
-   ```
-   https://github.com/tnduong/flag-sunset-plugin/tree/main
-   ```
-   Or for a feature branch before merging:
-   ```
-   https://github.com/tnduong/flag-sunset-plugin/tree/my-feature-branch
-   ```
+  ```
+  https://github.com/tnduong/flag-sunset-plugin
+  ```
 3. Run `/flag-sunset-plugin:run [FLAG_KEY]` and verify behavior
+
+For pre-merge feature branch testing, use the local source + cache sync loop above (checkout the branch locally, sync, and run scenarios).
 
 > **Important:** This installs into the plugin cache and overwrites your local test copy. Re-run the rsync above if you want to keep iterating locally after this.
 
@@ -175,9 +175,9 @@ These same scripts also run in CI via `.github/workflows/validate-plugin-layout.
 
 Only do this after the `main` branch has been manually tested.
 
-### 1. Bump the version
+### 1. Bump versions in both manifests
 
-Update `version` in `plugin.json`. The layout validator enforces that `.claude-plugin/plugin.json` stays in sync — bump both.
+Update `version` in both `plugin.json` and `.claude-plugin/plugin.json`.
 
 ```bash
 node scripts/validate-plugin-layout.mjs  # confirm they match
@@ -187,24 +187,26 @@ node scripts/validate-plugin-layout.mjs  # confirm they match
 
 Add an entry for the new version.
 
-### 3. Tag and push
+### 3. Run the release script
 
 ```bash
-git tag v0.2.0
-git push origin v0.2.0
+node scripts/create-release.mjs --dry-run
+node scripts/create-release.mjs
 ```
+
+This script validates branch/state, updates the README version badge, commits release artifacts, creates the annotated tag, advances `stable`, and pushes `main`, `stable`, and the tag.
 
 ### 4. Distribute the install URL
 
 Share with users:
 
 ```
-https://github.com/tnduong/flag-sunset-plugin/tree/v0.2.0
+https://github.com/tnduong/flag-sunset-plugin
 ```
 
-> **Common mistake:** Do NOT use the GitHub releases page URL (`/releases/tag/v0.2.0`). VS Code requires the `/tree/<ref>` format — it clones the repo using a git ref, not a GitHub web URL.
+> **Important:** The canonical install flow depends on `stable` being the repository default branch. See `Installation.md` and `DEVELOPMENT/REPO-INFO.md`.
 
-Users install via **Chat: Install Plugin from Source**. Source-installed plugins pinned to a tag do **not** auto-update — users must reinstall manually for each new version.
+Users install via **Chat: Install Plugin from Source**. Source-installed plugins do **not** auto-update — users must reinstall manually for each new version.
 
 ---
 
@@ -235,7 +237,7 @@ This prompt loads the key workflow, checklist, and contract files and checks ali
 |---------|-------|-----|
 | Changes not reflected in chat | Edited source but didn't sync to cache | Run the `rsync` command |
 | Plugin not loading after rsync | Started chat before rsync completed | Open a new chat |
-| Install URL rejected | Bare repo URL used (`github.com/tnduong/...`) | Must include `/tree/<branch-or-tag>` |
-| Install URL rejected | GitHub releases page URL used (`.../releases/tag/v0.1.0`) | Use `/tree/v0.1.0` instead — VS Code needs a git ref, not a web URL |
+| Install URL rejected | GitHub web URL with `/tree/...` or `/releases/tag/...` was pasted | Use the canonical repo URL `https://github.com/tnduong/flag-sunset-plugin` |
+| Installed an unexpected version | Repository default branch is not `stable` | Set default branch to `stable` and reinstall from source |
 | SKILL.md not invoked | `name:` in frontmatter doesn't match folder | Must be `flag-sunset-assets` exactly |
 | Version mismatch error from validator | `plugin.json` and `.claude-plugin/plugin.json` differ | Sync version field in both files |
