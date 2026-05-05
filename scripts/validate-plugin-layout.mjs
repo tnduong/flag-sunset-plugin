@@ -14,9 +14,17 @@ const readJson = async (relativePath) => {
 
 const readText = async (relativePath) => readFile(path.join(repoRoot, relativePath), 'utf8');
 
+const workflowDescriptionTemplate = 'FF Removal SKILL Workflow - version XXX';
+
 const assertEqual = (actual, expected, message) => {
   if (actual !== expected) {
     throw new Error(`${message}. Expected "${expected}", received "${actual}".`);
+  }
+};
+
+const assertOneOf = (actual, expectedValues, message) => {
+  if (!expectedValues.includes(actual)) {
+    throw new Error(`${message}. Expected one of ${expectedValues.map((value) => `"${value}"`).join(', ')}, received "${actual}".`);
   }
 };
 
@@ -40,21 +48,19 @@ const assertNotIncludes = (text, unexpected, message) => {
   }
 };
 
-const formatVersionedDescription = (prefix, version) => `${prefix} Installed version: ${version}.`;
+const formatWorkflowDescription = (version) => `FF Removal SKILL Workflow - version ${version}`;
 
 const rootManifest = await readJson('plugin.json');
 const pluginManifest = await readJson('.claude-plugin/plugin.json');
 const marketplaceManifest = await readJson('.claude-plugin/marketplace.json');
 const agentWrapper = await readText('agents/flag-sunset.agent.md');
-const expectedRootDescription = formatVersionedDescription(
-  'Shared LaunchDarkly feature-flag sunset workflow for VS Code Copilot.',
-  rootManifest.version,
-);
-const expectedNestedDescription = formatVersionedDescription('Flag sunset workflow helpers.', rootManifest.version);
+const expectedRootDescription = formatWorkflowDescription(rootManifest.version);
+const expectedNestedDescription = expectedRootDescription;
+const expectedMarketplaceDescription = expectedRootDescription;
 
-assertEqual(pluginManifest.version, rootManifest.version, 'Nested plugin manifest version must match root plugin.json version');
-assertEqual(rootManifest.description, expectedRootDescription, 'Root plugin description must advertise the current version');
-assertEqual(pluginManifest.description, expectedNestedDescription, 'Nested plugin description must advertise the current version');
+assertOneOf(pluginManifest.version, ['', rootManifest.version], 'Nested plugin manifest version must be empty or match root plugin.json version');
+assertOneOf(rootManifest.description, [workflowDescriptionTemplate, expectedRootDescription], 'Root plugin description must use the workflow description template or advertise the current version');
+assertOneOf(pluginManifest.description, ['', expectedNestedDescription], 'Nested plugin description must be empty or advertise the current version');
 
 assertEqual(pluginManifest.agents, '../agents', 'Nested plugin manifest must point to the repo-root agents folder');
 assertEqual(pluginManifest.commands, '../commands', 'Nested plugin manifest must point to the repo-root commands folder');
@@ -66,6 +72,8 @@ if (!pluginEntry) {
   throw new Error('Marketplace manifest must contain at least one plugin entry.');
 }
 
+assertOneOf(pluginEntry.version, ['', rootManifest.version], 'Marketplace manifest version must be empty or match root plugin.json version');
+assertOneOf(pluginEntry.description, ['', expectedMarketplaceDescription], 'Marketplace manifest description must be empty or advertise the current version');
 assertEqual(pluginEntry.source, '../', 'Marketplace manifest must point to the repo root as the plugin source');
 
 await assertExists('agents', 'Repo-root agents folder must exist');

@@ -1,8 +1,8 @@
 {
   "name": "flag-sunset-plugin",
   "displayName": "Flag Sunset Plugin",
-  "description": "Shared LaunchDarkly feature-flag sunset workflow for VS Code Copilot. Installed version: 1.0.2.",
-  "version": "1.0.2",
+  "description": "FF Removal SKILL Workflow - version XXX",
+  "version": "1.0.4",
   "commands": "commands",
   "agents": "agents",
   "skills": "skills"

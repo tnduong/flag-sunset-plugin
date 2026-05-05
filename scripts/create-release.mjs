@@ -4,8 +4,8 @@
  *
  * Automates the flag-sunset-plugin release process:
  *   1. Validates the repo state (branch, cleanliness, layout, version consistency)
- *   2. Updates the installed plugin manifest descriptions and README badge
- *   3. Commits plugin.json, .claude-plugin/plugin.json, and README.md
+ *   2. Updates the derived plugin manifests and README badge from plugin.json
+ *   3. Commits plugin.json, .claude-plugin/plugin.json, .claude-plugin/marketplace.json, and README.md
  *   4. Creates an annotated git tag
  *   5. Pushes the commit and tag to origin
  *
@@ -36,11 +36,9 @@ const repoRoot = path.resolve(__dirname, '..');
 const isDryRun = process.argv.includes('--dry-run');
 
 const label = isDryRun ? '[dry-run] ' : '';
-const rootDescriptionPrefix = 'Shared LaunchDarkly feature-flag sunset workflow for VS Code Copilot.';
-const nestedDescriptionPrefix = 'Flag sunset workflow helpers.';
 
-function formatVersionedDescription(prefix, version) {
-    return `${prefix} Installed version: ${version}.`;
+function formatWorkflowDescription(version) {
+    return `FF Removal SKILL Workflow - version ${version}`;
 }
 
 function readJson(relativePath) {
@@ -101,20 +99,30 @@ if (!version || !/^\d+\.\d+\.\d+$/.test(version)) {
 }
 const tag = `v${version}`;
 info(`Version from plugin.json: ${version}  →  tag: ${tag}`);
-const expectedRootDescription = formatVersionedDescription(rootDescriptionPrefix, version);
-const expectedNestedDescription = formatVersionedDescription(nestedDescriptionPrefix, version);
+const expectedRootDescription = formatWorkflowDescription(version);
+const expectedNestedDescription = expectedRootDescription;
+const expectedMarketplaceDescription = expectedRootDescription;
 
-// 3. Version must match .claude-plugin/plugin.json
+// 3. Load derived manifests that will be refreshed from plugin.json
 const nestedManifest = readJson('.claude-plugin/plugin.json');
 if (nestedManifest.version !== version) {
-    fail(
-        `Version drift detected.\n` +
-        `  plugin.json:               ${version}\n` +
-        `  .claude-plugin/plugin.json: ${nestedManifest.version}\n` +
-        `Fix: update .claude-plugin/plugin.json to match.`,
-    );
+    info(`.claude-plugin/plugin.json version is ${nestedManifest.version} — will be updated to ${version}`);
+} else {
+    ok(`.claude-plugin/plugin.json version already at ${version}`);
 }
-ok(`Version consistent across manifests (${version})`);
+
+const marketplaceManifest = readJson('.claude-plugin/marketplace.json');
+const marketplaceEntry = marketplaceManifest.plugins?.[0];
+
+if (!marketplaceEntry) {
+    fail('Marketplace manifest must contain at least one plugin entry.');
+}
+
+if (marketplaceEntry.version !== version) {
+    info(`.claude-plugin/marketplace.json version is ${marketplaceEntry.version} — will be updated to ${version}`);
+} else {
+    ok(`.claude-plugin/marketplace.json version already at ${version}`);
+}
 
 if (rootManifest.description !== expectedRootDescription) {
     info('plugin.json description version marker will be updated');
@@ -126,6 +134,12 @@ if (nestedManifest.description !== expectedNestedDescription) {
     info('.claude-plugin/plugin.json description version marker will be updated');
 } else {
     ok(`.claude-plugin/plugin.json description already advertises ${version}`);
+}
+
+if (marketplaceEntry.description !== expectedMarketplaceDescription) {
+    info('.claude-plugin/marketplace.json description version marker will be updated');
+} else {
+    ok(`.claude-plugin/marketplace.json description already advertises ${version}`);
 }
 
 // 4a. README badge must reference the current version (or will be patched)
@@ -142,15 +156,7 @@ if (badgeMatch[1] !== version) {
     ok(`README.md badge already at ${version}`);
 }
 
-// 4. Run the layout validator
-try {
-    execSync('node scripts/validate-plugin-layout.mjs', { cwd: repoRoot, stdio: 'pipe' });
-    ok('Plugin layout validation passed');
-} catch (err) {
-    fail(`Plugin layout validation failed:\n${err.stderr?.toString() ?? err.message}`);
-}
-
-// 5. Tag must not already exist on origin
+// 4. Tag must not already exist on origin
 try {
     const remoteTags = execSync('git ls-remote --tags origin', {
         cwd: repoRoot,
@@ -158,21 +164,21 @@ try {
         stdio: 'pipe',
     });
     if (remoteTags.includes(`refs/tags/${tag}`)) {
-        fail(`Tag ${tag} already exists on origin. Bump the version in plugin.json and .claude-plugin/plugin.json to create a new release.`);
+        fail(`Tag ${tag} already exists on origin. Bump the version in plugin.json to create a new release.`);
     }
 } catch (lsErr) {
     // ls-remote itself can fail if remote is unreachable — handled in check 7
 }
 ok(`Tag ${tag} does not yet exist on origin`);
 
-// 6. Check for uncommitted changes — only release manifests are expected to be dirty
+// 5. Check for uncommitted changes — only release manifests are expected to be dirty
 const statusLines = execSync('git status --porcelain', {
     cwd: repoRoot,
     encoding: 'utf8',
     stdio: 'pipe',
 }).split('\n').filter((line) => line.length > 0);
 
-const allowedDirtyFiles = new Set(['plugin.json', '.claude-plugin/plugin.json']);
+const allowedDirtyFiles = new Set(['plugin.json', '.claude-plugin/plugin.json', '.claude-plugin/marketplace.json']);
 
 const unexpectedChanges = statusLines.filter((line) => {
     const xy = line.substring(0, 2);
@@ -187,12 +193,12 @@ const unexpectedChanges = statusLines.filter((line) => {
 if (unexpectedChanges.length > 0) {
     fail(
         `Unexpected staged/modified files found:\n${unexpectedChanges.join('\n')}\n\n` +
-        `Either commit/stash them before releasing, or ensure only plugin.json and .claude-plugin/plugin.json are modified.`,
+        `Either commit/stash them before releasing, or ensure only plugin.json, .claude-plugin/plugin.json, and .claude-plugin/marketplace.json are modified.`,
     );
 }
 ok('Working tree is clean (only plugin manifests allowed to be modified)');
 
-// 7. Remote must be reachable (only warn — push will fail explicitly if not)
+// 6. Remote must be reachable (only warn — push will fail explicitly if not)
 try {
     execSync('git ls-remote --exit-code origin HEAD', {
         cwd: repoRoot,
@@ -215,7 +221,7 @@ console.log(`
 ─────────────────────────────────────────────
   Release plan for ${tag}${isDryRun ? '  [DRY RUN]' : ''}
 ─────────────────────────────────────────────
-    git add plugin.json .claude-plugin/plugin.json README.md
+    git add plugin.json .claude-plugin/plugin.json .claude-plugin/marketplace.json README.md
   git commit -m "release: ${version}"
   git tag -a ${tag} -m "Release ${tag}"
   git branch -f stable main
@@ -248,21 +254,36 @@ if (!isDryRun) {
 // Patch README badge to the release version
 const updatedReadme = readmeContent.replace(badgeRegex, `![version](https://img.shields.io/badge/version-${version}-blue)`);
 rootManifest.description = expectedRootDescription;
+nestedManifest.version = version;
 nestedManifest.description = expectedNestedDescription;
+marketplaceEntry.version = version;
+marketplaceEntry.description = expectedMarketplaceDescription;
 if (!isDryRun) {
     writeJson('plugin.json', rootManifest);
     writeJson('.claude-plugin/plugin.json', nestedManifest);
+    writeJson('.claude-plugin/marketplace.json', marketplaceManifest);
     writeFileSync(readmePath, updatedReadme, 'utf8');
     ok(`plugin.json description updated to advertise ${version}`);
     ok(`.claude-plugin/plugin.json description updated to advertise ${version}`);
+    ok(`.claude-plugin/marketplace.json updated to advertise ${version}`);
     ok(`README.md badge updated to ${version}`);
+
+    try {
+        execSync('node scripts/validate-plugin-layout.mjs', { cwd: repoRoot, stdio: 'pipe' });
+        ok('Plugin layout validation passed');
+    } catch (err) {
+        fail(`Plugin layout validation failed after derived manifest updates:\n${err.stderr?.toString() ?? err.message}`);
+    }
 } else {
     info(`${label}Would update plugin.json description to advertise ${version}`);
+    info(`${label}Would update .claude-plugin/plugin.json version to ${version}`);
     info(`${label}Would update .claude-plugin/plugin.json description to advertise ${version}`);
+    info(`${label}Would update .claude-plugin/marketplace.json version to ${version}`);
+    info(`${label}Would update .claude-plugin/marketplace.json description to advertise ${version}`);
     info(`${label}Would update README.md badge to ${version}`);
 }
 
-run('git add plugin.json .claude-plugin/plugin.json README.md');
+run('git add plugin.json .claude-plugin/plugin.json .claude-plugin/marketplace.json README.md');
 run(`git commit -m "release: ${version}"`);
 run(`git tag -a ${tag} -m "Release ${tag}"`);
 
