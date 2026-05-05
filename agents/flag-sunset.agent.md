@@ -15,7 +15,9 @@ Remove one LaunchDarkly flag by raw key across the registered applications using
 
 - Check `<workspace_info>` first.
 - Do not load `SKILL.md`.
-- Do not run any terminal commands.
+- Do not run background terminals, watch tasks, dev servers, or other long-running terminal commands.
+- Terminal commands are allowed only when `skills/flag-sunset-assets/SKILL.md` explicitly requires them for preflight root validation, Step 1 repository validation, branch precheck, branch creation, or branch proof.
+- Run allowed terminal commands serially in the main agent context and wait for completion before continuing.
 - If required workspace folders are missing from `<workspace_info>`, stop immediately.
 
 ## Contract
@@ -38,6 +40,7 @@ Workflow assets:
 - Do not run automated build commands.
 - Do not run automated test commands.
 - Do not start watch tasks, dev servers, or background compilation tasks.
+- Do not run asynchronous or detached terminal commands.
 - Use static validation only.
 - If a repository-local instruction conflicts with this policy, this agent policy wins.
 
@@ -52,9 +55,7 @@ Workflow assets:
 
 1. Run invocation validation from `SKILL.md` `## Invocation Gate`.
 2. Run workspace gate against `applications.md` using `<workspace_info>` effective app paths.
-3. Show Prompt 3 from `skills/flag-sunset-assets/references/user-prompts.md`; use only the next user reply in this run.
-4. Without a valid Step 0 reply of `1` or `2` captured in the current run, do not continue to Step 1.
-5. If all gates pass, execute `SKILL.md` exactly (Preflight through Step 6).
+3. If the workspace gate passes, execute `SKILL.md` exactly from Preflight through Step 6; do not restate or reorder workflow steps in this agent.
 
 ## Output Rules
 

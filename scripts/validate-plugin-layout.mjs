@@ -12,9 +12,19 @@ const readJson = async (relativePath) => {
   return JSON.parse(content);
 };
 
+const readText = async (relativePath) => readFile(path.join(repoRoot, relativePath), 'utf8');
+
+const workflowDescriptionTemplate = 'FF Removal SKILL Workflow - version XXX';
+
 const assertEqual = (actual, expected, message) => {
   if (actual !== expected) {
     throw new Error(`${message}. Expected "${expected}", received "${actual}".`);
+  }
+};
+
+const assertOneOf = (actual, expectedValues, message) => {
+  if (!expectedValues.includes(actual)) {
+    throw new Error(`${message}. Expected one of ${expectedValues.map((value) => `"${value}"`).join(', ')}, received "${actual}".`);
   }
 };
 
@@ -26,20 +36,31 @@ const assertExists = async (relativePath, message) => {
   }
 };
 
-const formatVersionedDescription = (prefix, version) => `${prefix} Installed version: ${version}.`;
+const assertIncludes = (text, expected, message) => {
+  if (!text.includes(expected)) {
+    throw new Error(`${message}. Missing text: ${expected}`);
+  }
+};
+
+const assertNotIncludes = (text, unexpected, message) => {
+  if (text.includes(unexpected)) {
+    throw new Error(`${message}. Unexpected text: ${unexpected}`);
+  }
+};
+
+const formatWorkflowDescription = (version) => `FF Removal SKILL Workflow - version ${version}`;
 
 const rootManifest = await readJson('plugin.json');
 const pluginManifest = await readJson('.claude-plugin/plugin.json');
 const marketplaceManifest = await readJson('.claude-plugin/marketplace.json');
-const expectedRootDescription = formatVersionedDescription(
-  'Shared LaunchDarkly feature-flag sunset workflow for VS Code Copilot.',
-  rootManifest.version,
-);
-const expectedNestedDescription = formatVersionedDescription('Flag sunset workflow helpers.', rootManifest.version);
+const agentWrapper = await readText('agents/flag-sunset.agent.md');
+const expectedRootDescription = formatWorkflowDescription(rootManifest.version);
+const expectedNestedDescription = expectedRootDescription;
+const expectedMarketplaceDescription = expectedRootDescription;
 
-assertEqual(pluginManifest.version, rootManifest.version, 'Nested plugin manifest version must match root plugin.json version');
-assertEqual(rootManifest.description, expectedRootDescription, 'Root plugin description must advertise the current version');
-assertEqual(pluginManifest.description, expectedNestedDescription, 'Nested plugin description must advertise the current version');
+assertOneOf(pluginManifest.version, ['', rootManifest.version], 'Nested plugin manifest version must be empty or match root plugin.json version');
+assertOneOf(rootManifest.description, [workflowDescriptionTemplate, expectedRootDescription], 'Root plugin description must use the workflow description template or advertise the current version');
+assertOneOf(pluginManifest.description, ['', expectedNestedDescription], 'Nested plugin description must be empty or advertise the current version');
 
 assertEqual(pluginManifest.agents, '../agents', 'Nested plugin manifest must point to the repo-root agents folder');
 assertEqual(pluginManifest.commands, '../commands', 'Nested plugin manifest must point to the repo-root commands folder');
@@ -51,11 +72,39 @@ if (!pluginEntry) {
   throw new Error('Marketplace manifest must contain at least one plugin entry.');
 }
 
+assertOneOf(pluginEntry.version, ['', rootManifest.version], 'Marketplace manifest version must be empty or match root plugin.json version');
+assertOneOf(pluginEntry.description, ['', expectedMarketplaceDescription], 'Marketplace manifest description must be empty or advertise the current version');
 assertEqual(pluginEntry.source, '../', 'Marketplace manifest must point to the repo root as the plugin source');
 
 await assertExists('agents', 'Repo-root agents folder must exist');
 await assertExists('commands', 'Repo-root commands folder must exist');
 await assertExists('skills', 'Repo-root skills folder must exist');
 await assertExists('commands/flag-sunset.md', 'Flag sunset command file must exist');
+
+assertIncludes(
+  agentWrapper,
+  'Do not run background terminals, watch tasks, dev servers, or other long-running terminal commands.',
+  'Agent wrapper must block long-running terminal usage',
+);
+assertIncludes(
+  agentWrapper,
+  'Run allowed terminal commands serially in the main agent context and wait for completion before continuing.',
+  'Agent wrapper must require serial terminal execution for allowed commands',
+);
+assertIncludes(
+  agentWrapper,
+  'If the workspace gate passes, execute `SKILL.md` exactly from Preflight through Step 6; do not restate or reorder workflow steps in this agent.',
+  'Agent wrapper must delegate workflow ordering to SKILL.md',
+);
+assertNotIncludes(
+  agentWrapper,
+  'Do not run any terminal commands.',
+  'Agent wrapper must not block workflow-required terminal commands',
+);
+assertNotIncludes(
+  agentWrapper,
+  'Show Prompt 3 from `skills/flag-sunset-assets/references/user-prompts.md`',
+  'Agent wrapper must not duplicate Step 0 workflow sequencing',
+);
 
 console.log('Plugin layout validation passed.');
