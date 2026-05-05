@@ -12,6 +12,8 @@ const readJson = async (relativePath) => {
   return JSON.parse(content);
 };
 
+const readText = async (relativePath) => readFile(path.join(repoRoot, relativePath), 'utf8');
+
 const assertEqual = (actual, expected, message) => {
   if (actual !== expected) {
     throw new Error(`${message}. Expected "${expected}", received "${actual}".`);
@@ -26,11 +28,24 @@ const assertExists = async (relativePath, message) => {
   }
 };
 
+const assertIncludes = (text, expected, message) => {
+  if (!text.includes(expected)) {
+    throw new Error(`${message}. Missing text: ${expected}`);
+  }
+};
+
+const assertNotIncludes = (text, unexpected, message) => {
+  if (text.includes(unexpected)) {
+    throw new Error(`${message}. Unexpected text: ${unexpected}`);
+  }
+};
+
 const formatVersionedDescription = (prefix, version) => `${prefix} Installed version: ${version}.`;
 
 const rootManifest = await readJson('plugin.json');
 const pluginManifest = await readJson('.claude-plugin/plugin.json');
 const marketplaceManifest = await readJson('.claude-plugin/marketplace.json');
+const agentWrapper = await readText('agents/flag-sunset.agent.md');
 const expectedRootDescription = formatVersionedDescription(
   'Shared LaunchDarkly feature-flag sunset workflow for VS Code Copilot.',
   rootManifest.version,
@@ -57,5 +72,31 @@ await assertExists('agents', 'Repo-root agents folder must exist');
 await assertExists('commands', 'Repo-root commands folder must exist');
 await assertExists('skills', 'Repo-root skills folder must exist');
 await assertExists('commands/flag-sunset.md', 'Flag sunset command file must exist');
+
+assertIncludes(
+  agentWrapper,
+  'Do not run background terminals, watch tasks, dev servers, or other long-running terminal commands.',
+  'Agent wrapper must block long-running terminal usage',
+);
+assertIncludes(
+  agentWrapper,
+  'Run allowed terminal commands serially in the main agent context and wait for completion before continuing.',
+  'Agent wrapper must require serial terminal execution for allowed commands',
+);
+assertIncludes(
+  agentWrapper,
+  'If the workspace gate passes, execute `SKILL.md` exactly from Preflight through Step 6; do not restate or reorder workflow steps in this agent.',
+  'Agent wrapper must delegate workflow ordering to SKILL.md',
+);
+assertNotIncludes(
+  agentWrapper,
+  'Do not run any terminal commands.',
+  'Agent wrapper must not block workflow-required terminal commands',
+);
+assertNotIncludes(
+  agentWrapper,
+  'Show Prompt 3 from `skills/flag-sunset-assets/references/user-prompts.md`',
+  'Agent wrapper must not duplicate Step 0 workflow sequencing',
+);
 
 console.log('Plugin layout validation passed.');
