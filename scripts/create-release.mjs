@@ -53,6 +53,11 @@ function writeJson(relativePath, value) {
     writeFileSync(full, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
 }
 
+function writeUtf8(relativePath, value) {
+    const full = path.join(repoRoot, relativePath);
+    writeFileSync(full, value, 'utf8');
+}
+
 function run(cmd, { capture = false } = {}) {
     if (isDryRun) {
         console.log(`${label}$ ${cmd}`);
@@ -142,13 +147,9 @@ if (badgeMatch[1] !== version) {
     ok(`README.md badge already at ${version}`);
 }
 
-// 4. Run the layout validator
-try {
-    execSync('node scripts/validate-plugin-layout.mjs', { cwd: repoRoot, stdio: 'pipe' });
-    ok('Plugin layout validation passed');
-} catch (err) {
-    fail(`Plugin layout validation failed:\n${err.stderr?.toString() ?? err.message}`);
-}
+const updatedReadme = readmeContent.replace(badgeRegex, `![version](https://img.shields.io/badge/version-${version}-blue)`);
+const releaseRootManifest = { ...rootManifest, description: expectedRootDescription };
+const releaseNestedManifest = { ...nestedManifest, description: expectedNestedDescription };
 
 // 5. Tag must not already exist on origin
 try {
@@ -207,6 +208,39 @@ try {
     info('(dry-run) Remote reachability check skipped');
 }
 
+function validatePatchedLayout() {
+    try {
+        execSync('node scripts/validate-plugin-layout.mjs', { cwd: repoRoot, stdio: 'pipe' });
+        ok('Plugin layout validation passed');
+    } catch (err) {
+        fail(`Plugin layout validation failed:\n${err.stderr?.toString() ?? err.message}`);
+    }
+}
+
+function applyReleaseMetadata() {
+    writeJson('plugin.json', releaseRootManifest);
+    writeJson('.claude-plugin/plugin.json', releaseNestedManifest);
+    writeUtf8('README.md', updatedReadme);
+}
+
+function restoreOriginalMetadata() {
+    writeJson('plugin.json', rootManifest);
+    writeJson('.claude-plugin/plugin.json', nestedManifest);
+    writeUtf8('README.md', readmeContent);
+}
+
+if (!isDryRun) {
+    applyReleaseMetadata();
+    validatePatchedLayout();
+} else {
+    applyReleaseMetadata();
+    try {
+        validatePatchedLayout();
+    } finally {
+        restoreOriginalMetadata();
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Confirmation prompt
 // ---------------------------------------------------------------------------
@@ -244,15 +278,7 @@ if (!isDryRun) {
 // ---------------------------------------------------------------------------
 // Execute
 // ---------------------------------------------------------------------------
-
-// Patch README badge to the release version
-const updatedReadme = readmeContent.replace(badgeRegex, `![version](https://img.shields.io/badge/version-${version}-blue)`);
-rootManifest.description = expectedRootDescription;
-nestedManifest.description = expectedNestedDescription;
 if (!isDryRun) {
-    writeJson('plugin.json', rootManifest);
-    writeJson('.claude-plugin/plugin.json', nestedManifest);
-    writeFileSync(readmePath, updatedReadme, 'utf8');
     ok(`plugin.json description updated to advertise ${version}`);
     ok(`.claude-plugin/plugin.json description updated to advertise ${version}`);
     ok(`README.md badge updated to ${version}`);
