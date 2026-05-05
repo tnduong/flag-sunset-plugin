@@ -61,7 +61,7 @@ Important:
 
 - Keep this at workspace scope, not user scope.
 - Step 1 file discovery uses VS Code `grep_search` on workspace-confirmed paths.
-- Destructive branch/delete patterns remain gated.
+- Git write/destructive commands remain gated by explicit deny entries: `git add`, `git commit`, `git push`, force-push, branch delete/force, `git reset --hard`, and `git clean`.
 
 If you use `pwsh` on macOS, you can also use the Windows profile because command names are PowerShell-native.
 

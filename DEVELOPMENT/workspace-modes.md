@@ -62,6 +62,21 @@ This is the deliberate choice. The alternatives were evaluated and rejected:
 
 `"Allow for session"` (the runtime prompt option) is ephemeral — it lives in VS Code in-memory state only and resets on every window reload or new session. It cannot be pre-configured in any settings file.
 
+The shared FF-removal workspace files also carry an explicit deny list for git write/destructive actions so the broad git allow pattern does not silently approve them. The current deny entries are:
+
+- `git branch -d|-D|-m|-M|--delete|--force`
+- `git add`
+- `git commit`
+- `git push`
+- `git push --force` or `git push -f`
+- `git reset --hard`
+- `git clean`
+
+Keep that deny list aligned with the operator workspace files:
+
+- `onboarding/ff-removal.code-workspace`
+- `onboarding/ff-removal.macos.code-workspace`
+
 ## Why github.copilot.chat.additionalReadAccessFolders
 
 Plugin skill/reference files (SKILL.md, applications.md, preflight-and-discovery.md, etc.) live in the plugin cache folder, which is outside the operator workspace. Without additional access, VS Code prompts once per file per session ("Allow reading external files?").

@@ -53,15 +53,27 @@ The canonical install path uses the repository default branch (`stable`).
 ```
 agents/                         # *.agent.md — custom agent definitions
 commands/                       # *.md — slash command entry points
+.claude-plugin/
+  plugin.json                   # Installed/nested manifest used by source install
+  marketplace.json              # Marketplace/source-install metadata
 skills/
   flag-sunset-assets/
     SKILL.md                    # Main workflow (loaded by the agent, not users directly)
     applications.md             # App registry used by the workflow
     references/                 # Supporting docs loaded on demand
-plugin.json                     # VS Code plugin manifest (root, single source of version truth)
-.claude-plugin/plugin.json      # Claude plugin manifest (must stay in version sync)
+plugin.json                     # Root plugin manifest; version source of truth
+onboarding/
+  ff-removal*.code-workspace    # Shared operator workspace files with scoped approvals
+  new-user-onboarding.md        # Operator setup/runbook
+DEVELOPMENT/
+  DEVELOPMENT.md                # Developer workflow and release guide
+  workspace-modes.md            # Developer vs operator mode rules and approval rationale
+  INTERNAL_ROLLOUT.md           # Rollout guidance and medium-profile approval policy
+  REPO-INFO.md                  # Branch/release protection notes
 scripts/
-  validate-plugin-layout.mjs    # Layout + version consistency check
+  create-release.mjs            # Release automation: patch manifests/README, tag, push
+  sync-plugin-cache.mjs         # Sync source repo changes into the installed plugin cache
+  validate-plugin-layout.mjs    # Manifest/layout/version-description consistency check
   validate-skill-contracts.mjs  # Static contract checks on SKILL.md clauses
 tests/
   workflow-regression-scenarios.md  # Manual test checklist
@@ -195,6 +207,7 @@ node scripts/create-release.mjs
 ```
 
 This script validates branch/state, updates the README version badge, commits release artifacts, creates the annotated tag, advances `stable`, and pushes `main`, `stable`, and the tag.
+This script also updates the root and nested plugin manifest descriptions so the installed plugin details panel advertises `Installed version: X.Y.Z.`.
 
 ### 4. Distribute the install URL
 

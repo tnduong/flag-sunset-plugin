@@ -54,6 +54,7 @@ Use these cutover assets:
 ## Notes
 
 - This plugin is distributed outside application repositories.
+- The installed plugin details panel exposes the current version in the description as `Installed version: X.Y.Z.`.
 - Installed plugin cache locations: macOS `~/.vscode/agent-plugins/github.com/tnduong/flag-sunset-plugin/`; Windows `%USERPROFILE%\.vscode\agent-plugins\github.com\tnduong\flag-sunset-plugin\`.
 - For distribution and ownership options (current public mode plus optional private/org mode), see `DEVELOPMENT/INTERNAL_ROLLOUT.md`.
 - For repository protection rules and release-branch guardrails, see `DEVELOPMENT/REPO-INFO.md`.

@@ -4,8 +4,8 @@
  *
  * Automates the flag-sunset-plugin release process:
  *   1. Validates the repo state (branch, cleanliness, layout, version consistency)
- *   2. Updates the version badge in README.md
- *   3. Commits plugin.json and README.md
+ *   2. Updates the installed plugin manifest descriptions and README badge
+ *   3. Commits plugin.json, .claude-plugin/plugin.json, and README.md
  *   4. Creates an annotated git tag
  *   5. Pushes the commit and tag to origin
  *
@@ -36,10 +36,21 @@ const repoRoot = path.resolve(__dirname, '..');
 const isDryRun = process.argv.includes('--dry-run');
 
 const label = isDryRun ? '[dry-run] ' : '';
+const rootDescriptionPrefix = 'Shared LaunchDarkly feature-flag sunset workflow for VS Code Copilot.';
+const nestedDescriptionPrefix = 'Flag sunset workflow helpers.';
+
+function formatVersionedDescription(prefix, version) {
+    return `${prefix} Installed version: ${version}.`;
+}
 
 function readJson(relativePath) {
     const full = path.join(repoRoot, relativePath);
     return JSON.parse(readFileSync(full, 'utf8'));
+}
+
+function writeJson(relativePath, value) {
+    const full = path.join(repoRoot, relativePath);
+    writeFileSync(full, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
 }
 
 function run(cmd, { capture = false } = {}) {
@@ -90,6 +101,8 @@ if (!version || !/^\d+\.\d+\.\d+$/.test(version)) {
 }
 const tag = `v${version}`;
 info(`Version from plugin.json: ${version}  →  tag: ${tag}`);
+const expectedRootDescription = formatVersionedDescription(rootDescriptionPrefix, version);
+const expectedNestedDescription = formatVersionedDescription(nestedDescriptionPrefix, version);
 
 // 3. Version must match .claude-plugin/plugin.json
 const nestedManifest = readJson('.claude-plugin/plugin.json');
@@ -102,6 +115,18 @@ if (nestedManifest.version !== version) {
     );
 }
 ok(`Version consistent across manifests (${version})`);
+
+if (rootManifest.description !== expectedRootDescription) {
+    info('plugin.json description version marker will be updated');
+} else {
+    ok(`plugin.json description already advertises ${version}`);
+}
+
+if (nestedManifest.description !== expectedNestedDescription) {
+    info('.claude-plugin/plugin.json description version marker will be updated');
+} else {
+    ok(`.claude-plugin/plugin.json description already advertises ${version}`);
+}
 
 // 4a. README badge must reference the current version (or will be patched)
 const readmePath = path.join(repoRoot, 'README.md');
@@ -222,10 +247,18 @@ if (!isDryRun) {
 
 // Patch README badge to the release version
 const updatedReadme = readmeContent.replace(badgeRegex, `![version](https://img.shields.io/badge/version-${version}-blue)`);
+rootManifest.description = expectedRootDescription;
+nestedManifest.description = expectedNestedDescription;
 if (!isDryRun) {
+    writeJson('plugin.json', rootManifest);
+    writeJson('.claude-plugin/plugin.json', nestedManifest);
     writeFileSync(readmePath, updatedReadme, 'utf8');
+    ok(`plugin.json description updated to advertise ${version}`);
+    ok(`.claude-plugin/plugin.json description updated to advertise ${version}`);
     ok(`README.md badge updated to ${version}`);
 } else {
+    info(`${label}Would update plugin.json description to advertise ${version}`);
+    info(`${label}Would update .claude-plugin/plugin.json description to advertise ${version}`);
     info(`${label}Would update README.md badge to ${version}`);
 }
 
