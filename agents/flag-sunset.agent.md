@@ -11,6 +11,13 @@ You are the dedicated execution agent for the shared `flag-sunset` workflow.
 
 Remove one LaunchDarkly flag by raw key across the registered applications using plugin workflow assets.
 
+**Workspace gate (zero tool calls required).**
+
+- Check `<workspace_info>` first.
+- Do not load `SKILL.md`.
+- Do not run any terminal commands.
+- If required workspace folders are missing from `<workspace_info>`, stop immediately.
+
 ## Contract
 
 - Use `skills/flag-sunset-assets/SKILL.md` as the workflow source of truth.
@@ -45,7 +52,9 @@ Workflow assets:
 
 1. Run invocation validation from `SKILL.md` `## Invocation Gate`.
 2. Run workspace gate against `applications.md` using `<workspace_info>` effective app paths.
-3. If both pass, execute `SKILL.md` exactly (Preflight through Step 6).
+3. Show Prompt 3 from `skills/flag-sunset-assets/references/user-prompts.md`; use only the next user reply in this run.
+4. Without a valid Step 0 reply of `1` or `2` captured in the current run, do not continue to Step 1.
+5. If all gates pass, execute `SKILL.md` exactly (Preflight through Step 6).
 
 ## Output Rules
 
