@@ -1,7 +1,7 @@
 {
   "name": "flag-sunset-plugin",
   "displayName": "Flag Sunset Plugin",
-  "description": "Shared LaunchDarkly feature-flag sunset workflow for VS Code Copilot.",
+  "description": "Shared LaunchDarkly feature-flag sunset workflow for VS Code Copilot. Installed version: 1.0.2.",
   "version": "1.0.2",
   "commands": "commands",
   "agents": "agents",

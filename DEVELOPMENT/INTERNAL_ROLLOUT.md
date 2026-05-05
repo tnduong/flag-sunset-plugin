@@ -108,7 +108,13 @@ Workspace settings example:
 		"/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+log\\b/": true,
 		"/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+show\\b/": true,
 		"/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+diff\\b/": true,
-		"/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+branch\\b.*\\s-(d|D|m|M|-delete|-force)\\b/": false
+		"/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+branch\\b.*\\s-(d|D|m|M|-delete|-force)\\b/": false,
+		"/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+add\\b/": false,
+		"/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+commit\\b/": false,
+		"/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+push\\b/": false,
+		"/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+push\\b.*\\s(--force|-f)\\b/": false,
+		"/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+reset\\s+--hard\\b/": false,
+		"/^git(\\s+(-C\\s+\\S+|--no-pager))*\\s+clean\\b/": false
 	}
 }
 ```
@@ -118,6 +124,7 @@ Notes:
 - Keep this in workspace settings, not user settings.
 - Do not use global bypass for this workflow.
 - If your VS Code build exposes tool-level autoapproval UI, use the medium list for read/search tools and keep edit/write tools gated.
+- Keep the git deny list explicit even though the workspace allows a broad git read-only pattern; the deny entries override the broad allow for write/destructive commands.
 - Keep the workflow validation scenarios in `tests/workflow-regression-scenarios.md` as the rollout pass criteria.
 - `onboarding/new-user-onboarding.md` is the canonical step-by-step setup guide for new operators.
 

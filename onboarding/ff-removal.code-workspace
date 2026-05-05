@@ -34,6 +34,9 @@
       "/^git(\\s+(-[cC]\\s+\\S+|--no-pager))*\\s+\\w/": true,
       // Deny destructive git commands: branch delete/force, push --force, reset --hard, clean
       "/^git(\\s+(-[cC]\\s+\\S+|--no-pager))*\\s+branch\\b.*\\s-(d|D|m|M|-delete|-force)\\b/": false,
+        "/^git(\\s+(-[cC]\\s+\\S+|--no-pager))*\\s+add\\b/": false,
+        "/^git(\\s+(-[cC]\\s+\\S+|--no-pager))*\\s+commit\\b/": false,
+        "/^git(\\s+(-[cC]\\s+\\S+|--no-pager))*\\s+push\\b/": false,
       "/^git(\\s+(-[cC]\\s+\\S+|--no-pager))*\\s+push\\b.*\\s(--force|-f)\\b/": false,
       "/^git(\\s+(-[cC]\\s+\\S+|--no-pager))*\\s+reset\\s+--hard\\b/": false,
       "/^git(\\s+(-[cC]\\s+\\S+|--no-pager))*\\s+clean\\b/": false

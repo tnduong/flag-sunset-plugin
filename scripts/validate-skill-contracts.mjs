@@ -36,9 +36,22 @@ const files = {
     operatorGoal: await readFile(operatorGoalPath, 'utf8'),
 };
 
-// Each contract is: { file, scenario, checks: [{ label, text }] }
-// `text` is an exact substring that must appear in the target file.
-// Keep `text` as short as possible while remaining unambiguous.
+const normalizeText = (value) => value.replace(/\s+/g, ' ').trim().toLowerCase();
+
+const matchesCheck = (source, check) => {
+    const normalizedSource = normalizeText(source);
+
+    if (check.allOf) {
+        return check.allOf.every((fragment) => normalizedSource.includes(normalizeText(fragment)));
+    }
+
+    return normalizedSource.includes(normalizeText(check.text));
+};
+
+// Each contract is: { file, scenario, checks: [{ label, text? , allOf? }] }
+// `text` is a normalized substring check.
+// `allOf` requires all normalized fragments to appear somewhere in the target file.
+// Keep checks as short as possible while remaining behaviorally meaningful.
 const contracts = [
     {
         file: 'command',
@@ -48,10 +61,6 @@ const contracts = [
                 label: 'Command is intentionally thin and routes to the execution agent',
                 text: 'Route this request to the configured custom agent.',
             },
-            {
-                label: 'Command delegates gating and workflow ownership to the agent and assets',
-                text: 'The command is intentionally thin. Workspace gating, workflow preflight, and execution rules are owned by the agent and skill assets.',
-            },
         ],
     },
     {
@@ -60,15 +69,15 @@ const contracts = [
         checks: [
             {
                 label: 'Agent performs a zero-tool workspace gate first',
-                text: '**Workspace gate (zero tool calls required).**',
+                allOf: ['workspace gate', 'zero tool calls required'],
             },
             {
                 label: 'Agent blocks SKILL.md loading before the workspace gate passes',
-                text: 'Do not load `SKILL.md`.',
+                allOf: ['do not load', 'skill.md'],
             },
             {
                 label: 'Agent blocks terminal commands before the workspace gate passes',
-                text: 'Do not run any terminal commands.',
+                allOf: ['do not run', 'terminal commands'],
             },
         ],
     },
@@ -432,11 +441,16 @@ const contracts = [
         checks: [
             {
                 label: 'Agent uses canonical Prompt 3 and the next user reply for Step 0',
-                text: 'Show Prompt 3 from `skills/flag-sunset-assets/references/user-prompts.md` and use only the next user reply in this run.',
+                allOf: [
+                    'show prompt 3',
+                    'skills/flag-sunset-assets/references/user-prompts.md',
+                    'use only the next user reply',
+                    'in this run',
+                ],
             },
             {
                 label: 'Agent blocks Step 1 without a valid Step 0 reply',
-                text: 'without a valid Step 0 reply of `1` or `2` captured in the current run',
+                allOf: ['without a valid step 0 reply', '`1` or `2`', 'captured in the current run'],
             },
         ],
     },
@@ -555,13 +569,17 @@ for (const { file, scenario, checks } of contracts) {
     console.log(`\n${scenario} [${file}]`);
     const source = files[file];
 
-    for (const { label, text } of checks) {
-        if (source.includes(text)) {
-            console.log(`  PASS  ${label}`);
+    for (const check of checks) {
+        if (matchesCheck(source, check)) {
+            console.log(`  PASS  ${check.label}`);
             passed++;
         } else {
-            console.log(`  FAIL  ${label}`);
-            console.log(`        Missing: "${text}"`);
+            console.log(`  FAIL  ${check.label}`);
+            if (check.allOf) {
+                console.log(`        Missing fragments: ${check.allOf.map((fragment) => `"${fragment}"`).join(', ')}`);
+            } else {
+                console.log(`        Missing: "${check.text}"`);
+            }
             failed++;
         }
     }

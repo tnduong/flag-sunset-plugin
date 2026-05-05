@@ -26,11 +26,20 @@ const assertExists = async (relativePath, message) => {
   }
 };
 
+const formatVersionedDescription = (prefix, version) => `${prefix} Installed version: ${version}.`;
+
 const rootManifest = await readJson('plugin.json');
 const pluginManifest = await readJson('.claude-plugin/plugin.json');
 const marketplaceManifest = await readJson('.claude-plugin/marketplace.json');
+const expectedRootDescription = formatVersionedDescription(
+  'Shared LaunchDarkly feature-flag sunset workflow for VS Code Copilot.',
+  rootManifest.version,
+);
+const expectedNestedDescription = formatVersionedDescription('Flag sunset workflow helpers.', rootManifest.version);
 
 assertEqual(pluginManifest.version, rootManifest.version, 'Nested plugin manifest version must match root plugin.json version');
+assertEqual(rootManifest.description, expectedRootDescription, 'Root plugin description must advertise the current version');
+assertEqual(pluginManifest.description, expectedNestedDescription, 'Nested plugin description must advertise the current version');
 
 assertEqual(pluginManifest.agents, '../agents', 'Nested plugin manifest must point to the repo-root agents folder');
 assertEqual(pluginManifest.commands, '../commands', 'Nested plugin manifest must point to the repo-root commands folder');

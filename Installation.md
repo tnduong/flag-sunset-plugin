@@ -42,7 +42,7 @@ Source-installed plugins do not auto-update. When a new version is released, rei
 2. Run **Chat: Install Plugin From Source**.
 3. Paste: `https://github.com/tnduong/flag-sunset-plugin`
 4. Enable the plugin if prompted.
-5. Confirm the upgrade by running `/flag-sunset-plugin:run` — the first output line will show the new version.
+5. Confirm the upgrade from the installed plugin details panel. The plugin description includes `Installed version: X.Y.Z.` and is updated by the release script.
 
 The release notification DM will confirm when a new version has been pushed to `stable`.
 
