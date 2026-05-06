@@ -178,7 +178,7 @@ const statusLines = execSync('git status --porcelain', {
     stdio: 'pipe',
 }).split('\n').filter((line) => line.length > 0);
 
-const allowedDirtyFiles = new Set(['plugin.json', '.claude-plugin/plugin.json', '.claude-plugin/marketplace.json']);
+const allowedDirtyFiles = new Set(['plugin.json', '.claude-plugin/plugin.json', '.claude-plugin/marketplace.json', 'README.md']);
 
 const unexpectedChanges = statusLines.filter((line) => {
     const xy = line.substring(0, 2);
@@ -193,7 +193,7 @@ const unexpectedChanges = statusLines.filter((line) => {
 if (unexpectedChanges.length > 0) {
     fail(
         `Unexpected staged/modified files found:\n${unexpectedChanges.join('\n')}\n\n` +
-        `Either commit/stash them before releasing, or ensure only plugin.json, .claude-plugin/plugin.json, and .claude-plugin/marketplace.json are modified.`,
+        `Either commit/stash them before releasing, or ensure only plugin.json, .claude-plugin/plugin.json, .claude-plugin/marketplace.json, and README.md are modified.`,
     );
 }
 ok('Working tree is clean (only plugin manifests allowed to be modified)');
