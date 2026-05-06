@@ -67,6 +67,18 @@ function runCapture(cmd) {
     return execSync(cmd, { cwd: repoRoot, encoding: 'utf8', stdio: 'pipe' }).trim();
 }
 
+function hasStagedChanges() {
+    try {
+        execSync('git diff --cached --quiet', { cwd: repoRoot, stdio: 'pipe' });
+        return false;
+    } catch (error) {
+        if (error.status === 1) {
+            return true;
+        }
+        throw error;
+    }
+}
+
 function fail(message) {
     console.error(`\n❌  ${message}\n`);
     process.exit(1);
@@ -284,7 +296,13 @@ if (!isDryRun) {
 }
 
 run('git add plugin.json .claude-plugin/plugin.json .claude-plugin/marketplace.json README.md');
-run(`git commit -m "release: ${version}"`);
+
+if (isDryRun || hasStagedChanges()) {
+    run(`git commit -m "release: ${version}"`);
+} else {
+    info(`Release files already match ${version}; skipping release commit and tagging current HEAD.`);
+}
+
 run(`git tag -a ${tag} -m "Release ${tag}"`);
 
 // Advance the 'stable' branch to this commit so users installing from the
