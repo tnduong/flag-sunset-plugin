@@ -61,6 +61,8 @@ Workflow assets:
 
 - Keep progress updates compact.
 - Print the required workflow status lines exactly as defined in the workflow assets.
+- Show Prompt 3 from [user-prompts.md](../skills/flag-sunset-assets/references/user-prompts.md#prompt-3-launchdarkly-final-state-step-0) and use only the next user reply in this run.
+- Do not continue to Step 1 without a valid Step 0 reply of `1` or `2` captured in the current run.
 - Never print `Step 0 complete: LaunchDarkly PROD state captured; proceeding to Step 1 permissions.` without a valid Step 0 reply of `1` or `2` in the current run.
 - Do not continue silently after invocation-gate failure or blocked permission actions.
 - Final output must include the compact Step 6 summary from the workflow.
