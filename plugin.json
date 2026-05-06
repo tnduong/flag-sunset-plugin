@@ -1,8 +1,8 @@
 {
   "name": "flag-sunset-plugin",
   "displayName": "Flag Sunset Plugin",
-  "description": "FF Removal SKILL Workflow - version XXX",
-  "version": "1.0.3",
+  "description": "FF Removal SKILL Workflow - version 1.0.4",
+  "version": "1.0.4",
   "commands": "commands",
   "agents": "agents",
   "skills": "skills"

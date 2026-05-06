@@ -6,8 +6,8 @@
   "plugins": [
     {
       "name": "flag-sunset-plugin",
-      "version": "",
-      "description": "",
+      "version": "1.0.4",
+      "description": "FF Removal SKILL Workflow - version 1.0.4",
       "author": {
         "name": "Thuy Duong"
       },
